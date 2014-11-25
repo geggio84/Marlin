@@ -27,20 +27,20 @@
  * \brief SdBaseFile class
  */
 #include "Marlin.h"
-#include "SdFatConfig.h"
-#include "SdVolume.h"
+//#include "SdFatConfig.h"
+//#include "SdVolume.h"
 //------------------------------------------------------------------------------
 /**
- * \struct fpos_t
+ * \struct file_pos
  * \brief internal type for istream
  * do not use in user apps
  */
-struct fpos_t {
-  /** stream position */
+struct file_pos {
+  // stream position 
   uint32_t position;
-  /** cluster for position */
+  // cluster for position 
   uint32_t cluster;
-  fpos_t() : position(0), cluster(0) {}
+  file_pos() : position(0), cluster(0) {}
 };
 
 // use the gnu style oflag in open()
@@ -196,11 +196,11 @@ class SdBaseFile {
   /** get position for streams
    * \param[out] pos struct to receive position
    */
-  void getpos(fpos_t* pos);
+  void getpos(file_pos* pos);
   /** set position for streams
    * \param[out] pos struct with value for new position
    */
-  void setpos(fpos_t* pos);
+  void setpos(file_pos* pos);
   //----------------------------------------------------------------------------
   bool close();
   bool contiguousRange(uint32_t* bgnBlock, uint32_t* endBlock);
@@ -245,8 +245,8 @@ class SdBaseFile {
   }
   /**  Cancel the date/time callback function. */
   static void dateTimeCallbackCancel() {dateTime_ = 0;}
-  bool dirEntry(dir_t* dir);
-  static void dirName(const dir_t& dir, char* name);
+  //bool dirEntry(dir_t* dir);
+  //static void dirName(const dir_t& dir, char* name);
   bool exists(const char* name);
   int16_t fgets(char* str, int16_t num, char* delim = 0);
   /** \return The total number of bytes in a file or directory. */
@@ -260,6 +260,7 @@ class SdBaseFile {
   bool isFile() const {return type_ == FAT_FILE_TYPE_NORMAL;}
   /** \return True if this is an open file/directory else false. */
   bool isOpen() const {return type_ != FAT_FILE_TYPE_CLOSED;}
+  //bool isOpen(FILE *gcode_file) const {return gcode_file != NULL;}
   /** \return True if this is a subdirectory else false. */
   bool isSubDir() const {return type_ == FAT_FILE_TYPE_SUBDIR;}
   /** \return True if this is the root directory. */
@@ -276,14 +277,14 @@ class SdBaseFile {
   bool open(SdBaseFile* dirFile, const char* path, uint8_t oflag);
   bool open(const char* path, uint8_t oflag = O_READ);
   bool openNext(SdBaseFile* dirFile, uint8_t oflag);
-  bool openRoot(SdVolume* vol);
+  //bool openRoot(SdVolume* vol);
   int peek();
   static void printFatDate(uint16_t fatDate);
   static void printFatTime( uint16_t fatTime);
   bool printName();
   int16_t read();
   int16_t read(void* buf, uint16_t nbyte);
-  int8_t readDir(dir_t* dir, char* longFilename);
+  //int8_t readDir(dir_t* dir, char* longFilename);
   static bool remove(SdBaseFile* dirFile, const char* path);
   bool remove();
   /** Set the file's current position to zero. */
@@ -318,7 +319,7 @@ class SdBaseFile {
   uint8_t type() const {return type_;}
   bool truncate(uint32_t size);
   /** \return SdVolume that contains this file. */
-  SdVolume* volume() const {return vol_;}
+  //SdVolume* volume() const {return vol_;}
   int16_t write(const void* buf, uint16_t nbyte);
 //------------------------------------------------------------------------------
  private:
@@ -344,24 +345,24 @@ class SdBaseFile {
   uint8_t   dirIndex_;      // index of directory entry in dirBlock
   uint32_t  fileSize_;      // file size in bytes
   uint32_t  firstCluster_;  // first cluster of file
-  SdVolume* vol_;           // volume where file is located
+  //SdVolume* vol_;           // volume where file is located
 
   /** experimental don't use */
   bool openParent(SdBaseFile* dir);
   // private functions
   bool addCluster();
   bool addDirCluster();
-  dir_t* cacheDirEntry(uint8_t action);
+  //dir_t* cacheDirEntry(uint8_t action);
   int8_t lsPrintNext( uint8_t flags, uint8_t indent);
   static bool make83Name(const char* str, uint8_t* name, const char** ptr);
   bool mkdir(SdBaseFile* parent, const uint8_t dname[11]);
   bool open(SdBaseFile* dirFile, const uint8_t dname[11], uint8_t oflag);
   bool openCachedEntry(uint8_t cacheIndex, uint8_t oflags);
-  dir_t* readDirCache();
+  //dir_t* readDirCache();
 //------------------------------------------------------------------------------
 // to be deleted
-  static void printDirName( const dir_t& dir,
-    uint8_t width, bool printSlash);
+  //static void printDirName( const dir_t& dir,
+  //  uint8_t width, bool printSlash);
 //------------------------------------------------------------------------------
 // Deprecated functions  - suppress cpplint warnings with NOLINT comment
 #if ALLOW_DEPRECATED_FUNCTIONS && !defined(DOXYGEN)

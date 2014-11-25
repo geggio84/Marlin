@@ -27,19 +27,26 @@
 #define SERIAL_PORT 0
 #endif
 
+extern int serial_file;
 // The presence of the UBRRH register is used to detect a UART.
+#if MOTHERBOARD == 999
+#define UART_PRESENT(port) 1
+#else
 #define UART_PRESENT(port) ((port == 0 && (defined(UBRRH) || defined(UBRR0H))) || \
 						(port == 1 && defined(UBRR1H)) || (port == 2 && defined(UBRR2H)) || \
 						(port == 3 && defined(UBRR3H)))				
-						
+#endif					
 // These are macros to build serial port register names for the selected SERIAL_PORT (C preprocessor
 // requires two levels of indirection to expand macro values properly)
 #define SERIAL_REGNAME(registerbase,number,suffix) SERIAL_REGNAME_INTERNAL(registerbase,number,suffix)
-#if SERIAL_PORT == 0 && (!defined(UBRR0H) || !defined(UDR0)) // use un-numbered registers if necessary
+/* TODO: FIXME */
+/*#if SERIAL_PORT == 0 && (!defined(UBRR0H) || !defined(UDR0)) // use un-numbered registers if necessary
 #define SERIAL_REGNAME_INTERNAL(registerbase,number,suffix) registerbase##suffix
 #else
 #define SERIAL_REGNAME_INTERNAL(registerbase,number,suffix) registerbase##number##suffix
 #endif
+*/
+/* TODO: FIXME */
 
 // Registers used by MarlinSerial class (these are expanded 
 // depending on selected serial port
@@ -92,27 +99,43 @@ class MarlinSerial //: public Stream
     void begin(long);
     void end();
     int peek(void);
-    int read(void);
+    int read_buf(void);
     void flush(void);
     
     FORCE_INLINE int available(void)
     {
-      return (unsigned int)(RX_BUFFER_SIZE + rx_buffer.head - rx_buffer.tail) % RX_BUFFER_SIZE;
+        int c;  
+        if (read(serial_file,&c,1)>0){
+                if (c != EOF)
+                {
+                        int i = (unsigned int)(rx_buffer.head + 1) % RX_BUFFER_SIZE;
+                        //printf("%c",c);
+                        //write(serial_file,&c,1);
+                        // if we should be storing the received character into the location
+                        // just before the tail (meaning that the head would advance to the
+                        // current location of the tail), we're about to overflow the buffer
+                        // and so we don't write the character or advance the head.
+                        if (i != rx_buffer.tail) {
+                                rx_buffer.buffer[rx_buffer.head] = c;
+                                rx_buffer.head = i;
+                        }
+                        return ((unsigned int)(RX_BUFFER_SIZE + rx_buffer.head - rx_buffer.tail) % RX_BUFFER_SIZE);
+                }
+                else return -1;
+        }
+        return ((unsigned int)(RX_BUFFER_SIZE + rx_buffer.head - rx_buffer.tail) % RX_BUFFER_SIZE);
     }
     
-    FORCE_INLINE void write(uint8_t c)
+    FORCE_INLINE void write_ser(uint8_t c)
     {
-      while (!((M_UCSRxA) & (1 << M_UDREx)))
-        ;
-
-      M_UDRx = c;
+      write(serial_file,&c,1);
     }
     
     
     FORCE_INLINE void checkRx(void)
     {
-      if((M_UCSRxA & (1<<M_RXCx)) != 0) {
-        unsigned char c  =  M_UDRx;
+      //if((M_UCSRxA & (1<<M_RXCx)) != 0) {
+        unsigned char c  =  fgetc(serial_file);//M_UDRx;
         int i = (unsigned int)(rx_buffer.head + 1) % RX_BUFFER_SIZE;
 
         // if we should be storing the received character into the location
@@ -123,7 +146,6 @@ class MarlinSerial //: public Stream
           rx_buffer.buffer[rx_buffer.head] = c;
           rx_buffer.head = i;
         }
-      }
     }
     
     
@@ -134,29 +156,29 @@ class MarlinSerial //: public Stream
     
   public:
     
-    FORCE_INLINE void write(const char *str)
+    FORCE_INLINE void write_ser(const char *str)
     {
       while (*str)
-        write(*str++);
+        write_ser(*str++);
     }
 
 
-    FORCE_INLINE void write(const uint8_t *buffer, size_t size)
+    FORCE_INLINE void write_ser(const uint8_t *buffer, size_t size)
     {
       while (size--)
-        write(*buffer++);
+        write_ser(*buffer++);
     }
 
-    FORCE_INLINE void print(const String &s)
+    /*FORCE_INLINE void print(const String &s)
     {
       for (int i = 0; i < (int)s.length(); i++) {
         write(s[i]);
       }
-    }
+    }*/
     
     FORCE_INLINE void print(const char *str)
     {
-      write(str);
+      write_ser(str);
     }
     void print(char, int = BYTE);
     void print(unsigned char, int = BYTE);
@@ -166,7 +188,7 @@ class MarlinSerial //: public Stream
     void print(unsigned long, int = DEC);
     void print(double, int = 2);
 
-    void println(const String &s);
+    void println(const char &s);
     void println(const char[]);
     void println(char, int = BYTE);
     void println(unsigned char, int = BYTE);

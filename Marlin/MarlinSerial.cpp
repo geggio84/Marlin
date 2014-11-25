@@ -26,11 +26,11 @@
 #ifndef AT90USB
 // this next line disables the entire HardwareSerial.cpp, 
 // this is so I can support Attiny series and any other chip without a UART
-#if defined(UBRRH) || defined(UBRR0H) || defined(UBRR1H) || defined(UBRR2H) || defined(UBRR3H)
+//#if defined(UBRRH) || defined(UBRR0H) || defined(UBRR1H) || defined(UBRR2H) || defined(UBRR3H)
 
-#if UART_PRESENT(SERIAL_PORT)
-  ring_buffer rx_buffer  =  { { 0 }, 0, 0 };
-#endif
+//#if UART_PRESENT(SERIAL_PORT)
+ring_buffer rx_buffer  =  { { 0 }, 0, 0 };
+//#endif
 
 FORCE_INLINE void store_char(unsigned char c)
 {
@@ -48,7 +48,7 @@ FORCE_INLINE void store_char(unsigned char c)
 
 
 //#elif defined(SIG_USART_RECV)
-#if defined(M_USARTx_RX_vect)
+/*#if defined(M_USARTx_RX_vect)
   // fixed by Mark Sproul this is on the 644/644p
   //SIGNAL(SIG_USART_RECV)
   SIGNAL(M_USARTx_RX_vect)
@@ -56,7 +56,7 @@ FORCE_INLINE void store_char(unsigned char c)
     unsigned char c  =  M_UDRx;
     store_char(c);
   }
-#endif
+#endif*/
 
 // Constructors ////////////////////////////////////////////////////////////////
 
@@ -71,8 +71,8 @@ void MarlinSerial::begin(long baud)
 {
   uint16_t baud_setting;
   bool useU2X = true;
-
-#if F_CPU == 16000000UL && SERIAL_PORT == 0
+/* TODO: FIX */
+/*#if F_CPU == 16000000UL && SERIAL_PORT == 0
   // hard coded exception for compatibility with the bootloader shipped
   // with the Duemilanove and previous boards and the firmware on the 8U2
   // on the Uno and Mega 2560.
@@ -95,14 +95,17 @@ void MarlinSerial::begin(long baud)
 
   sbi(M_UCSRxB, M_RXENx);
   sbi(M_UCSRxB, M_TXENx);
-  sbi(M_UCSRxB, M_RXCIEx);
+  sbi(M_UCSRxB, M_RXCIEx);*/
+  /* TODO: FIX */
 }
 
 void MarlinSerial::end()
 {
-  cbi(M_UCSRxB, M_RXENx);
-  cbi(M_UCSRxB, M_TXENx);
-  cbi(M_UCSRxB, M_RXCIEx);  
+/* TODO: FIX */
+  //cbi(M_UCSRxB, M_RXENx);
+  //cbi(M_UCSRxB, M_TXENx);
+  //cbi(M_UCSRxB, M_RXCIEx);
+/* TODO: FIX */
 }
 
 
@@ -116,7 +119,7 @@ int MarlinSerial::peek(void)
   }
 }
 
-int MarlinSerial::read(void)
+int MarlinSerial::read_buf(void)
 {
   // if the head isn't ahead of the tail, we don't have any characters
   if (rx_buffer.head == rx_buffer.tail) {
@@ -173,7 +176,7 @@ void MarlinSerial::print(unsigned int n, int base)
 void MarlinSerial::print(long n, int base)
 {
   if (base == 0) {
-    write(n);
+    write_ser(n);
   } else if (base == 10) {
     if (n < 0) {
       print('-');
@@ -187,7 +190,7 @@ void MarlinSerial::print(long n, int base)
 
 void MarlinSerial::print(unsigned long n, int base)
 {
-  if (base == 0) write(n);
+  if (base == 0) write_ser(n);
   else printNumber(n, base);
 }
 
@@ -196,13 +199,13 @@ void MarlinSerial::print(double n, int digits)
   printFloat(n, digits);
 }
 
-void MarlinSerial::println(void)
+void MarlinSerial::println()
 {
   print('\r');
   print('\n');  
 }
 
-void MarlinSerial::println(const String &s)
+void MarlinSerial::println(const char &s)
 {
   print(s);
   println();
@@ -318,7 +321,7 @@ void MarlinSerial::printFloat(double number, uint8_t digits)
 
 MarlinSerial MSerial;
 
-#endif // whole file
+//#endif // whole file
 #endif // !AT90USB
 
 // For AT90USB targets use the UART for BT interfacing

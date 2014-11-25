@@ -8,7 +8,9 @@ void _EEPROM_writeData(int &pos, uint8_t* value, uint8_t size)
 {
     do
     {
-        eeprom_write_byte((unsigned char*)pos, *value);
+        /* TODO: FIXME */
+        //eeprom_write_byte((unsigned char*)pos, *value);
+        /* TODO: FIXME */
         pos++;
         value++;
     }while(--size);
@@ -18,7 +20,9 @@ void _EEPROM_readData(int &pos, uint8_t* value, uint8_t size)
 {
     do
     {
-        *value = eeprom_read_byte((unsigned char*)pos);
+        /* TODO: FIXME */
+        //*value = eeprom_read_byte((unsigned char*)pos);
+        /* TODO: FIXME */
         pos++;
         value++;
     }while(--size);

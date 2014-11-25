@@ -8,19 +8,46 @@
 
 #include <math.h>
 #include <stdio.h>
+/* TODO: ADDED */
+#include <ctype.h>
+/* TODO: ADDED */
 #include <stdlib.h>
 #include <string.h>
 #include <inttypes.h>
+/* TODO: ADDED */
+#include <sys/time.h>
+#include <time.h>
+#include <unistd.h>
+#include <termios.h>
+#include <fcntl.h>
+#include <signal.h>
+/* TODO: ADDED */
 
-#include <util/delay.h>
+/* TODO: FIXME */
+/*#include <util/delay.h>
 #include <avr/pgmspace.h>
 #include <avr/eeprom.h>
-#include <avr/interrupt.h>
+#include <avr/interrupt.h>*/
+/* TODO: FIXME */
 
 
 #include "fastio.h"
 #include "Configuration.h"
 #include "pins.h"
+
+/* TODO: ADDED */
+#define F_CPU 16000000
+
+#define HIGH 0x1
+#define LOW  0x0
+
+#define INPUT 0x0
+#define OUTPUT 0x1
+#define INPUT_PULLUP 0x2
+
+#define min(a,b) ((a)<(b)?(a):(b))
+#define max(a,b) ((a)>(b)?(a):(b))
+/* TODO: ADDED */
 
 #ifndef AT90USB
 #define  HardwareSerial_h // trick to disable the standard HWserial
@@ -29,14 +56,22 @@
 #if (ARDUINO >= 100)
 # include "Arduino.h"
 #else
-# include "WProgram.h"
+//# include "WProgram.h"
   //Arduino < 1.0.0 does not define this, so we need to do it ourselves
-# define analogInputToDigitalPin(p) ((p) + A0)
+# define analogInputToDigitalPin(p) (p)//((p) + A0)
 #endif
 
 #ifdef AT90USB
 #include "HardwareSerial.h"
 #endif
+
+/* TODO: ADDED */
+typedef struct {
+    FILE *file_p;
+    uint32_t currpos;
+    uint32_t size;
+} myFILE;
+/* TODO: ADDED */
 
 #include "MarlinSerial.h"
 
@@ -47,7 +82,7 @@
 #define sbi(sfr, bit) (_SFR_BYTE(sfr) |= _BV(bit))
 #endif
 
-#include "WString.h"
+//#include "WString.h"
 
 #ifdef AT90USB
    #ifdef BTENABLED
@@ -61,13 +96,18 @@
 
 #define SERIAL_PROTOCOL(x) (MYSERIAL.print(x))
 #define SERIAL_PROTOCOL_F(x,y) (MYSERIAL.print(x,y))
-#define SERIAL_PROTOCOLPGM(x) (serialprintPGM(PSTR(x)))
-#define SERIAL_PROTOCOLLN(x) (MYSERIAL.print(x),MYSERIAL.write('\n'))
-#define SERIAL_PROTOCOLLNPGM(x) (serialprintPGM(PSTR(x)),MYSERIAL.write('\n'))
+//#define SERIAL_PROTOCOLPGM(x) (serialprintPGM(PSTR(x)))
+//#define SERIAL_PROTOCOLLN(x) (MYSERIAL.print(x),MYSERIAL.write('\n'))
+//#define SERIAL_PROTOCOLLNPGM(x) (serialprintPGM(PSTR(x)),MYSERIAL.write('\n'))
+#define SERIAL_PROTOCOLPGM(x) (serialprintPGM(x))
+#define SERIAL_PROTOCOLLN(x) (MYSERIAL.print(x),MYSERIAL.write_ser('\n'))
+#define SERIAL_PROTOCOLLNPGM(x) (serialprintPGM(x),MYSERIAL.write_ser('\n'))
 
 
-const char errormagic[] PROGMEM ="Error:";
-const char echomagic[] PROGMEM ="echo:";
+//const char errormagic[] PROGMEM ="Error:";
+//const char echomagic[] PROGMEM ="echo:";
+const char errormagic[] ="Error:";
+const char echomagic[] ="echo:";
 #define SERIAL_ERROR_START (serialprintPGM(errormagic))
 #define SERIAL_ERROR(x) SERIAL_PROTOCOL(x)
 #define SERIAL_ERRORPGM(x) SERIAL_PROTOCOLPGM(x)
@@ -80,27 +120,34 @@ const char echomagic[] PROGMEM ="echo:";
 #define SERIAL_ECHOLN(x) SERIAL_PROTOCOLLN(x)
 #define SERIAL_ECHOLNPGM(x) SERIAL_PROTOCOLLNPGM(x)
 
-#define SERIAL_ECHOPAIR(name,value) (serial_echopair_P(PSTR(name),(value)))
+//#define SERIAL_ECHOPAIR(name,value) (serial_echopair_P(PSTR(name),(value)))
+#define SERIAL_ECHOPAIR(name,value) (serial_echopair_P(((const char *)(name)),(value)))
 
 void serial_echopair_P(const char *s_P, float v);
 void serial_echopair_P(const char *s_P, double v);
 void serial_echopair_P(const char *s_P, unsigned long v);
 
-
+void pinMode(uint8_t, uint8_t);
+void digitalWrite(uint8_t, uint8_t);
+int digitalRead(uint8_t);
+int analogRead(uint8_t);
+void analogWrite(uint8_t, int);
+void signal_callback_handler(int signum);
 //Things to write to serial from Program memory. Saves 400 to 2k of RAM.
 FORCE_INLINE void serialprintPGM(const char *str)
 {
-  char ch=pgm_read_byte(str);
+  char ch=*str;
   while(ch)
   {
-    MYSERIAL.write(ch);
-    ch=pgm_read_byte(++str);
+    write(serial_file,&ch,1);
+    ch=*(++str);
   }
 }
 
-
-void get_command();
+int loop();
+int get_command();
 void process_commands();
+unsigned long millis(void);
 
 void manage_inactivity();
 

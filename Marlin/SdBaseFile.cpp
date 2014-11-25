@@ -22,6 +22,8 @@
 #ifdef SDSUPPORT
 
 #include "SdBaseFile.h"
+
+static FILE *gcode_file;
 //------------------------------------------------------------------------------
 // pointer to cwd directory
 SdBaseFile* SdBaseFile::cwd_ = 0;
@@ -45,7 +47,7 @@ bool SdBaseFile::addCluster() {
 //------------------------------------------------------------------------------
 // Add a cluster to a directory file and zero the cluster.
 // return with first block of cluster in the cache
-bool SdBaseFile::addDirCluster() {
+/*bool SdBaseFile::addDirCluster() {
   uint32_t block;
   // max folder size
   if (fileSize_/sizeof(dir_t) >= 0XFFFF) goto fail;
@@ -71,7 +73,7 @@ bool SdBaseFile::addDirCluster() {
 
  fail:
   return false;
-}
+}*/
 //------------------------------------------------------------------------------
 // cache a file's directory entry
 // return pointer to cached entry or null for failure
@@ -294,7 +296,7 @@ bool SdBaseFile::getFilename(char* name) {
   return true;
 }
 //------------------------------------------------------------------------------
-void SdBaseFile::getpos(fpos_t* pos) {
+void SdBaseFile::getpos(file_pos* pos) {
   pos->position = curPosition_;
   pos->cluster = curCluster_;
 }
@@ -394,9 +396,9 @@ bool SdBaseFile::make83Name(const char* str, uint8_t* name, const char** ptr) {
       i = 8;   // place for extension
     } else {
       // illegal FAT characters
-      PGM_P p = PSTR("|<>^+=?/[];,*\"\\");
+      const char* p = "|<>^+=?/[];,*\"\\";
       uint8_t b;
-      while ((b = pgm_read_byte(p++))) if (b == c) goto fail;
+      while ((b = *(p++))) if (b == c) goto fail;
       // check size and only allow ASCII printable characters
       if (i > n || c < 0X21 || c > 0X7E)goto fail;
       // only upper case allowed in 8.3 names - convert lower to upper
@@ -925,7 +927,7 @@ bool SdBaseFile::openRoot(SdVolume* vol) {
  * \return The byte if no error and not at eof else -1;
  */
 int SdBaseFile::peek() {
-  fpos_t pos;
+  file_pos pos;
   getpos(&pos);
   int c = read();
   if (c >= 0) setpos(&pos);
@@ -1058,7 +1060,7 @@ int16_t SdBaseFile::read(void* buf, uint16_t nbyte) {
   toRead = nbyte;
   while (toRead > 0) {
     offset = curPosition_ & 0X1FF;  // offset in block
-    if (type_ == FAT_FILE_TYPE_ROOT_FIXED) {
+    /*if (type_ == FAT_FILE_TYPE_ROOT_FIXED) {
       block = vol_->rootDirStart() + (curPosition_ >> 9);
     } else {
       uint8_t blockOfCluster = vol_->blockOfCluster(curPosition_);
@@ -1073,24 +1075,29 @@ int16_t SdBaseFile::read(void* buf, uint16_t nbyte) {
         }
       }
       block = vol_->clusterStartBlock(curCluster_) + blockOfCluster;
-    }
-    uint16_t n = toRead;
+    }*/
+    //uint16_t n = toRead;
 
     // amount to be read from current block
-    if (n > (512 - offset)) n = 512 - offset;
+    //if (n > (512 - offset)) n = 512 - offset;
 
     // no buffering needed if n == 512
-    if (n == 512 && block != vol_->cacheBlockNumber()) {
+    /*if (n == 512 && block != vol_->cacheBlockNumber()) {
       if (!vol_->readBlock(block, dst)) goto fail;
     } else {
       // read block to cache and copy data to caller
       if (!vol_->cacheRawBlock(block, SdVolume::CACHE_FOR_READ)) goto fail;
       uint8_t* src = vol_->cache()->data + offset;
       memcpy(dst, src, n);
-    }
-    dst += n;
+    }*/
+    
+    /*dst += n;
     curPosition_ += n;
-    toRead -= n;
+    toRead -= n;*/
+    if((*dst = fgetc(gcode_file)) != EOF)
+    dst += 1;
+    curPosition_ += 1;
+    toRead -= 1;
   }
   return nbyte;
 
@@ -1492,7 +1499,7 @@ bool SdBaseFile::seekSet(uint32_t pos) {
   return false;
 }
 //------------------------------------------------------------------------------
-void SdBaseFile::setpos(fpos_t* pos) {
+void SdBaseFile::setpos(file_pos* pos) {
   curPosition_ = pos->position;
   curCluster_ = pos->cluster;
 }
@@ -1742,7 +1749,7 @@ int16_t SdBaseFile::write(const void* buf, uint16_t nbyte) {
   }
 
   while (nToWrite > 0) {
-    uint8_t blockOfCluster = vol_->blockOfCluster(curPosition_);
+    /*uint8_t blockOfCluster = vol_->blockOfCluster(curPosition_);
     uint16_t blockOffset = curPosition_ & 0X1FF;
     if (blockOfCluster == 0 && blockOffset == 0) {
       // start of new cluster
@@ -1791,10 +1798,14 @@ int16_t SdBaseFile::write(const void* buf, uint16_t nbyte) {
       }
       uint8_t* dst = vol_->cache()->data + blockOffset;
       memcpy(dst, src, n);
-    }
-    curPosition_ += n;
-    src += n;
-    nToWrite -= n;
+    }*/
+    //curPosition_ += n;
+    //src += n;
+    //nToWrite -= n;
+    fputc(*src, gcode_file);
+    src += 1;
+    curPosition_ += 1;
+    nToWrite -= 1;
   }
   if (curPosition_ > fileSize_) {
     // update fileSize and insure sync will update dir entry

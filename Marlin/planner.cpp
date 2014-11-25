@@ -210,7 +210,9 @@ void calculate_trapezoid_for_block(block_t *block, float entry_factor, float exi
 
   // block->accelerate_until = accelerate_steps;
   // block->decelerate_after = accelerate_steps+plateau_steps;
-  CRITICAL_SECTION_START;  // Fill variables used by the stepper in a critical section
+/* TODO: FIXME */
+  //CRITICAL_SECTION_START;  // Fill variables used by the stepper in a critical section
+/* TODO: FIXME */
   if(block->busy == false) { // Don't update variables if block is busy.
     block->accelerate_until = accelerate_steps;
     block->decelerate_after = accelerate_steps+plateau_steps;
@@ -221,7 +223,9 @@ void calculate_trapezoid_for_block(block_t *block, float entry_factor, float exi
     block->final_advance = final_advance;
 #endif //ADVANCE
   }
-  CRITICAL_SECTION_END;
+/* TODO: FIXME */
+  //CRITICAL_SECTION_END;
+/* TODO: FIXME */
 }                    
 
 // Calculates the maximum allowable speed at this point when you must be able to reach target_velocity using the 
@@ -272,9 +276,13 @@ void planner_reverse_pass() {
   uint8_t block_index = block_buffer_head;
   
   //Make a local copy of block_buffer_tail, because the interrupt can alter it
-  CRITICAL_SECTION_START;
+/* TODO: FIXME */
+  //CRITICAL_SECTION_START;
+/* TODO: FIXME */
   unsigned char tail = block_buffer_tail;
-  CRITICAL_SECTION_END
+/* TODO: FIXME */
+  //CRITICAL_SECTION_END
+/* TODO: FIXME */
   
   if(((block_buffer_head-tail + BLOCK_BUFFER_SIZE) & (BLOCK_BUFFER_SIZE - 1)) > 3) {
     block_index = (block_buffer_head - 3) & (BLOCK_BUFFER_SIZE - 1);
@@ -702,7 +710,7 @@ block->steps_y = labs((target[X_AXIS]-position[X_AXIS]) - (target[Y_AXIS]-positi
   } 
   else
   {
-    block->millimeters = sqrt(square(delta_mm[X_AXIS]) + square(delta_mm[Y_AXIS]) + square(delta_mm[Z_AXIS]));
+    block->millimeters = sqrt(pow(delta_mm[X_AXIS],2) + pow(delta_mm[Y_AXIS],2) + pow(delta_mm[Z_AXIS],2));
   }
   float inverse_millimeters = 1.0/block->millimeters;  // Inverse millimeters to remove multiple divides 
 

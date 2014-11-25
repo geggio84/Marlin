@@ -1,7 +1,9 @@
 #include "Marlin.h"
 #include "cardreader.h"
-#include "ultralcd.h"
-#include "stepper.h"
+/* TODO: FIXME */
+//#include "ultralcd.h"
+//#include "stepper.h"
+/* TODO: FIXME */
 #include "temperature.h"
 #include "language.h"
 
@@ -20,7 +22,7 @@ CardReader::CardReader()
    autostart_atmillis=0;
    workDirDepth = 0;
    file_subcall_ctr=0;
-   memset(workDirParents, 0, sizeof(workDirParents));
+   //memset(workDirParents, 0, sizeof(workDirParents));
 
    autostart_stilltocheck=true; //the SD start is delayed, because otherwise the serial cannot answer fast enough to make contact with the host software.
    lastnr=0;
@@ -33,7 +35,8 @@ CardReader::CardReader()
   autostart_atmillis=millis()+5000;
 }
 
-char *createFilename(char *buffer,const dir_t &p) //buffer>12characters
+/* TODO: FIXME */
+/*char *createFilename(char *buffer,const dir_t &p) //buffer>12characters
 {
   char *pos=buffer;
   for (uint8_t i = 0; i < 11; i++) 
@@ -47,10 +50,11 @@ char *createFilename(char *buffer,const dir_t &p) //buffer>12characters
   }
   *pos++=0;
   return buffer;
-}
+}*/
+/* TODO: FIXME */
 
-
-void  CardReader::lsDive(const char *prepend,SdFile parent)
+/* TODO: FIXME */
+/*void  CardReader::lsDive(const char *prepend,SdFile parent)
 {
   dir_t p;
  uint8_t cnt=0;
@@ -131,9 +135,11 @@ void  CardReader::lsDive(const char *prepend,SdFile parent)
       }
     }
   }
-}
+}*/
+/* TODO: FIXME */
 
-void CardReader::ls() 
+/* TODO: FIXME */
+/*void CardReader::ls() 
 {
   lsAction=LS_SerialPrint;
   if(lsAction==LS_Count)
@@ -141,15 +147,17 @@ void CardReader::ls()
 
   root.rewind();
   lsDive("",root);
-}
+}*/
+/* TODO: FIXME */
 
 
 void CardReader::initsd()
 {
   cardOK = false;
-  if(root.isOpen())
-    root.close();
-#ifdef SDSLOW
+/* TODO: FIXME */
+  //if(root.isOpen())
+  //  root.close();
+/*#ifdef SDSLOW
   if (!card.init(SPI_HALF_SPEED,SDSS))
 #else
   if (!card.init(SPI_FULL_SPEED,SDSS))
@@ -176,26 +184,28 @@ void CardReader::initsd()
     SERIAL_ECHOLNPGM(MSG_SD_CARD_OK);
   }
   workDir=root;
-  curDir=&root;
+  curDir=&root;*/
   /*
   if(!workDir.openRoot(&volume))
   {
     SERIAL_ECHOLNPGM(MSG_SD_WORKDIR_FAIL);
   }
   */
-  
+/* TODO: FIXME */  
 }
 
-void CardReader::setroot()
+/* TODO: FIXME */
+/*void CardReader::setroot()
 {
-  /*if(!workDir.openRoot(&volume))
+  if(!workDir.openRoot(&volume))
   {
     SERIAL_ECHOLNPGM(MSG_SD_WORKDIR_FAIL);
-  }*/
+  }
   workDir=root;
   
   curDir=&workDir;
-}
+}*/
+/* TODO: FIXME */
 void CardReader::release()
 {
   sdprinting = false;
@@ -231,19 +241,24 @@ void CardReader::getAbsFilename(char *t)
   *t='/';t++;cnt++;
   for(uint8_t i=0;i<workDirDepth;i++)
   {
-    workDirParents[i].getFilename(t); //SDBaseFile.getfilename!
+/* TODO: FIXME */
+    //workDirParents[i].getFilename(t); //SDBaseFile.getfilename!
+/* TODO: FIXME */
     while(*t!=0 && cnt< MAXPATHNAMELENGTH) 
     {t++;cnt++;}  //crawl counter forward.
   }
-  if(cnt<MAXPATHNAMELENGTH-13)
+/* TODO: FIXME */
+  /*if(cnt<MAXPATHNAMELENGTH-13)
     file.getFilename(t);
   else
-    t[0]=0;
+    t[0]=0;*/
+/* TODO: FIXME */
 }
 
 void CardReader::openFile(char* name,bool read, bool replace_current/*=true*/)
 {
-  if(!cardOK)
+/* TODO: FIXME */
+ /* if(!cardOK)
     return;
   if(file.isOpen())  //replacing current file by new file, or subfile call
   {
@@ -350,7 +365,7 @@ void CardReader::openFile(char* name,bool read, bool replace_current/*=true*/)
       sdpos = 0;
       
       SERIAL_PROTOCOLLNPGM(MSG_SD_FILE_SELECTED);
-      lcd_setstatus(fname);
+      //lcd_setstatus(fname);
     }
     else
     {
@@ -372,15 +387,17 @@ void CardReader::openFile(char* name,bool read, bool replace_current/*=true*/)
       saving = true;
       SERIAL_PROTOCOLPGM(MSG_SD_WRITE_TO_FILE);
       SERIAL_PROTOCOLLN(name);
-      lcd_setstatus(fname);
+      //lcd_setstatus(fname);
     }
   }
-  
+  */
+/* TODO: FIXME */
 }
 
 void CardReader::removeFile(char* name)
 {
-  if(!cardOK)
+/* TODO: FIXME */
+  /*if(!cardOK)
     return;
   file.close();
   sdprinting = false;
@@ -446,7 +463,8 @@ void CardReader::removeFile(char* name)
       SERIAL_PROTOCOL(fname);
       SERIAL_PROTOCOLLNPGM(".");
     }
-  
+  */
+/* TODO: FIXME */
 }
 
 void CardReader::getStatus()
@@ -467,7 +485,9 @@ void CardReader::write_command(char *buf)
   char* npos = 0;
   char* end = buf + strlen(buf) - 1;
 
-  file.writeError = false;
+/* TODO: FIXME */
+  //file.writeError = false;
+/* TODO: FIXME */
   if((npos = strchr(buf, 'N')) != NULL)
   {
     begin = strchr(npos, ' ') + 1;
@@ -476,12 +496,14 @@ void CardReader::write_command(char *buf)
   end[1] = '\r';
   end[2] = '\n';
   end[3] = '\0';
-  file.write(begin);
-  if (file.writeError)
+/* TODO: FIXME */
+  //file.write(begin);
+  /*if (file.writeError)
   {
     SERIAL_ERROR_START;
     SERIAL_ERRORLNPGM(MSG_SD_ERR_WRITE_TO_FILE);
-  }
+  }*/
+/* TODO: FIXME */
 }
 
 
@@ -503,15 +525,21 @@ void CardReader::checkautostart(bool force)
   }
   
   char autoname[30];
-  sprintf_P(autoname, PSTR("auto%i.g"), lastnr);
+/* TODO: FIXME */
+  //sprintf_P(autoname, PSTR("auto%i.g"), lastnr);
+/* TODO: FIXME */
+  printf("%s auto%i.g",autoname, lastnr);
   for(int8_t i=0;i<(int8_t)strlen(autoname);i++)
     autoname[i]=tolower(autoname[i]);
-  dir_t p;
+/* TODO: FIXME */
+  //dir_t p;
 
-  root.rewind();
-  
+  //root.rewind();
+/* TODO: FIXME */
+
   bool found=false;
-  while (root.readDir(p, NULL) > 0) 
+/* TODO: FIXME */
+  /*while (root.readDir(p, NULL) > 0) 
   {
     for(int8_t i=0;i<(int8_t)strlen((char*)p.name);i++)
     p.name[i]=tolower(p.name[i]);
@@ -523,12 +551,13 @@ void CardReader::checkautostart(bool force)
     {
       char cmd[30];
 
-      sprintf_P(cmd, PSTR("M23 %s"), autoname);
+      printf("%s M23 %s",cmd, autoname);
       enquecommand(cmd);
-      enquecommand_P(PSTR("M24"));
+      enquecommand_P("M24");
       found=true;
     }
-  }
+  }*/
+/* TODO: FIXME */
   if(!found)
     lastnr=-1;
   else
@@ -537,8 +566,10 @@ void CardReader::checkautostart(bool force)
 
 void CardReader::closefile(bool store_location)
 {
-  file.sync();
-  file.close();
+/* TODO: FIXME */
+  //file.sync();
+  //file.close();
+/* TODO: FIXME */
   saving = false; 
   logging = false;
   
@@ -552,7 +583,8 @@ void CardReader::closefile(bool store_location)
   
 }
 
-void CardReader::getfilename(const uint8_t nr)
+/* TODO: FIXME */
+/*void CardReader::getfilename(const uint8_t nr)
 {
   curDir=&workDir;
   lsAction=LS_GetFilename;
@@ -560,9 +592,11 @@ void CardReader::getfilename(const uint8_t nr)
   curDir->rewind();
   lsDive("",*curDir);
   
-}
+}*/
+/* TODO: FIXME */
 
-uint16_t CardReader::getnrfilenames()
+/* TODO: FIXME */
+/*uint16_t CardReader::getnrfilenames()
 {
   curDir=&workDir;
   lsAction=LS_Count;
@@ -571,9 +605,11 @@ uint16_t CardReader::getnrfilenames()
   lsDive("",*curDir);
   //SERIAL_ECHOLN(nrFiles);
   return nrFiles;
-}
+}*/
+/* TODO: FIXME */
 
-void CardReader::chdir(const char * relpath)
+/* TODO: FIXME */
+/*void CardReader::chdir(const char * relpath)
 {
   SdFile newfile;
   SdFile *parent=&root;
@@ -596,9 +632,11 @@ void CardReader::chdir(const char * relpath)
     }
     workDir=newfile;
   }
-}
+}*/
+/* TODO: FIXME */
 
-void CardReader::updir()
+/* TODO: FIXME */
+/*void CardReader::updir()
 {
   if(workDirDepth > 0)
   {
@@ -608,13 +646,15 @@ void CardReader::updir()
     for (int d = 0; d < workDirDepth; d++)
       workDirParents[d] = workDirParents[d+1];
   }
-}
+}*/
+/* TODO: FIXME */
 
 
-void CardReader::printingHasFinished()
+void CardReader::printingHasFinished(myFILE *gcode_file)
 {
-    st_synchronize();
-    if(file_subcall_ctr>0) //heading up to a parent file that called current as a procedure.
+/* TODO: FIXME */
+    //st_synchronize();
+    /*if(file_subcall_ctr>0) //heading up to a parent file that called current as a procedure.
     {
       file.close();
       file_subcall_ctr--;
@@ -622,15 +662,19 @@ void CardReader::printingHasFinished()
       setIndex(filespos[file_subcall_ctr]);
       startFileprint();
     }
-    else
+    else*/
+/* TODO: FIXME */
     {
-      quickStop();
-      file.close();
+/* TODO: FIXME */
+      //quickStop();
+      //file.close();
+/* TODO: FIXME */
+      if(gcode_file->file_p != NULL) fclose(gcode_file->file_p);
       sdprinting = false;
       if(SD_FINISHED_STEPPERRELEASE)
       {
           //finishAndDisableSteppers();
-          enquecommand_P(PSTR(SD_FINISHED_RELEASECOMMAND));
+          enquecommand_P(SD_FINISHED_RELEASECOMMAND);
       }
       autotempShutdown();
     }

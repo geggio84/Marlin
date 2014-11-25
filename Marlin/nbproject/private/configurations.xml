@@ -100,6 +100,7 @@
         </gdb_interceptlist>
         <gdb_options>
           <DebugOptions>
+            <option name="gdb_source_dirs" value="Y:/home/matteo/Marlin/Marlin"/>
           </DebugOptions>
         </gdb_options>
         <gdb_buildfirst gdb_buildfirst_overriden="false" gdb_buildfirst_old="false"/>
@@ -109,6 +110,11 @@
       </nativedebugger>
       <runprofile version="9">
         <runcommandpicklist>
+          <runcommandpicklistitem>"${OUTPUT_PATH}" /home/matteo/prints/</runcommandpicklistitem>
+          <runcommandpicklistitem>"${OUTPUT_PATH}" /home/matteo/Prints/foot_export.gcode</runcommandpicklistitem>
+          <runcommandpicklistitem>"${OUTPUT_PATH}" -f /home/matteo/Prints/foot_export.gcode</runcommandpicklistitem>
+          <runcommandpicklistitem>"${OUTPUT_PATH}" -f /home/matteo/Prints/test.gcode</runcommandpicklistitem>
+          <runcommandpicklistitem>sudo "${OUTPUT_PATH}"</runcommandpicklistitem>
           <runcommandpicklistitem>"${OUTPUT_PATH}"</runcommandpicklistitem>
         </runcommandpicklist>
         <runcommand>"${OUTPUT_PATH}"</runcommand>

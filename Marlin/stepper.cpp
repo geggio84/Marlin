@@ -166,8 +166,8 @@ asm volatile ( \
 
 // Some useful constants
 
-#define ENABLE_STEPPER_DRIVER_INTERRUPT()  TIMSK1 |= (1<<OCIE1A)
-#define DISABLE_STEPPER_DRIVER_INTERRUPT() TIMSK1 &= ~(1<<OCIE1A)
+#define ENABLE_STEPPER_DRIVER_INTERRUPT()  do{}while(0)//TIMSK1 |= (1<<OCIE1A)
+#define DISABLE_STEPPER_DRIVER_INTERRUPT() do{}while(0)//TIMSK1 &= ~(1<<OCIE1A)
 
 
 void checkHitEndstops()
@@ -265,15 +265,25 @@ FORCE_INLINE unsigned short calc_timer(unsigned short step_rate) {
   if(step_rate >= (8*256)){ // higher step rate
     unsigned short table_address = (unsigned short)&speed_lookuptable_fast[(unsigned char)(step_rate>>8)][0];
     unsigned char tmp_step_rate = (step_rate & 0x00ff);
-    unsigned short gain = (unsigned short)pgm_read_word_near(table_address+2);
+/* TODO: FIXME */    
+    //unsigned short gain = (unsigned short)pgm_read_word_near(table_address+2);
+    unsigned short gain = (unsigned short)(table_address+2);
+/* TODO: FIXME */
     MultiU16X8toH16(timer, tmp_step_rate, gain);
-    timer = (unsigned short)pgm_read_word_near(table_address) - timer;
+/* TODO: FIXME */
+    //timer = (unsigned short)pgm_read_word_near(table_address) - timer;
+    timer = (unsigned short)(table_address) - timer;
+/* TODO: FIXME */
   }
   else { // lower step rates
     unsigned short table_address = (unsigned short)&speed_lookuptable_slow[0][0];
     table_address += ((step_rate)>>1) & 0xfffc;
-    timer = (unsigned short)pgm_read_word_near(table_address);
-    timer -= (((unsigned short)pgm_read_word_near(table_address+2) * (unsigned char)(step_rate & 0x0007))>>3);
+/* TODO: FIXME */
+    //timer = (unsigned short)pgm_read_word_near(table_address);
+    //timer -= (((unsigned short)pgm_read_word_near(table_address+2) * (unsigned char)(step_rate & 0x0007))>>3);
+    timer = (unsigned short)(table_address);
+    timer -= (((unsigned short)(table_address+2) * (unsigned char)(step_rate & 0x0007))>>3);
+/* TODO: FIXME */
   }
   if(timer < 100) { timer = 100; MYSERIAL.print(MSG_STEPPER_TOO_HIGH); MYSERIAL.println(step_rate); }//(20kHz this should never happen)
   return timer;
@@ -296,7 +306,9 @@ FORCE_INLINE void trapezoid_generator_reset() {
   step_loops_nominal = step_loops;
   acc_step_rate = current_block->initial_rate;
   acceleration_time = calc_timer(acc_step_rate);
-  OCR1A = acceleration_time;
+/* TODO: FIXME */
+  //OCR1A = acceleration_time;
+/* TODO: FIXME */
 
 //    SERIAL_ECHO_START;
 //    SERIAL_ECHOPGM("advance :");
@@ -312,7 +324,8 @@ FORCE_INLINE void trapezoid_generator_reset() {
 
 // "The Stepper Driver Interrupt" - This timer interrupt is the workhorse.
 // It pops blocks from the block_buffer and executes them by pulsing the stepper pins appropriately.
-ISR(TIMER1_COMPA_vect)
+/* TODO: FIXME */
+/*ISR(TIMER1_COMPA_vect)
 {
   // If there is no current block, attempt to pop one from the buffer
   if (current_block == NULL) {
@@ -340,7 +353,7 @@ ISR(TIMER1_COMPA_vect)
 //      #endif
     }
     else {
-        OCR1A=2000; // 1kHz.
+        //OCR1A=2000; // 1kHz.
     }
   }
 
@@ -652,7 +665,7 @@ ISR(TIMER1_COMPA_vect)
 
       // step_rate to timer interval
       timer = calc_timer(acc_step_rate);
-      OCR1A = timer;
+      //OCR1A = timer;
       acceleration_time += timer;
       #ifdef ADVANCE
         for(int8_t i=0; i < step_loops; i++) {
@@ -681,7 +694,7 @@ ISR(TIMER1_COMPA_vect)
 
       // step_rate to timer interval
       timer = calc_timer(step_rate);
-      OCR1A = timer;
+      //OCR1A = timer;
       deceleration_time += timer;
       #ifdef ADVANCE
         for(int8_t i=0; i < step_loops; i++) {
@@ -694,7 +707,7 @@ ISR(TIMER1_COMPA_vect)
       #endif //ADVANCE
     }
     else {
-      OCR1A = OCR1A_nominal;
+      //OCR1A = OCR1A_nominal;
       // ensure we're running at the correct step rate, even if we just came off an acceleration
       step_loops = step_loops_nominal;
     }
@@ -705,7 +718,8 @@ ISR(TIMER1_COMPA_vect)
       plan_discard_current_block();
     }
   }
-}
+}*/
+/* TODO: FIXME */
 
 #ifdef ADVANCE
   unsigned char old_OCR0A;
@@ -932,24 +946,26 @@ void st_init()
   #endif
 
   // waveform generation = 0100 = CTC
-  TCCR1B &= ~(1<<WGM13);
-  TCCR1B |=  (1<<WGM12);
-  TCCR1A &= ~(1<<WGM11);
-  TCCR1A &= ~(1<<WGM10);
+/* TODO: FIXME */
+  //TCCR1B &= ~(1<<WGM13);
+  //TCCR1B |=  (1<<WGM12);
+  //TCCR1A &= ~(1<<WGM11);
+  //TCCR1A &= ~(1<<WGM10);
 
   // output mode = 00 (disconnected)
-  TCCR1A &= ~(3<<COM1A0);
-  TCCR1A &= ~(3<<COM1B0);
+  //TCCR1A &= ~(3<<COM1A0);
+  //TCCR1A &= ~(3<<COM1B0);
 
   // Set the timer pre-scaler
   // Generally we use a divider of 8, resulting in a 2MHz timer
   // frequency on a 16MHz MCU. If you are going to change this, be
   // sure to regenerate speed_lookuptable.h with
   // create_speed_lookuptable.py
-  TCCR1B = (TCCR1B & ~(0x07<<CS10)) | (2<<CS10);
+  //TCCR1B = (TCCR1B & ~(0x07<<CS10)) | (2<<CS10);
 
-  OCR1A = 0x4000;
-  TCNT1 = 0;
+  //OCR1A = 0x4000;
+  //TCNT1 = 0;
+/* TODO: FIXME */
   ENABLE_STEPPER_DRIVER_INTERRUPT();
 
   #ifdef ADVANCE
@@ -964,7 +980,9 @@ void st_init()
   #endif //ADVANCE
 
   enable_endstops(true); // Start with endstops active. After homing they can be disabled
-  sei();
+/* TODO: FIXME */
+  //sei();
+/* TODO: FIXME */
 }
 
 
@@ -980,27 +998,39 @@ void st_synchronize()
 
 void st_set_position(const long &x, const long &y, const long &z, const long &e)
 {
-  CRITICAL_SECTION_START;
+/* TODO: FIXME */
+  //CRITICAL_SECTION_START;
+/* TODO: FIXME */
   count_position[X_AXIS] = x;
   count_position[Y_AXIS] = y;
   count_position[Z_AXIS] = z;
   count_position[E_AXIS] = e;
-  CRITICAL_SECTION_END;
+/* TODO: FIXME */
+  //CRITICAL_SECTION_END;
+/* TODO: FIXME */
 }
 
 void st_set_e_position(const long &e)
 {
-  CRITICAL_SECTION_START;
+/* TODO: FIXME */
+  //CRITICAL_SECTION_START;
+/* TODO: FIXME */
   count_position[E_AXIS] = e;
-  CRITICAL_SECTION_END;
+/* TODO: FIXME */
+  //CRITICAL_SECTION_END;
+/* TODO: FIXME */
 }
 
 long st_get_position(uint8_t axis)
 {
   long count_pos;
-  CRITICAL_SECTION_START;
+/* TODO: FIXME */
+  //CRITICAL_SECTION_START;
+/* TODO: FIXME */
   count_pos = count_position[axis];
-  CRITICAL_SECTION_END;
+/* TODO: FIXME */
+  //CRITICAL_SECTION_END;
+/* TODO: FIXME */
   return count_pos;
 }
 

@@ -187,9 +187,12 @@ class SdVolume {
     return  cluster >= FAT32EOC_MIN;
   }
   bool readBlock(uint32_t block, uint8_t* dst) {
-    return sdCard_->readBlock(block, dst);}
+    //return sdCard_->readBlock(block, dst);
+      return 1;
+  }
   bool writeBlock(uint32_t block, const uint8_t* dst) {
-    return sdCard_->writeBlock(block, dst);
+    //return sdCard_->writeBlock(block, dst);
+      return 1;
   }
 //------------------------------------------------------------------------------
   // Deprecated functions  - suppress cpplint warnings with NOLINT comment

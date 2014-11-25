@@ -23,7 +23,7 @@
 
 #ifndef Sd2PinMap_h
 #define Sd2PinMap_h
-#include <avr/io.h>
+//#include <avr/io.h>
 //------------------------------------------------------------------------------
 /** struct for mapping digital pins */
 struct pin_map_t {
@@ -313,11 +313,11 @@ static const pin_map_t digitalPinMap[] = {
   {&DDRC, &PINC, &PORTC, 4},  // C4 18
   {&DDRC, &PINC, &PORTC, 5}   // C5 19
 };
-#else  // defined(__AVR_ATmega1280__)
-#error unknown chip
+//#else  // defined(__AVR_ATmega1280__)
+//#error unknown chip
 #endif  // defined(__AVR_ATmega1280__)
 //------------------------------------------------------------------------------
-static const uint8_t digitalPinCount = sizeof(digitalPinMap)/sizeof(pin_map_t);
+/*static const uint8_t digitalPinCount = sizeof(digitalPinMap)/sizeof(pin_map_t);
 
 uint8_t badPinNumber(void)
   __attribute__((error("Pin number is too large or not a constant")));
@@ -361,7 +361,7 @@ static inline __attribute__((always_inline))
   } else {
     badPinNumber();
   }
-}
+}*/
 #endif  // Sd2PinMap_h
 
 

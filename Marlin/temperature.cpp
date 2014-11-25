@@ -164,7 +164,8 @@ unsigned long watchmillis[EXTRUDERS] = ARRAY_BY_EXTRUDERS(0,0,0);
 
 void PID_autotune(float temp, int extruder, int ncycles)
 {
-  float input = 0.0;
+/* TODO: FIXME */
+/*  float input = 0.0;
   int cycles=0;
   bool heating = true;
 
@@ -254,22 +255,22 @@ void PID_autotune(float temp, int extruder, int ncycles)
               SERIAL_PROTOCOLPGM(" Kp: "); SERIAL_PROTOCOLLN(Kp);
               SERIAL_PROTOCOLPGM(" Ki: "); SERIAL_PROTOCOLLN(Ki);
               SERIAL_PROTOCOLPGM(" Kd: "); SERIAL_PROTOCOLLN(Kd);
-              /*
-              Kp = 0.33*Ku;
-              Ki = Kp/Tu;
-              Kd = Kp*Tu/3;
-              SERIAL_PROTOCOLLNPGM(" Some overshoot ");
-              SERIAL_PROTOCOLPGM(" Kp: "); SERIAL_PROTOCOLLN(Kp);
-              SERIAL_PROTOCOLPGM(" Ki: "); SERIAL_PROTOCOLLN(Ki);
-              SERIAL_PROTOCOLPGM(" Kd: "); SERIAL_PROTOCOLLN(Kd);
-              Kp = 0.2*Ku;
-              Ki = 2*Kp/Tu;
-              Kd = Kp*Tu/3;
-              SERIAL_PROTOCOLLNPGM(" No overshoot ");
-              SERIAL_PROTOCOLPGM(" Kp: "); SERIAL_PROTOCOLLN(Kp);
-              SERIAL_PROTOCOLPGM(" Ki: "); SERIAL_PROTOCOLLN(Ki);
-              SERIAL_PROTOCOLPGM(" Kd: "); SERIAL_PROTOCOLLN(Kd);
-              */
+              
+              //Kp = 0.33*Ku;
+              //Ki = Kp/Tu;
+              //Kd = Kp*Tu/3;
+              //SERIAL_PROTOCOLLNPGM(" Some overshoot ");
+              //SERIAL_PROTOCOLPGM(" Kp: "); SERIAL_PROTOCOLLN(Kp);
+              //SERIAL_PROTOCOLPGM(" Ki: "); SERIAL_PROTOCOLLN(Ki);
+              //SERIAL_PROTOCOLPGM(" Kd: "); SERIAL_PROTOCOLLN(Kd);
+              //Kp = 0.2*Ku;
+              //Ki = 2*Kp/Tu;
+              //Kd = Kp*Tu/3;
+              //SERIAL_PROTOCOLLNPGM(" No overshoot ");
+              //SERIAL_PROTOCOLPGM(" Kp: "); SERIAL_PROTOCOLLN(Kp);
+              //SERIAL_PROTOCOLPGM(" Ki: "); SERIAL_PROTOCOLLN(Ki);
+              //SERIAL_PROTOCOLPGM(" Kd: "); SERIAL_PROTOCOLLN(Kd);
+              
             }
           }
           if (extruder<0)
@@ -310,7 +311,8 @@ void PID_autotune(float temp, int extruder, int ncycles)
       return;
     }
     lcd_update();
-  }
+  }*/
+/* TODO: FIXME */
 }
 
 void updatePID()
@@ -521,12 +523,14 @@ void manage_heater()
     extruder_autofan_last_check = millis();
   }  
   #endif       
-  
-  #ifndef PIDTEMPBED
+ 
+/* TODO: FIXME */
+  /*#ifndef PIDTEMPBED
   if(millis() - previous_millis_bed_heater < BED_CHECK_INTERVAL)
     return;
   previous_millis_bed_heater = millis();
-  #endif
+  #endif*/
+/* TODO: FIXME */
 
   #if TEMP_SENSOR_BED != 0
   
@@ -603,7 +607,9 @@ void manage_heater()
   #endif
 }
 
-#define PGM_RD_W(x)   (short)pgm_read_word(&x)
+/* TODO: FIXME */
+#define PGM_RD_W(x)   (x)//(short)pgm_read_word(&x)
+/* TODO: FIXME */
 // Derived from RepRap FiveD extruder::getTemperature()
 // For hot end temperature measurement.
 static float analog2temp(int raw, uint8_t e) {
@@ -697,9 +703,13 @@ static void updateTemperaturesFromRawValues()
     //Reset the watchdog after we know we have a temperature measurement.
     watchdog_reset();
 
-    CRITICAL_SECTION_START;
+/* TODO: FIXME */
+    //CRITICAL_SECTION_START;
+/* TODO: FIXME */
     temp_meas_ready = false;
-    CRITICAL_SECTION_END;
+/* TODO: FIXME */
+    //CRITICAL_SECTION_END;
+/* TODO: FIXME */
 }
 
 void tp_init()
@@ -763,14 +773,18 @@ void tp_init()
   #endif
 
   // Set analog inputs
-  ADCSRA = 1<<ADEN | 1<<ADSC | 1<<ADIF | 0x07;
-  DIDR0 = 0;
+/* TODO: FIXME */
+//  ADCSRA = 1<<ADEN | 1<<ADSC | 1<<ADIF | 0x07;
+//  DIDR0 = 0;
+/* TODO: FIXME */
   #ifdef DIDR2
     DIDR2 = 0;
   #endif
   #if defined(TEMP_0_PIN) && (TEMP_0_PIN > -1)
     #if TEMP_0_PIN < 8
-       DIDR0 |= 1 << TEMP_0_PIN; 
+/* TODO: FIXME */
+       //DIDR0 |= 1 << TEMP_0_PIN; 
+/* TODO: FIXME */
     #else
        DIDR2 |= 1<<(TEMP_0_PIN - 8); 
     #endif
@@ -791,7 +805,9 @@ void tp_init()
   #endif
   #if defined(TEMP_BED_PIN) && (TEMP_BED_PIN > -1)
     #if TEMP_BED_PIN < 8
-       DIDR0 |= 1<<TEMP_BED_PIN; 
+/* TODO: FIXME */
+       //DIDR0 |= 1<<TEMP_BED_PIN; 
+/* TODO: FIXME */
     #else
        DIDR2 |= 1<<(TEMP_BED_PIN - 8); 
     #endif
@@ -799,11 +815,13 @@ void tp_init()
   
   // Use timer0 for temperature measurement
   // Interleave temperature interrupt with millies interrupt
-  OCR0B = 128;
-  TIMSK0 |= (1<<OCIE0B);  
+/* TODO: FIXME */
+  //OCR0B = 128;
+  //TIMSK0 |= (1<<OCIE0B);  
   
   // Wait for temperature measurement to settle
-  delay(250);
+  //delay(250);
+/* TODO: FIXME */
 
 #ifdef HEATER_0_MINTEMP
   minttemp[0] = HEATER_0_MINTEMP;
@@ -1030,9 +1048,11 @@ void min_temp_error(uint8_t e) {
 }
 
 void bed_max_temp_error(void) {
-#if HEATER_BED_PIN > -1
+/* TODO: FIXME */
+/*#if HEATER_BED_PIN > -1
   WRITE(HEATER_BED_PIN, 0);
-#endif
+#endif*/
+/* TODO: FIXME */
   if(IsStopped() == false) {
     SERIAL_ERROR_START;
     SERIAL_ERRORLNPGM("Temperature heated bed switched off. MAXTEMP triggered !!");
@@ -1101,7 +1121,8 @@ int read_max6675()
 
 
 // Timer 0 is shared with millies
-ISR(TIMER0_COMPB_vect)
+/* TODO: FIXME */
+/*ISR(TIMER0_COMPB_vect)
 {
   //these variables are only accesible from the ISR, but static, so they don't lose their value
   static unsigned char temp_count = 0;
@@ -1331,7 +1352,7 @@ ISR(TIMER0_COMPB_vect)
     }
 #endif
   
-  /* No bed MINTEMP error? */
+  // No bed MINTEMP error? 
 #if defined(BED_MAXTEMP) && (TEMP_SENSOR_BED != 0)
 # if HEATER_BED_RAW_LO_TEMP > HEATER_BED_RAW_HI_TEMP
     if(current_temperature_bed_raw <= bed_maxttemp_raw) {
@@ -1351,19 +1372,20 @@ ISR(TIMER0_COMPB_vect)
    
     if(curTodo>0)
     {
-      babystep(axis,/*fwd*/true);
+      babystep(axis, //fwd// true);
       babystepsTodo[axis]--; //less to do next time
     }
     else
     if(curTodo<0)
     {
-      babystep(axis,/*fwd*/false);
+      babystep(axis, //fwd// false);
       babystepsTodo[axis]++; //less to do next time
     }
   }
 #endif //BABYSTEPPING
 }
-
+*/
+/* TODO: FIXME */
 #ifdef PIDTEMP
 // Apply the scale factors to the PID values
 

@@ -78,17 +78,17 @@ void SdFile::write(const char* str) {
  * \param[in] str Pointer to the PROGMEM string.
  * Use writeError to check for errors.
  */
-void SdFile::write_P(PGM_P str) {
-  for (uint8_t c; (c = pgm_read_byte(str)); str++) write(c);
+void SdFile::write_P(const char* str) {
+  for (uint8_t c; (c = *str); str++) write(c);
 }
 //------------------------------------------------------------------------------
 /** Write a PROGMEM string followed by CR/LF to a file.
  * \param[in] str Pointer to the PROGMEM string.
  * Use writeError to check for errors.
  */
-void SdFile::writeln_P(PGM_P str) {
+void SdFile::writeln_P(const char* str) {
   write_P(str);
-  write_P(PSTR("\r\n"));
+  write_P("\r\n");
 }
 
 

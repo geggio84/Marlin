@@ -42,12 +42,12 @@
 #include "temperature.h"
 #include "motion_control.h"
 #include "cardreader.h"
-#include "watchdog.h"
+//#include "watchdog.h"
 #include "ConfigurationStore.h"
 #include "language.h"
-#include "pins_arduino.h"
-#include "math.h"
-
+//#include "pins_arduino.h"
+//#include "math.h"
+/*
 #ifdef BLINKM
 #include "BlinkM.h"
 #include "Wire.h"
@@ -60,8 +60,9 @@
 #if defined(DIGIPOTSS_PIN) && DIGIPOTSS_PIN > -1
 #include <SPI.h>
 #endif
+*/
 
-#define VERSION_STRING  "1.0.0"
+#define VERSION_STRING  "0.9.0"
 
 // look here for descriptions of G-codes: http://linuxcnc.org/handbook/gcode/g-code.html
 // http://objects.reprap.org/wiki/Mendel_User_Manual:_RepRapGCodes
@@ -183,6 +184,12 @@
 //===========================================================================
 //=============================public variables=============================
 //===========================================================================
+unsigned long time_zero = 0;
+myFILE *gcode_file;
+myFILE *log_file;
+//static myFILE *serial_file;
+int serial_file;
+
 #ifdef SDSUPPORT
 CardReader card;
 #endif
@@ -316,7 +323,7 @@ static int buflen = 0;
 //static int i = 0;
 static char serial_char;
 static int serial_count = 0;
-static boolean comment_mode = false;
+static bool comment_mode = false;
 static char *strchr_pointer; // just a pointer to find chars in the command string like X, Y, Z, E, etc
 
 const int sensitive_pins[] = SENSITIVE_PINS; // Sensitive pin list for M42
@@ -364,7 +371,8 @@ void serial_echopair_P(const char *s_P, double v)
 void serial_echopair_P(const char *s_P, unsigned long v)
     { serialprintPGM(s_P); SERIAL_ECHO(v); }
 
-extern "C"{
+/* TODO: FIXME */
+/*extern "C"{
   extern unsigned int __bss_end;
   extern unsigned int __heap_start;
   extern void *__brkval;
@@ -379,7 +387,8 @@ extern "C"{
 
     return free_memory;
   }
-}
+}*/
+/* TODO: FIXME */
 
 //adds an command to the main command buffer
 //thats really done in a non-safe way.
@@ -404,7 +413,8 @@ void enquecommand_P(const char *cmd)
   if(buflen < BUFSIZE)
   {
     //this is dangerous if a mixing of serial and this happens
-    strcpy_P(&(cmdbuffer[bufindw][0]),cmd);
+    //strcpy_P(&(cmdbuffer[bufindw][0]),cmd);
+    strcpy(&(cmdbuffer[bufindw][0]),cmd);
     SERIAL_ECHO_START;
     SERIAL_ECHOPGM("enqueing \"");
     SERIAL_ECHO(cmdbuffer[bufindw]);
@@ -497,14 +507,19 @@ void setup()
   SERIAL_ECHO_START;
 
   // Check startup - does nothing if bootloader sets MCUSR to 0
-  byte mcu = MCUSR;
+/* TODO: FIXME */
+  //byte mcu = MCUSR;
+  char mcu = 0;
+/* TODO: FIXME */
   if(mcu & 1) SERIAL_ECHOLNPGM(MSG_POWERUP);
   if(mcu & 2) SERIAL_ECHOLNPGM(MSG_EXTERNAL_RESET);
   if(mcu & 4) SERIAL_ECHOLNPGM(MSG_BROWNOUT_RESET);
   if(mcu & 8) SERIAL_ECHOLNPGM(MSG_WATCHDOG_RESET);
   if(mcu & 32) SERIAL_ECHOLNPGM(MSG_SOFTWARE_RESET);
-  MCUSR=0;
-
+/* TODO: FIXME */
+  //MCUSR=0;
+/* TODO: FIXME */
+  
   SERIAL_ECHOPGM(MSG_MARLIN);
   SERIAL_ECHOLNPGM(VERSION_STRING);
   #ifdef STRING_VERSION_CONFIG_H
@@ -520,7 +535,9 @@ void setup()
   #endif
   SERIAL_ECHO_START;
   SERIAL_ECHOPGM(MSG_FREE_MEMORY);
-  SERIAL_ECHO(freeMemory());
+/* TODO: FIXME */
+  //SERIAL_ECHO(freeMemory());
+/* TODO: FIXME */
   SERIAL_ECHOPGM(MSG_PLANNER_BUFFER_BYTES);
   SERIAL_ECHOLN((int)sizeof(block_t)*BLOCK_BUFFER_SIZE);
   for(int8_t i = 0; i < BUFSIZE; i++)
@@ -533,13 +550,15 @@ void setup()
 
   tp_init();    // Initialize temperature loop
   plan_init();  // Initialize planner;
-  watchdog_init();
+/* TODO: FIXME */
+  //watchdog_init();
+/* TODO: FIXME */
   st_init();    // Initialize stepper, this enables interrupts!
   setup_photpin();
   servo_init();
 
   lcd_init();
-  _delay_ms(1000);	// wait 1sec to display the splash screen
+  sleep(1);	// wait 1sec to display the splash screen
 
   #if defined(CONTROLLERFAN_PIN) && CONTROLLERFAN_PIN > -1
     SET_OUTPUT(CONTROLLERFAN_PIN); //Set pin used for driver cooling fan
@@ -550,58 +569,153 @@ void setup()
   #endif
 }
 
+unsigned long millis(void)
+{
+    struct timeval tv;
+    gettimeofday(&tv,NULL);
+    return ( (tv.tv_sec * 1000 + tv.tv_usec / 1000L) - time_zero );
+}
 
-void loop()
+void header()
+{
+    printf("####################################\n\r");
+    printf("#      BeagleBone 3d Printer       #\n\r");
+    printf("####################################\n\r");
+    printf("based on Marlin 3d printer firmware 1.0\n\r");
+    printf("author: Matteo Geromin\n\r");
+    printf("version: %s\n\r",VERSION_STRING);
+    printf("\n\r");
+}
+
+void usage()
+{
+    printf("Missing input G-code file\n\r");
+    printf("USAGE:\n\r");
+    printf("\n\r");
+    printf("    ./Marlin.elf -s <Serial file> -f <G-code file>\n\r");
+    printf("\n\r");
+}
+
+int main(int argc, char *argv[])
+{   
+    struct timeval tv;
+    char str[80],str2[5];
+    struct termios serial_config;
+    int serial_baud;
+    
+    // Register signal and signal handler
+    signal(SIGINT, signal_callback_handler);
+    gettimeofday(&tv,NULL);
+    time_zero = tv.tv_sec * 1000 + tv.tv_usec / 1000L;
+    header();
+
+    // Setup
+    setup();
+    
+    // OPEN Serial Port
+    strcpy (str,"/dev/tty");
+    sprintf(str2,"%s",SERIAL_PORT);
+    strcat (str,str2);
+    printf("Now We Open Serial Port File: %s\n\r", str);
+    serial_file = open(str, O_RDWR | O_NOCTTY | O_NONBLOCK);
+    if (serial_file == 0) {
+        printf("Failed to open file %s\n\r",str);
+        return EXIT_FAILURE;
+    }
+    if(!isatty(serial_file)) {
+        printf("Serial file %s is NOT a TTY\n\r",str);
+        return EXIT_FAILURE;
+    }
+    // Set serial port baudrate
+    if(tcgetattr(serial_file, &serial_config) < 0){
+        printf("Failed to get serial attribute\n\r");
+        return EXIT_FAILURE;
+    }
+    switch (BAUDRATE)
+      {
+         case 500000:
+         default:
+            serial_baud = B500000;
+            break;
+         case 460800:
+            serial_baud  = B460800;
+            break;
+         case 230400:
+            serial_baud  = B230400;
+            break;
+         case 115200:
+            serial_baud  = B115200;
+            break;
+         case 57600:
+            serial_baud  = B57600;
+            break;
+         case 38400:
+            serial_baud  = B38400;
+            break;
+         case 19200:
+            serial_baud  = B19200;
+            break;
+         case 9600:
+            serial_baud  = B9600;
+            break;
+    }
+    memset(&serial_config,0,sizeof(serial_config));
+    serial_config.c_iflag=0;
+    serial_config.c_oflag=0;
+    serial_config.c_cflag=CS8|CREAD|CLOCAL;           // 8n1, see termios.h for more information
+    serial_config.c_lflag=0;
+    serial_config.c_cc[VMIN]=1;
+    serial_config.c_cc[VTIME]=5;
+    if(cfsetispeed(&serial_config, serial_baud) < 0 || cfsetospeed(&serial_config, serial_baud) < 0) {
+        printf("Failed to set serial baudrate\n\r");
+        return EXIT_FAILURE;
+    }
+
+    if(tcsetattr(serial_file, TCSANOW, &serial_config) < 0){
+        printf("Failed to set serial attribute\n\r");
+        return EXIT_FAILURE;
+    }
+    
+    while(1)
+    {
+        if(loop() < 0) break;
+    }
+        
+    /*if (gcode_file.file_p != NULL) {
+        fclose(gcode_file.file_p);
+    }*/
+    if (serial_file != 0) {
+        printf("Now We Close Serial Port File: %s\n\r", str);
+        close(serial_file);
+    }
+    return EXIT_SUCCESS;
+}
+
+int loop()
 {
   if(buflen < (BUFSIZE-1))
-    get_command();
-  #ifdef SDSUPPORT
-  card.checkautostart(false);
-  #endif
+    if(get_command() < 0) return -1;
   if(buflen)
   {
-    #ifdef SDSUPPORT
-      if(card.saving)
-      {
-        if(strstr_P(cmdbuffer[bufindr], PSTR("M29")) == NULL)
-        {
-          card.write_command(cmdbuffer[bufindr]);
-          if(card.logging)
-          {
-            process_commands();
-          }
-          else
-          {
-            SERIAL_PROTOCOLLNPGM(MSG_OK);
-          }
-        }
-        else
-        {
-          card.closefile();
-          SERIAL_PROTOCOLLNPGM(MSG_FILE_SAVED);
-        }
-      }
-      else
-      {
-        process_commands();
-      }
-    #else
-      process_commands();
-    #endif //SDSUPPORT
+    //printf("Process Command nr.%d : %s\n\r",bufindr,cmdbuffer[bufindr]);
+    process_commands();
     buflen = (buflen-1);
     bufindr = (bufindr + 1)%BUFSIZE;
   }
   //check heater every n milliseconds
-  manage_heater();
-  manage_inactivity();
-  checkHitEndstops();
-  lcd_update();
+/* TODO: FIXME */
+//  manage_heater();
+//  manage_inactivity();
+//  checkHitEndstops();
+//  lcd_update();
+/* TODO: FIXME */
+  return 0;
 }
 
-void get_command()
+int get_command()
 {
   while( MYSERIAL.available() > 0  && buflen < BUFSIZE) {
-    serial_char = MYSERIAL.read();
+    serial_char = MYSERIAL.read_buf();
     if(serial_char == '\n' ||
        serial_char == '\r' ||
        (serial_char == ':' && comment_mode == false) ||
@@ -609,7 +723,7 @@ void get_command()
     {
       if(!serial_count) { //if empty line
         comment_mode = false; //for new command
-        return;
+        return 0;
       }
       cmdbuffer[bufindw][serial_count] = 0; //terminate string
       if(!comment_mode){
@@ -619,20 +733,20 @@ void get_command()
         {
           strchr_pointer = strchr(cmdbuffer[bufindw], 'N');
           gcode_N = (strtol(&cmdbuffer[bufindw][strchr_pointer - cmdbuffer[bufindw] + 1], NULL, 10));
-          if(gcode_N != gcode_LastN+1 && (strstr_P(cmdbuffer[bufindw], PSTR("M110")) == NULL) ) {
+          if(gcode_N != gcode_LastN+1 && (strstr(cmdbuffer[bufindw], "M110") == NULL) ) {
             SERIAL_ERROR_START;
             SERIAL_ERRORPGM(MSG_ERR_LINE_NO);
             SERIAL_ERRORLN(gcode_LastN);
             //Serial.println(gcode_N);
             FlushSerialRequestResend();
             serial_count = 0;
-            return;
+            return 0;
           }
 
           if(strchr(cmdbuffer[bufindw], '*') != NULL)
           {
-            byte checksum = 0;
-            byte count = 0;
+            char checksum = 0;
+            char count = 0;
             while(cmdbuffer[bufindw][count] != '*') checksum = checksum^cmdbuffer[bufindw][count++];
             strchr_pointer = strchr(cmdbuffer[bufindw], '*');
 
@@ -642,7 +756,7 @@ void get_command()
               SERIAL_ERRORLN(gcode_LastN);
               FlushSerialRequestResend();
               serial_count = 0;
-              return;
+              return 0;
             }
             //if no errors, continue parsing
           }
@@ -653,7 +767,7 @@ void get_command()
             SERIAL_ERRORLN(gcode_LastN);
             FlushSerialRequestResend();
             serial_count = 0;
-            return;
+            return 0;
           }
 
           gcode_LastN = gcode_N;
@@ -667,7 +781,7 @@ void get_command()
             SERIAL_ERRORPGM(MSG_ERR_NO_LINENUMBER_WITH_CHECKSUM);
             SERIAL_ERRORLN(gcode_LastN);
             serial_count = 0;
-            return;
+            return 0;
           }
         }
         if((strchr(cmdbuffer[bufindw], 'G') != NULL)){
@@ -712,7 +826,7 @@ void get_command()
   }
   #ifdef SDSUPPORT
   if(!card.sdprinting || serial_count!=0){
-    return;
+    return 0;
   }
 
   //'#' stops reading from SD to the buffer prematurely, so procedural macro calls are possible
@@ -723,7 +837,7 @@ void get_command()
   if(buflen==0) stop_buffering=false;
 
   while( !card.eof()  && buflen < BUFSIZE && !stop_buffering) {
-    int16_t n=card.get();
+    int16_t n=card.get(gcode_file);
     serial_char = (char)n;
     if(serial_char == '\n' ||
        serial_char == '\r' ||
@@ -739,11 +853,11 @@ void get_command()
         int hours, minutes;
         minutes=(t/60)%60;
         hours=t/60/60;
-        sprintf_P(time, PSTR("%i hours %i minutes"),hours, minutes);
+        printf("%i hours %i minutes",hours, minutes);
         SERIAL_ECHO_START;
         SERIAL_ECHOLN(time);
         lcd_setstatus(time);
-        card.printingHasFinished();
+        card.printingHasFinished(gcode_file);
         card.checkautostart(true);
 
       }
@@ -753,7 +867,7 @@ void get_command()
       if(!serial_count)
       {
         comment_mode = false; //for new command
-        return; //if empty line
+        return 0; //if empty line
       }
       cmdbuffer[bufindw][serial_count] = 0; //terminate string
 //      if(!comment_mode){
@@ -772,7 +886,7 @@ void get_command()
   }
 
   #endif //SDSUPPORT
-
+  return 0;
 }
 
 
@@ -792,6 +906,11 @@ bool code_seen(char code)
   return (strchr_pointer != NULL);  //Return True if a character was found
 }
 
+#define pgm_read_float_near(address_short) 0
+//    __LPM_float((uint16_t)(address_short))
+#define pgm_read_byte_near(address_short) 0
+//    __LPM_float((uint16_t)(address_short))
+
 #define DEFINE_PGM_READ_ANY(type, reader)       \
     static inline type pgm_read_any(const type *p)  \
     { return pgm_read_##reader##_near(p); }
@@ -800,7 +919,7 @@ DEFINE_PGM_READ_ANY(float,       float);
 DEFINE_PGM_READ_ANY(signed char, byte);
 
 #define XYZ_CONSTS_FROM_CONFIG(type, array, CONFIG) \
-static const PROGMEM type array##_P[3] =        \
+static const type array##_P[3] =        \
     { X_##CONFIG, Y_##CONFIG, Z_##CONFIG };     \
 static inline type array(int axis)          \
     { return pgm_read_any(&array##_P[axis]); }
@@ -811,7 +930,8 @@ XYZ_CONSTS_FROM_CONFIG(float, base_home_pos,   HOME_POS);
 XYZ_CONSTS_FROM_CONFIG(float, max_length,      MAX_LENGTH);
 XYZ_CONSTS_FROM_CONFIG(float, home_retract_mm, HOME_RETRACT_MM);
 XYZ_CONSTS_FROM_CONFIG(signed char, home_dir,  HOME_DIR);
-
+/* TODO: FIXME */
+/*
 #ifdef DUAL_X_CARRIAGE
   #if EXTRUDERS == 1 || defined(COREXY) \
       || !defined(X2_ENABLE_PIN) || !defined(X2_STEP_PIN) || !defined(X2_DIR_PIN) \
@@ -851,7 +971,8 @@ static float duplicate_extruder_x_offset = DEFAULT_DUPLICATION_X_OFFSET; // used
 static float duplicate_extruder_temp_offset = 0; // used in mode 2
 bool extruder_duplication_enabled = false; // used in mode 2
 #endif //DUAL_X_CARRIAGE
-
+*/
+/* TODO: FIXME */
 static void axis_is_at_home(int axis) {
 #ifdef DUAL_X_CARRIAGE
   if (axis == X_AXIS) {
@@ -874,7 +995,8 @@ static void axis_is_at_home(int axis) {
   min_pos[axis] =          base_min_pos(axis) + add_homeing[axis];
   max_pos[axis] =          base_max_pos(axis) + add_homeing[axis];
 }
-
+/* TODO: FIXME */
+/*
 #ifdef ENABLE_AUTO_BED_LEVELING
 #ifdef AUTO_BED_LEVELING_GRID
 static void set_bed_level_equation_lsq(double *plane_equation_coefficients)
@@ -1052,6 +1174,8 @@ static float probe_pt(float x, float y, float z_before) {
 }
 
 #endif // #ifdef ENABLE_AUTO_BED_LEVELING
+*/
+/* TODO: FIXME */
 
 static void homeaxis(int axis) {
 #define HOMEAXIS_DO(LETTER) \
@@ -1135,7 +1259,8 @@ void refresh_cmd_timeout(void)
 {
   previous_millis_cmd = millis();
 }
-
+/* TODO: FIXME */
+/*
 #ifdef FWRETRACT
   void retract(bool retracting, bool swapretract = false) {
     if(retracting && !retracted[active_extruder]) {
@@ -1179,6 +1304,8 @@ void refresh_cmd_timeout(void)
     }
   } //retract
 #endif //FWRETRACT
+*/
+/* TODO: FIXME */
 
 void process_commands()
 {
@@ -1232,11 +1359,15 @@ void process_commands()
       if(code_seen('P')) codenum = code_value(); // milliseconds to wait
       if(code_seen('S')) codenum = code_value() * 1000; // seconds to wait
 
-      st_synchronize();
+/* TODO: FIXME */
+      //st_synchronize();
+/* TODO: FIXME */
       codenum += millis();  // keep track of when we started waiting
       previous_millis_cmd = millis();
       while(millis()  < codenum ){
-        manage_heater();
+/* TODO: FIXME */
+        //manage_heater();
+/* TODO: FIXME */
         manage_inactivity();
         lcd_update();
       }
@@ -1715,7 +1846,9 @@ void process_commands()
 #ifdef SDSUPPORT
     case 20: // M20 - list SD card
       SERIAL_PROTOCOLLNPGM(MSG_BEGIN_FILE_LIST);
-      card.ls();
+/* TODO: FIXME */
+      //card.ls();
+/* TODO: FIXME */
       SERIAL_PROTOCOLLNPGM(MSG_END_FILE_LIST);
       break;
     case 21: // M21 - init SD card
@@ -1828,7 +1961,7 @@ void process_commands()
       int sec,min;
       min=t/60;
       sec=t%60;
-      sprintf_P(time, PSTR("%i min, %i sec"), min, sec);
+      printf("%s %i min, %i sec", time, min, sec);
       SERIAL_ECHO_START;
       SERIAL_ECHOLN(time);
       lcd_setstatus(time);
@@ -1856,6 +1989,7 @@ void process_commands()
       #endif
         if (pin_number > -1)
         {
+          printf("Set PIN %d to: %d\n\r",pin_number,pin_status);
           pinMode(pin_number, OUTPUT);
           digitalWrite(pin_number, pin_status);
           analogWrite(pin_number, pin_status);
@@ -2148,7 +2282,7 @@ void process_commands()
         disable_e2();
         finishAndDisableSteppers();
         fanSpeed = 0;
-        delay(1000); // Wait a little before to switch off
+        sleep(1); // Wait a little before to switch off
       #if defined(SUICIDE_PIN) && SUICIDE_PIN > -1
         st_synchronize();
         suicide();
@@ -3092,7 +3226,7 @@ void process_commands()
       SERIAL_ECHOLN(MSG_INVALID_EXTRUDER);
     }
     else {
-      boolean make_move = false;
+      bool make_move = false;
       if(code_seen('F')) {
         make_move = true;
         next_feedrate = code_value();
@@ -3300,15 +3434,14 @@ void calculate_delta(float cartesian[3])
                        - sq(delta_tower3_x-cartesian[X_AXIS])
                        - sq(delta_tower3_y-cartesian[Y_AXIS])
                        ) + cartesian[Z_AXIS];
-  /*
-  SERIAL_ECHOPGM("cartesian x="); SERIAL_ECHO(cartesian[X_AXIS]);
-  SERIAL_ECHOPGM(" y="); SERIAL_ECHO(cartesian[Y_AXIS]);
-  SERIAL_ECHOPGM(" z="); SERIAL_ECHOLN(cartesian[Z_AXIS]);
+  //SERIAL_ECHOPGM("cartesian x="); SERIAL_ECHO(cartesian[X_AXIS]);
+  //SERIAL_ECHOPGM(" y="); SERIAL_ECHO(cartesian[Y_AXIS]);
+  //SERIAL_ECHOPGM(" z="); SERIAL_ECHOLN(cartesian[Z_AXIS]);
 
-  SERIAL_ECHOPGM("delta x="); SERIAL_ECHO(delta[X_AXIS]);
-  SERIAL_ECHOPGM(" y="); SERIAL_ECHO(delta[Y_AXIS]);
-  SERIAL_ECHOPGM(" z="); SERIAL_ECHOLN(delta[Z_AXIS]);
-  */
+  //SERIAL_ECHOPGM("delta x="); SERIAL_ECHO(delta[X_AXIS]);
+  //SERIAL_ECHOPGM(" y="); SERIAL_ECHO(delta[Y_AXIS]);
+  //SERIAL_ECHOPGM(" z="); SERIAL_ECHOLN(delta[Z_AXIS]);
+  
 }
 #endif
 
@@ -3568,8 +3701,10 @@ void manage_inactivity()
 
 void kill()
 {
-  cli(); // Stop interrupts
-  disable_heater();
+/* TODO: FIXME */
+  //cli(); // Stop interrupts
+  //disable_heater();
+/* TODO: FIXME */
 
   disable_x();
   disable_y();
@@ -3585,7 +3720,17 @@ void kill()
   SERIAL_ERRORLNPGM(MSG_ERR_KILLED);
   LCD_ALERTMESSAGEPGM(MSG_KILLED);
   suicide();
-  while(1) { /* Intentionally left empty */ } // Wait for reset
+  printf("Exit MARLIN Firmware\n\r");
+  // Terminate program
+  exit(0);
+}
+
+void signal_callback_handler(int signum)
+{
+  printf("Caught signal %d\n",signum);
+  // Cleanup and close up stuff here
+  // Terminate program
+  exit(signum);
 }
 
 void Stop()
@@ -3702,3 +3847,21 @@ bool setTargetedHotend(int code){
   return false;
 }
 
+
+void pinMode(uint8_t pin, uint8_t mode){
+    printf("Set PIN %d to mode %d\n\r",pin,mode);
+}
+void digitalWrite(uint8_t pin, uint8_t val){
+    printf("Set PIN %d to value %d\n\r",pin,val);
+}
+int digitalRead(uint8_t pin){
+    printf("Read Digital PIN %d\n\r",pin);
+    return 0;
+}
+int analogRead(uint8_t pin){
+    printf("Read Analog PIN %d\n\r",pin);
+    return 0;
+}
+void analogWrite(uint8_t pin, int val){
+    printf("Set Analog PIN %d to value %d\n\r",pin,val);
+}
