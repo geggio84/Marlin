@@ -67,36 +67,71 @@ MarlinSerial::MarlinSerial()
 
 // Public Methods //////////////////////////////////////////////////////////////
 
-void MarlinSerial::begin(long baud)
+void MarlinSerial::begin(long baud, char* serial)
 {
-  uint16_t baud_setting;
-  bool useU2X = true;
-/* TODO: FIX */
-/*#if F_CPU == 16000000UL && SERIAL_PORT == 0
-  // hard coded exception for compatibility with the bootloader shipped
-  // with the Duemilanove and previous boards and the firmware on the 8U2
-  // on the Uno and Mega 2560.
-  if (baud == 57600) {
-    useU2X = false;
-  }
-#endif
-  
-  if (useU2X) {
-    M_UCSRxA = 1 << M_U2Xx;
-    baud_setting = (F_CPU / 4 / baud - 1) / 2;
-  } else {
-    M_UCSRxA = 0;
-    baud_setting = (F_CPU / 8 / baud - 1) / 2;
-  }
+    int serial_baud;
+    struct termios serial_config;
+    
+        // OPEN Serial Port
+        printf("Now We Open Serial Port File: %s\n\r", serial);
+        serial_file = open(serial, O_RDWR | O_NOCTTY | O_NONBLOCK);
+        if (serial_file == 0) {
+                printf("Failed to open file %s\n\r",serial);
+                kill();
+        }
+        if(!isatty(serial_file)) {
+                printf("Serial file %s is NOT a TTY\n\r",serial);
+                kill();
+        }
+        // Set serial port baudrate
+        if(tcgetattr(serial_file, &serial_config) < 0){
+                printf("Failed to get serial attribute\n\r");
+                kill();
+        }
+        switch (baud)
+        {
+                case 500000:
+                        serial_baud = B500000;
+                        break;
+                case 460800:
+                        serial_baud  = B460800;
+                        break;
+                case 230400:
+                        serial_baud  = B230400;
+                        break;
+                case 115200:
+                default:
+                        serial_baud  = B115200;
+                        break;
+                case 57600:
+                        serial_baud  = B57600;
+                        break;
+                case 38400:
+                        serial_baud  = B38400;
+                        break;
+                case 19200:
+                        serial_baud  = B19200;
+                        break;
+                case 9600:
+                        serial_baud  = B9600;
+                        break;
+        }
+        memset(&serial_config,0,sizeof(serial_config));
+        serial_config.c_iflag=0;
+        serial_config.c_oflag=0;
+        serial_config.c_cflag=CS8|CREAD|CLOCAL;           // 8n1, see termios.h for more information
+        serial_config.c_lflag=0;
+        serial_config.c_cc[VMIN]=1;
+        serial_config.c_cc[VTIME]=5;
+        if(cfsetispeed(&serial_config, serial_baud) < 0 || cfsetospeed(&serial_config, serial_baud) < 0) {
+                printf("Failed to set serial baudrate\n\r");
+                kill();
+        }
 
-  // assign the baud_setting, a.k.a. ubbr (USART Baud Rate Register)
-  M_UBRRxH = baud_setting >> 8;
-  M_UBRRxL = baud_setting;
-
-  sbi(M_UCSRxB, M_RXENx);
-  sbi(M_UCSRxB, M_TXENx);
-  sbi(M_UCSRxB, M_RXCIEx);*/
-  /* TODO: FIX */
+        if(tcsetattr(serial_file, TCSANOW, &serial_config) < 0){
+                printf("Failed to set serial attribute\n\r");
+                kill();
+        }
 }
 
 void MarlinSerial::end()

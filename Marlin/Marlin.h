@@ -8,26 +8,24 @@
 
 #include <math.h>
 #include <stdio.h>
-/* TODO: ADDED */
 #include <ctype.h>
-/* TODO: ADDED */
 #include <stdlib.h>
 #include <string.h>
 #include <inttypes.h>
-/* TODO: ADDED */
 #include <sys/time.h>
+#include <sys/wait.h>
 #include <time.h>
 #include <unistd.h>
 #include <termios.h>
 #include <fcntl.h>
 #include <signal.h>
-/* TODO: ADDED */
+#include "marlin_types.h"
 
 /* TODO: FIXME */
-/*#include <util/delay.h>
-#include <avr/pgmspace.h>
-#include <avr/eeprom.h>
-#include <avr/interrupt.h>*/
+//#include <util/delay.h>
+#include "util/pgmspace.h"
+//#include <avr/eeprom.h>
+//#include <avr/interrupt.h>
 /* TODO: FIXME */
 
 
@@ -35,7 +33,6 @@
 #include "Configuration.h"
 #include "pins.h"
 
-/* TODO: ADDED */
 #define F_CPU 16000000
 
 #define HIGH 0x1
@@ -47,7 +44,6 @@
 
 #define min(a,b) ((a)<(b)?(a):(b))
 #define max(a,b) ((a)>(b)?(a):(b))
-/* TODO: ADDED */
 
 #ifndef AT90USB
 #define  HardwareSerial_h // trick to disable the standard HWserial
@@ -65,13 +61,11 @@
 #include "HardwareSerial.h"
 #endif
 
-/* TODO: ADDED */
 typedef struct {
     FILE *file_p;
     uint32_t currpos;
     uint32_t size;
 } myFILE;
-/* TODO: ADDED */
 
 #include "MarlinSerial.h"
 
@@ -82,32 +76,17 @@ typedef struct {
 #define sbi(sfr, bit) (_SFR_BYTE(sfr) |= _BV(bit))
 #endif
 
-//#include "WString.h"
-
-#ifdef AT90USB
-   #ifdef BTENABLED
-         #define MYSERIAL bt
-   #else
-         #define MYSERIAL Serial
-   #endif // BTENABLED
-#else
-  #define MYSERIAL MSerial
-#endif
+#define MYSERIAL MSerial
 
 #define SERIAL_PROTOCOL(x) (MYSERIAL.print(x))
 #define SERIAL_PROTOCOL_F(x,y) (MYSERIAL.print(x,y))
-//#define SERIAL_PROTOCOLPGM(x) (serialprintPGM(PSTR(x)))
-//#define SERIAL_PROTOCOLLN(x) (MYSERIAL.print(x),MYSERIAL.write('\n'))
-//#define SERIAL_PROTOCOLLNPGM(x) (serialprintPGM(PSTR(x)),MYSERIAL.write('\n'))
-#define SERIAL_PROTOCOLPGM(x) (serialprintPGM(x))
+#define SERIAL_PROTOCOLPGM(x) (serialprintPGM(PSTR(x)))
 #define SERIAL_PROTOCOLLN(x) (MYSERIAL.print(x),MYSERIAL.write_ser('\n'))
-#define SERIAL_PROTOCOLLNPGM(x) (serialprintPGM(x),MYSERIAL.write_ser('\n'))
+#define SERIAL_PROTOCOLLNPGM(x) (serialprintPGM(PSTR(x)),MYSERIAL.write_ser('\n'))
 
 
-//const char errormagic[] PROGMEM ="Error:";
-//const char echomagic[] PROGMEM ="echo:";
-const char errormagic[] ="Error:";
-const char echomagic[] ="echo:";
+const char errormagic[] PROGMEM ="Error:";
+const char echomagic[] PROGMEM ="echo:";
 #define SERIAL_ERROR_START (serialprintPGM(errormagic))
 #define SERIAL_ERROR(x) SERIAL_PROTOCOL(x)
 #define SERIAL_ERRORPGM(x) SERIAL_PROTOCOLPGM(x)

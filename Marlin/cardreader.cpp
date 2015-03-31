@@ -138,17 +138,16 @@ CardReader::CardReader()
 }*/
 /* TODO: FIXME */
 
-/* TODO: FIXME */
-/*void CardReader::ls() 
+void CardReader::ls() 
 {
   lsAction=LS_SerialPrint;
   if(lsAction==LS_Count)
   nrFiles=0;
-
-  root.rewind();
-  lsDive("",root);
-}*/
 /* TODO: FIXME */
+  //root.rewind();
+  //lsDive("",root);
+/* TODO: FIXME */
+}
 
 
 void CardReader::initsd()

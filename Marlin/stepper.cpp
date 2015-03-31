@@ -268,9 +268,7 @@ FORCE_INLINE unsigned short calc_timer(unsigned short step_rate) {
 /* TODO: FIXME */    
     //unsigned short gain = (unsigned short)pgm_read_word_near(table_address+2);
     unsigned short gain = (unsigned short)(table_address+2);
-/* TODO: FIXME */
-    MultiU16X8toH16(timer, tmp_step_rate, gain);
-/* TODO: FIXME */
+    //MultiU16X8toH16(timer, tmp_step_rate, gain);
     //timer = (unsigned short)pgm_read_word_near(table_address) - timer;
     timer = (unsigned short)(table_address) - timer;
 /* TODO: FIXME */
@@ -324,9 +322,11 @@ FORCE_INLINE void trapezoid_generator_reset() {
 
 // "The Stepper Driver Interrupt" - This timer interrupt is the workhorse.
 // It pops blocks from the block_buffer and executes them by pulsing the stepper pins appropriately.
-/* TODO: FIXME */
-/*ISR(TIMER1_COMPA_vect)
+void ISR(int sign)// ISR(TIMER1_COMPA_vect)
 {
+  signal(SIGALRM, ISR); //Set alarm clock for 3 seconds.
+  alarm(3);
+  printf("I'm Alive\n\r");
   // If there is no current block, attempt to pop one from the buffer
   if (current_block == NULL) {
     // Anything in the buffer?
@@ -656,7 +656,9 @@ FORCE_INLINE void trapezoid_generator_reset() {
     unsigned short step_rate;
     if (step_events_completed <= (unsigned long int)current_block->accelerate_until) {
 
-      MultiU24X24toH16(acc_step_rate, acceleration_time, current_block->acceleration_rate);
+      /* TODO: FIXME */
+      //MultiU24X24toH16(acc_step_rate, acceleration_time, current_block->acceleration_rate);
+      /* TODO: FIXME */
       acc_step_rate += current_block->initial_rate;
 
       // upper limit
@@ -679,7 +681,9 @@ FORCE_INLINE void trapezoid_generator_reset() {
       #endif
     }
     else if (step_events_completed > (unsigned long int)current_block->decelerate_after) {
-      MultiU24X24toH16(step_rate, deceleration_time, current_block->acceleration_rate);
+      /* TODO: FIXME */
+      //MultiU24X24toH16(step_rate, deceleration_time, current_block->acceleration_rate);
+      /* TODO: FIXME */
 
       if(step_rate > acc_step_rate) { // Check step_rate stays positive
         step_rate = current_block->final_rate;
@@ -718,8 +722,7 @@ FORCE_INLINE void trapezoid_generator_reset() {
       plan_discard_current_block();
     }
   }
-}*/
-/* TODO: FIXME */
+}
 
 #ifdef ADVANCE
   unsigned char old_OCR0A;

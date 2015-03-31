@@ -14,6 +14,9 @@
           <in>Configuration_adv.h</in>
         </df>
       </df>
+      <df name="util">
+        <in>pgmspace.h</in>
+      </df>
       <in>BlinkM.cpp</in>
       <in>BlinkM.h</in>
       <in>Configuration.h</in>
@@ -50,6 +53,7 @@
       <in>dogm_lcd_implementation.h</in>
       <in>fastio.h</in>
       <in>language.h</in>
+      <in>marlin_types.h</in>
       <in>motion_control.cpp</in>
       <in>motion_control.h</in>
       <in>pins.h</in>

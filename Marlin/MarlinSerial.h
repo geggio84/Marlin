@@ -39,14 +39,6 @@ extern int serial_file;
 // These are macros to build serial port register names for the selected SERIAL_PORT (C preprocessor
 // requires two levels of indirection to expand macro values properly)
 #define SERIAL_REGNAME(registerbase,number,suffix) SERIAL_REGNAME_INTERNAL(registerbase,number,suffix)
-/* TODO: FIXME */
-/*#if SERIAL_PORT == 0 && (!defined(UBRR0H) || !defined(UDR0)) // use un-numbered registers if necessary
-#define SERIAL_REGNAME_INTERNAL(registerbase,number,suffix) registerbase##suffix
-#else
-#define SERIAL_REGNAME_INTERNAL(registerbase,number,suffix) registerbase##number##suffix
-#endif
-*/
-/* TODO: FIXME */
 
 // Registers used by MarlinSerial class (these are expanded 
 // depending on selected serial port
@@ -96,7 +88,7 @@ class MarlinSerial //: public Stream
 
   public:
     MarlinSerial();
-    void begin(long);
+    void begin(long,char*);
     void end();
     int peek(void);
     int read_buf(void);
@@ -135,7 +127,8 @@ class MarlinSerial //: public Stream
     FORCE_INLINE void checkRx(void)
     {
       //if((M_UCSRxA & (1<<M_RXCx)) != 0) {
-        unsigned char c  =  fgetc(serial_file);//M_UDRx;
+        unsigned char c;
+        read(serial_file,&c,1);
         int i = (unsigned int)(rx_buffer.head + 1) % RX_BUFFER_SIZE;
 
         // if we should be storing the received character into the location

@@ -187,7 +187,6 @@
 unsigned long time_zero = 0;
 myFILE *gcode_file;
 myFILE *log_file;
-//static myFILE *serial_file;
 int serial_file;
 
 #ifdef SDSUPPORT
@@ -371,25 +370,6 @@ void serial_echopair_P(const char *s_P, double v)
 void serial_echopair_P(const char *s_P, unsigned long v)
     { serialprintPGM(s_P); SERIAL_ECHO(v); }
 
-/* TODO: FIXME */
-/*extern "C"{
-  extern unsigned int __bss_end;
-  extern unsigned int __heap_start;
-  extern void *__brkval;
-
-  int freeMemory() {
-    int free_memory;
-
-    if((int)__brkval == 0)
-      free_memory = ((int)&free_memory) - ((int)&__bss_end);
-    else
-      free_memory = ((int)&free_memory) - ((int)__brkval);
-
-    return free_memory;
-  }
-}*/
-/* TODO: FIXME */
-
 //adds an command to the main command buffer
 //thats really done in a non-safe way.
 //needs overworking someday
@@ -502,24 +482,10 @@ void setup()
 {
   setup_killpin();
   setup_powerhold();
-  MYSERIAL.begin(BAUDRATE);
+  MYSERIAL.begin(BAUDRATE,SERIAL_PORT);
   SERIAL_PROTOCOLLNPGM("start");
   SERIAL_ECHO_START;
 
-  // Check startup - does nothing if bootloader sets MCUSR to 0
-/* TODO: FIXME */
-  //byte mcu = MCUSR;
-  char mcu = 0;
-/* TODO: FIXME */
-  if(mcu & 1) SERIAL_ECHOLNPGM(MSG_POWERUP);
-  if(mcu & 2) SERIAL_ECHOLNPGM(MSG_EXTERNAL_RESET);
-  if(mcu & 4) SERIAL_ECHOLNPGM(MSG_BROWNOUT_RESET);
-  if(mcu & 8) SERIAL_ECHOLNPGM(MSG_WATCHDOG_RESET);
-  if(mcu & 32) SERIAL_ECHOLNPGM(MSG_SOFTWARE_RESET);
-/* TODO: FIXME */
-  //MCUSR=0;
-/* TODO: FIXME */
-  
   SERIAL_ECHOPGM(MSG_MARLIN);
   SERIAL_ECHOLNPGM(VERSION_STRING);
   #ifdef STRING_VERSION_CONFIG_H
@@ -535,9 +501,6 @@ void setup()
   #endif
   SERIAL_ECHO_START;
   SERIAL_ECHOPGM(MSG_FREE_MEMORY);
-/* TODO: FIXME */
-  //SERIAL_ECHO(freeMemory());
-/* TODO: FIXME */
   SERIAL_ECHOPGM(MSG_PLANNER_BUFFER_BYTES);
   SERIAL_ECHOLN((int)sizeof(block_t)*BLOCK_BUFFER_SIZE);
   for(int8_t i = 0; i < BUFSIZE; i++)
@@ -550,9 +513,7 @@ void setup()
 
   tp_init();    // Initialize temperature loop
   plan_init();  // Initialize planner;
-/* TODO: FIXME */
   //watchdog_init();
-/* TODO: FIXME */
   st_init();    // Initialize stepper, this enables interrupts!
   setup_photpin();
   servo_init();
@@ -599,11 +560,10 @@ void usage()
 int main(int argc, char *argv[])
 {   
     struct timeval tv;
-    char str[80],str2[5];
-    struct termios serial_config;
-    int serial_baud;
     
     // Register signal and signal handler
+    signal(SIGALRM, ISR);
+    alarm(3);
     signal(SIGINT, signal_callback_handler);
     gettimeofday(&tv,NULL);
     time_zero = tv.tv_sec * 1000 + tv.tv_usec / 1000L;
@@ -611,70 +571,6 @@ int main(int argc, char *argv[])
 
     // Setup
     setup();
-    
-    // OPEN Serial Port
-    strcpy (str,"/dev/tty");
-    sprintf(str2,"%s",SERIAL_PORT);
-    strcat (str,str2);
-    printf("Now We Open Serial Port File: %s\n\r", str);
-    serial_file = open(str, O_RDWR | O_NOCTTY | O_NONBLOCK);
-    if (serial_file == 0) {
-        printf("Failed to open file %s\n\r",str);
-        return EXIT_FAILURE;
-    }
-    if(!isatty(serial_file)) {
-        printf("Serial file %s is NOT a TTY\n\r",str);
-        return EXIT_FAILURE;
-    }
-    // Set serial port baudrate
-    if(tcgetattr(serial_file, &serial_config) < 0){
-        printf("Failed to get serial attribute\n\r");
-        return EXIT_FAILURE;
-    }
-    switch (BAUDRATE)
-      {
-         case 500000:
-         default:
-            serial_baud = B500000;
-            break;
-         case 460800:
-            serial_baud  = B460800;
-            break;
-         case 230400:
-            serial_baud  = B230400;
-            break;
-         case 115200:
-            serial_baud  = B115200;
-            break;
-         case 57600:
-            serial_baud  = B57600;
-            break;
-         case 38400:
-            serial_baud  = B38400;
-            break;
-         case 19200:
-            serial_baud  = B19200;
-            break;
-         case 9600:
-            serial_baud  = B9600;
-            break;
-    }
-    memset(&serial_config,0,sizeof(serial_config));
-    serial_config.c_iflag=0;
-    serial_config.c_oflag=0;
-    serial_config.c_cflag=CS8|CREAD|CLOCAL;           // 8n1, see termios.h for more information
-    serial_config.c_lflag=0;
-    serial_config.c_cc[VMIN]=1;
-    serial_config.c_cc[VTIME]=5;
-    if(cfsetispeed(&serial_config, serial_baud) < 0 || cfsetospeed(&serial_config, serial_baud) < 0) {
-        printf("Failed to set serial baudrate\n\r");
-        return EXIT_FAILURE;
-    }
-
-    if(tcsetattr(serial_file, TCSANOW, &serial_config) < 0){
-        printf("Failed to set serial attribute\n\r");
-        return EXIT_FAILURE;
-    }
     
     while(1)
     {
@@ -685,7 +581,7 @@ int main(int argc, char *argv[])
         fclose(gcode_file.file_p);
     }*/
     if (serial_file != 0) {
-        printf("Now We Close Serial Port File: %s\n\r", str);
+        printf("Now We Close Serial Port File: %s\n\r", SERIAL_PORT);
         close(serial_file);
     }
     return EXIT_SUCCESS;
@@ -703,12 +599,10 @@ int loop()
     bufindr = (bufindr + 1)%BUFSIZE;
   }
   //check heater every n milliseconds
-/* TODO: FIXME */
-//  manage_heater();
-//  manage_inactivity();
-//  checkHitEndstops();
-//  lcd_update();
-/* TODO: FIXME */
+  manage_heater();
+  manage_inactivity();
+  checkHitEndstops();
+  lcd_update();
   return 0;
 }
 
@@ -746,7 +640,7 @@ int get_command()
           if(strchr(cmdbuffer[bufindw], '*') != NULL)
           {
             char checksum = 0;
-            char count = 0;
+            int count = 0;
             while(cmdbuffer[bufindw][count] != '*') checksum = checksum^cmdbuffer[bufindw][count++];
             strchr_pointer = strchr(cmdbuffer[bufindw], '*');
 
@@ -906,10 +800,12 @@ bool code_seen(char code)
   return (strchr_pointer != NULL);  //Return True if a character was found
 }
 
+/* TODO: FIXME */
 #define pgm_read_float_near(address_short) 0
 //    __LPM_float((uint16_t)(address_short))
 #define pgm_read_byte_near(address_short) 0
 //    __LPM_float((uint16_t)(address_short))
+/* TODO: FIXME */
 
 #define DEFINE_PGM_READ_ANY(type, reader)       \
     static inline type pgm_read_any(const type *p)  \
@@ -930,8 +826,7 @@ XYZ_CONSTS_FROM_CONFIG(float, base_home_pos,   HOME_POS);
 XYZ_CONSTS_FROM_CONFIG(float, max_length,      MAX_LENGTH);
 XYZ_CONSTS_FROM_CONFIG(float, home_retract_mm, HOME_RETRACT_MM);
 XYZ_CONSTS_FROM_CONFIG(signed char, home_dir,  HOME_DIR);
-/* TODO: FIXME */
-/*
+
 #ifdef DUAL_X_CARRIAGE
   #if EXTRUDERS == 1 || defined(COREXY) \
       || !defined(X2_ENABLE_PIN) || !defined(X2_STEP_PIN) || !defined(X2_DIR_PIN) \
@@ -971,8 +866,7 @@ static float duplicate_extruder_x_offset = DEFAULT_DUPLICATION_X_OFFSET; // used
 static float duplicate_extruder_temp_offset = 0; // used in mode 2
 bool extruder_duplication_enabled = false; // used in mode 2
 #endif //DUAL_X_CARRIAGE
-*/
-/* TODO: FIXME */
+
 static void axis_is_at_home(int axis) {
 #ifdef DUAL_X_CARRIAGE
   if (axis == X_AXIS) {
@@ -995,8 +889,7 @@ static void axis_is_at_home(int axis) {
   min_pos[axis] =          base_min_pos(axis) + add_homeing[axis];
   max_pos[axis] =          base_max_pos(axis) + add_homeing[axis];
 }
-/* TODO: FIXME */
-/*
+
 #ifdef ENABLE_AUTO_BED_LEVELING
 #ifdef AUTO_BED_LEVELING_GRID
 static void set_bed_level_equation_lsq(double *plane_equation_coefficients)
@@ -1174,8 +1067,6 @@ static float probe_pt(float x, float y, float z_before) {
 }
 
 #endif // #ifdef ENABLE_AUTO_BED_LEVELING
-*/
-/* TODO: FIXME */
 
 static void homeaxis(int axis) {
 #define HOMEAXIS_DO(LETTER) \
@@ -1259,8 +1150,7 @@ void refresh_cmd_timeout(void)
 {
   previous_millis_cmd = millis();
 }
-/* TODO: FIXME */
-/*
+
 #ifdef FWRETRACT
   void retract(bool retracting, bool swapretract = false) {
     if(retracting && !retracted[active_extruder]) {
@@ -1304,8 +1194,6 @@ void refresh_cmd_timeout(void)
     }
   } //retract
 #endif //FWRETRACT
-*/
-/* TODO: FIXME */
 
 void process_commands()
 {
@@ -1359,15 +1247,12 @@ void process_commands()
       if(code_seen('P')) codenum = code_value(); // milliseconds to wait
       if(code_seen('S')) codenum = code_value() * 1000; // seconds to wait
 
-/* TODO: FIXME */
-      //st_synchronize();
-/* TODO: FIXME */
+      st_synchronize();
+
       codenum += millis();  // keep track of when we started waiting
       previous_millis_cmd = millis();
       while(millis()  < codenum ){
-/* TODO: FIXME */
-        //manage_heater();
-/* TODO: FIXME */
+        manage_heater();
         manage_inactivity();
         lcd_update();
       }
@@ -1846,9 +1731,7 @@ void process_commands()
 #ifdef SDSUPPORT
     case 20: // M20 - list SD card
       SERIAL_PROTOCOLLNPGM(MSG_BEGIN_FILE_LIST);
-/* TODO: FIXME */
-      //card.ls();
-/* TODO: FIXME */
+      card.ls();
       SERIAL_PROTOCOLLNPGM(MSG_END_FILE_LIST);
       break;
     case 21: // M21 - init SD card
@@ -3703,8 +3586,8 @@ void kill()
 {
 /* TODO: FIXME */
   //cli(); // Stop interrupts
-  //disable_heater();
 /* TODO: FIXME */
+  disable_heater();
 
   disable_x();
   disable_y();
@@ -3727,10 +3610,18 @@ void kill()
 
 void signal_callback_handler(int signum)
 {
-  printf("Caught signal %d\n",signum);
-  // Cleanup and close up stuff here
-  // Terminate program
-  exit(signum);
+  switch (signum) {
+        case SIGINT:
+                printf("\nPressed CTR-C\n");
+                if (serial_file != 0) {
+                        printf("Now We Close Serial Port File: %s\n\r", SERIAL_PORT);
+                        close(serial_file);
+                }
+                kill();
+                // Cleanup and close up stuff here
+                // Terminate program
+      default : break;
+  }
 }
 
 void Stop()
