@@ -23,14 +23,7 @@
 #include "Marlin.h"
 #include "MarlinSerial.h"
 
-#ifndef AT90USB
-// this next line disables the entire HardwareSerial.cpp, 
-// this is so I can support Attiny series and any other chip without a UART
-//#if defined(UBRRH) || defined(UBRR0H) || defined(UBRR1H) || defined(UBRR2H) || defined(UBRR3H)
-
-//#if UART_PRESENT(SERIAL_PORT)
 ring_buffer rx_buffer  =  { { 0 }, 0, 0 };
-//#endif
 
 FORCE_INLINE void store_char(unsigned char c)
 {
@@ -45,18 +38,6 @@ FORCE_INLINE void store_char(unsigned char c)
     rx_buffer.head = i;
   }
 }
-
-
-//#elif defined(SIG_USART_RECV)
-/*#if defined(M_USARTx_RX_vect)
-  // fixed by Mark Sproul this is on the 644/644p
-  //SIGNAL(SIG_USART_RECV)
-  SIGNAL(M_USARTx_RX_vect)
-  {
-    unsigned char c  =  M_UDRx;
-    store_char(c);
-  }
-#endif*/
 
 // Constructors ////////////////////////////////////////////////////////////////
 
@@ -136,10 +117,6 @@ void MarlinSerial::begin(long baud, char* serial)
 
 void MarlinSerial::end()
 {
-/* TODO: FIX */
-  //cbi(M_UCSRxB, M_RXENx);
-  //cbi(M_UCSRxB, M_TXENx);
-  //cbi(M_UCSRxB, M_RXCIEx);
 /* TODO: FIX */
 }
 
@@ -353,14 +330,6 @@ void MarlinSerial::printFloat(double number, uint8_t digits)
 }
 // Preinstantiate Objects //////////////////////////////////////////////////////
 
-
 MarlinSerial MSerial;
 
-//#endif // whole file
-#endif // !AT90USB
-
-// For AT90USB targets use the UART for BT interfacing
-#if defined(AT90USB) && defined (BTENABLED)
-   HardwareSerial bt;
-#endif
 

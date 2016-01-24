@@ -23,34 +23,7 @@
 #define MarlinSerial_h
 #include "Marlin.h"
 
-#if !defined(SERIAL_PORT) 
-#define SERIAL_PORT 0
-#endif
-
 extern int serial_file;
-// The presence of the UBRRH register is used to detect a UART.
-#define UART_PRESENT(port) 1
-
-// These are macros to build serial port register names for the selected SERIAL_PORT (C preprocessor
-// requires two levels of indirection to expand macro values properly)
-#define SERIAL_REGNAME(registerbase,number,suffix) SERIAL_REGNAME_INTERNAL(registerbase,number,suffix)
-
-// Registers used by MarlinSerial class (these are expanded 
-// depending on selected serial port
-#define M_UCSRxA SERIAL_REGNAME(UCSR,SERIAL_PORT,A) // defines M_UCSRxA to be UCSRnA where n is the serial port number
-#define M_UCSRxB SERIAL_REGNAME(UCSR,SERIAL_PORT,B) 
-#define M_RXENx SERIAL_REGNAME(RXEN,SERIAL_PORT,)    
-#define M_TXENx SERIAL_REGNAME(TXEN,SERIAL_PORT,)    
-#define M_RXCIEx SERIAL_REGNAME(RXCIE,SERIAL_PORT,)    
-#define M_UDREx SERIAL_REGNAME(UDRE,SERIAL_PORT,)    
-#define M_UDRx SERIAL_REGNAME(UDR,SERIAL_PORT,)  
-#define M_UBRRxH SERIAL_REGNAME(UBRR,SERIAL_PORT,H)
-#define M_UBRRxL SERIAL_REGNAME(UBRR,SERIAL_PORT,L)
-#define M_RXCx SERIAL_REGNAME(RXC,SERIAL_PORT,)
-#define M_USARTx_RX_vect SERIAL_REGNAME(USART,SERIAL_PORT,_RX_vect)
-#define M_U2Xx SERIAL_REGNAME(U2X,SERIAL_PORT,)
-
-
 
 #define DEC 10
 #define HEX 16
@@ -74,9 +47,7 @@ struct ring_buffer
   int tail;
 };
 
-#if UART_PRESENT(SERIAL_PORT)
-  extern ring_buffer rx_buffer;
-#endif
+extern ring_buffer rx_buffer;
 
 class MarlinSerial //: public Stream
 {
@@ -121,7 +92,6 @@ class MarlinSerial //: public Stream
     
     FORCE_INLINE void checkRx(void)
     {
-      //if((M_UCSRxA & (1<<M_RXCx)) != 0) {
         unsigned char c;
         read(serial_file,&c,1);
         int i = (unsigned int)(rx_buffer.head + 1) % RX_BUFFER_SIZE;
