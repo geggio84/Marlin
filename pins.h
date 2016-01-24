@@ -3,7 +3,6 @@
 
 #define GPIO(bank,num) ((bank*32)+num)
 
-#if MOTHERBOARD != 88
 #define X_MS1_PIN -1
 #define X_MS2_PIN -1
 #define Y_MS1_PIN -1
@@ -15,15 +14,11 @@
 #define E1_MS1_PIN -1
 #define E1_MS2_PIN -1
 #define DIGIPOTSS_PIN -1
-#endif
 
 /****************************************************************************************
 * BeagleBone Printer v1.0
 *
 ****************************************************************************************/
-#if MOTHERBOARD == 999
-#define KNOWN_BOARD 1
-
 #define X_STEP_PIN         GPIO(0,27)
 #define X_DIR_PIN          GPIO(2,24)
 #define X_STOP_PIN         GPIO(3,21)
@@ -81,13 +76,6 @@
 #define TEMP_BED_PIN        6   // MUST USE ANALOG INPUT NUMBERING NOT DIGITAL OUTPUT NUMBERING!!!!!!!!! (pin 34 bed)
 #define SDPOWER            -1
 #define SDSS               31
-
-#endif
-
-
-#ifndef KNOWN_BOARD
-#error Unknown MOTHERBOARD value in configuration.h
-#endif
 
 //List of pins which to ignore when asked to change by gcode, 0 and 1 are RX and TX, do not mess with those!
 #define _E0_PINS E0_STEP_PIN, E0_DIR_PIN, E0_ENABLE_PIN, HEATER_0_PIN,

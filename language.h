@@ -27,28 +27,8 @@
 
 #define PROTOCOL_VERSION "1.0"
 
-#if MOTHERBOARD == 7 || MOTHERBOARD == 71 || MOTHERBOARD == 72
-	#define MACHINE_NAME "Ultimaker"
-	#define FIRMWARE_URL "http://firmware.ultimaker.com"
-#elif MOTHERBOARD == 80
-	#define MACHINE_NAME "Rumba"
-	#define FIRMWARE_URL "https://github.com/ErikZalm/Marlin/"
-#elif MOTHERBOARD == 77
-	#define MACHINE_NAME "3Drag"
-	#define FIRMWARE_URL "http://3dprint.elettronicain.it/"
-#elif MOTHERBOARD == 88
-	#define MACHINE_NAME "Makibox"
-	#define FIRMWARE_URL "https://github.com/ErikZalm/Marlin/"
-#else
-	#ifdef CUSTOM_MENDEL_NAME
-		#define MACHINE_NAME CUSTOM_MENDEL_NAME
-	#else
-		#define MACHINE_NAME "Mendel"
-	#endif
-
-// Default firmware set to Mendel
-	#define FIRMWARE_URL "https://github.com/ErikZalm/Marlin/"
-#endif
+#define MACHINE_NAME "Mendel"
+#define FIRMWARE_URL "https://github.com/ErikZalm/Marlin/"
 
 
 #ifndef MACHINE_UUID
