@@ -40,7 +40,7 @@
 HARDWARE_MOTHERBOARD ?= 999
 
 #Directory used to build files in, contains all the build files, from object files to the final hex file.
-BUILD_DIR          ?= applet
+BUILD_DIR          ?= out
 
 TARGET = $(notdir $(CURDIR))
 

@@ -1,5 +1,5 @@
 *.o
-applet/
+out/
 *~
 *.orig
 *.rej
