@@ -51,11 +51,11 @@ CXXSRC = Marlin_main.cpp MarlinSerial.cpp cardreader.cpp \
 	planner.cpp stepper.cpp temperature.cpp motion_control.cpp \
 	ConfigurationStore.cpp
 #CXXSRC = WMath.cpp WString.cpp Print.cpp Marlin_main.cpp	\
-	MarlinSerial.cpp Sd2Card.cpp SdBaseFile.cpp SdFatUtil.cpp	\
-	SdFile.cpp SdVolume.cpp motion_control.cpp planner.cpp		\
-	stepper.cpp temperature.cpp cardreader.cpp ConfigurationStore.cpp \
-	watchdog.cpp SPI.cpp Servo.cpp Tone.cpp ultralcd.cpp digipot_mcp4451.cpp \
-	vector_3.cpp qr_solve.cpp
+#	MarlinSerial.cpp Sd2Card.cpp SdBaseFile.cpp SdFatUtil.cpp	\
+#	SdFile.cpp SdVolume.cpp motion_control.cpp planner.cpp		\
+#	stepper.cpp temperature.cpp cardreader.cpp ConfigurationStore.cpp \
+#	watchdog.cpp SPI.cpp Servo.cpp Tone.cpp ultralcd.cpp \
+#	vector_3.cpp qr_solve.cpp
 
 # Name of this Makefile (used for "make depend").
 MAKEFILE = Makefile
@@ -95,12 +95,12 @@ CXXINCS = ${addprefix -I ,${VPATH}}
 # gnu99 - c99 plus GCC extensions
 #CSTANDARD = -std=gnu99
 CDEBUG = -g$(DEBUG)
-CWARN = -Wall -Wstrict-prototypes
+CWARN = -Wstrict-prototypes
 CTUNING =
 CEXTRA =
 
 CFLAGS := $(CDEBUG) $(CDEFS) $(CINCS) -O$(OPT) $(CWARN) $(CEXTRA) $(CTUNING)
-CXXFLAGS := $(CDEBUG) $(CDEFS) $(CINCS) -O$(OPT) -Wall    $(CEXTRA) $(CTUNING)
+CXXFLAGS := $(CDEBUG) $(CDEFS) $(CINCS) -O$(OPT) $(CEXTRA) $(CTUNING)
 #ASFLAGS = -Wa,-adhlns=$(<:.S=.lst),-gstabs
 LDFLAGS = -lm
 
