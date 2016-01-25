@@ -9,31 +9,6 @@
 #
 # This makefile allows you to build sketches from the command line
 # without the Arduino environment (or Java).
-#
-# Detailed instructions for using the makefile:
-#
-#  1. Modify the line containg "ARDUINO_INSTALL_DIR" to point to the directory that
-#     contains the Arduino installation (for example, under Mac OS X, this
-#     might be /Applications/Arduino.app/Contents/Resources/Java).
-#
-#  2. Modify the line containing "UPLOAD_PORT" to refer to the filename
-#     representing the USB or serial connection to your Arduino board
-#     (e.g. UPLOAD_PORT = /dev/tty.USB0).  If the exact name of this file
-#     changes, you can use * as a wildcard (e.g. UPLOAD_PORT = /dev/tty.usb*).
-#
-#  3. Set the line containing "MCU" to match your board's processor.
-#     Older one's are atmega8 based, newer ones like Arduino Mini, Bluetooth
-#     or Diecimila have the atmega168.  If you're using a LilyPad Arduino,
-#     change F_CPU to 8000000. If you are using Gen7 electronics, you
-#     probably need to use 20000000. Either way, you must regenerate
-#     the speed lookup table with create_speed_lookuptable.py.
-#
-#  4. Type "make" and press enter to compile/verify your program.
-#
-#  5. Type "make upload", reset your Arduino board, and press enter to
-#     upload your program to the Arduino board.
-#
-# Note that all settings are set with ?=, this means you can override them
 
 #Directory used to build files in, contains all the build files, from object files to the final hex file.
 BUILD_DIR          ?= out
@@ -70,15 +45,15 @@ OPT = 0
 DEFINES ?=
 
 # Program settings
-CC = gcc
-CXX = g++
-OBJCOPY = objcopy
-OBJDUMP = objdump
-AR  = ar
-SIZE = size
-NM = nm
-REMOVE = rm -f
-MV = mv -f
+CC ?= $(CROSS_COMPILE)gcc
+CXX ?= $(CROSS_COMPILE)g++
+OBJCOPY ?= $(CROSS_COMPILE)objcopy
+OBJDUMP ?= $(CROSS_COMPILE)objdump
+AR ?= $(CROSS_COMPILE)ar
+SIZE ?= $(CROSS_COMPILE)size
+NM ?= $(CROSS_COMPILE)nm
+REMOVE ?= rm -f
+MV ?= mv -f
 
 # Place -D or -U options here
 CDEFS    = -fpermissive ${addprefix -D , $(DEFINES)}
