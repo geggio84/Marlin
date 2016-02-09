@@ -187,6 +187,7 @@
 unsigned long time_zero = 0;
 myFILE *gcode_file;
 myFILE *log_file;
+int config_file;
 int serial_file;
 
 #ifdef SDSUPPORT
@@ -480,6 +481,9 @@ void servo_init()
 
 void setup()
 {
+  config_file = fopen(CONFIG_FILE , "w+b");
+  if (config_file == NULL)
+		printf("Error opening %s file\n",CONFIG_FILE);
   setup_killpin();
   setup_powerhold();
   MYSERIAL.begin(BAUDRATE,(char*)SERIAL_PORT);
@@ -593,7 +597,7 @@ int loop()
     if(get_command() < 0) return -1;
   if(buflen)
   {
-    //printf("Process Command nr.%d : %s\n\r",bufindr,cmdbuffer[bufindr]);
+    printf("Process Command nr.%d : %s\n\r",bufindr,cmdbuffer[bufindr]);
     process_commands();
     buflen = (buflen-1);
     bufindr = (bufindr + 1)%BUFSIZE;
@@ -3584,9 +3588,6 @@ void manage_inactivity()
 
 void kill()
 {
-/* TODO: FIXME */
-  //cli(); // Stop interrupts
-/* TODO: FIXME */
   disable_heater();
 
   disable_x();
@@ -3641,70 +3642,7 @@ bool IsStopped() { return Stopped; };
 #ifdef FAST_PWM_FAN
 void setPwmFrequency(uint8_t pin, int val)
 {
-  val &= 0x07;
-  switch(digitalPinToTimer(pin))
-  {
-
-    #if defined(TCCR0A)
-    case TIMER0A:
-    case TIMER0B:
-//         TCCR0B &= ~(_BV(CS00) | _BV(CS01) | _BV(CS02));
-//         TCCR0B |= val;
-         break;
-    #endif
-
-    #if defined(TCCR1A)
-    case TIMER1A:
-    case TIMER1B:
-//         TCCR1B &= ~(_BV(CS10) | _BV(CS11) | _BV(CS12));
-//         TCCR1B |= val;
-         break;
-    #endif
-
-    #if defined(TCCR2)
-    case TIMER2:
-    case TIMER2:
-         TCCR2 &= ~(_BV(CS10) | _BV(CS11) | _BV(CS12));
-         TCCR2 |= val;
-         break;
-    #endif
-
-    #if defined(TCCR2A)
-    case TIMER2A:
-    case TIMER2B:
-         TCCR2B &= ~(_BV(CS20) | _BV(CS21) | _BV(CS22));
-         TCCR2B |= val;
-         break;
-    #endif
-
-    #if defined(TCCR3A)
-    case TIMER3A:
-    case TIMER3B:
-    case TIMER3C:
-         TCCR3B &= ~(_BV(CS30) | _BV(CS31) | _BV(CS32));
-         TCCR3B |= val;
-         break;
-    #endif
-
-    #if defined(TCCR4A)
-    case TIMER4A:
-    case TIMER4B:
-    case TIMER4C:
-         TCCR4B &= ~(_BV(CS40) | _BV(CS41) | _BV(CS42));
-         TCCR4B |= val;
-         break;
-   #endif
-
-    #if defined(TCCR5A)
-    case TIMER5A:
-    case TIMER5B:
-    case TIMER5C:
-         TCCR5B &= ~(_BV(CS50) | _BV(CS51) | _BV(CS52));
-         TCCR5B |= val;
-         break;
-   #endif
-
-  }
+	// Not Yet Implemented
 }
 #endif //FAST_PWM_FAN
 

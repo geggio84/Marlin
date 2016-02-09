@@ -21,13 +21,7 @@
 #include <signal.h>
 #include "marlin_types.h"
 
-/* TODO: FIXME */
-//#include <util/delay.h>
 #include "util/pgmspace.h"
-//#include <avr/eeprom.h>
-//#include <avr/interrupt.h>
-/* TODO: FIXME */
-
 
 #include "fastio.h"
 #include "Configuration.h"

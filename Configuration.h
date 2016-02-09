@@ -11,6 +11,7 @@
 // For a Delta printer replace the configuration files with the files in the
 // example_configurations/delta directory.
 //
+#define CONFIG_FILE "./config"
 
 // User-specified version info of this build to display in [Pronterface, etc] terminal window during
 // startup. Implementation of an idea by Prof Braino to inform user that any changes made to this

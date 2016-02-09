@@ -1116,7 +1116,7 @@ int read_max6675()
 
 // Timer 0 is shared with millies
 /* TODO: FIXME */
-/*ISR(TIMER0_COMPB_vect)
+void ISR(void)
 {
   //these variables are only accesible from the ISR, but static, so they don't lose their value
   static unsigned char temp_count = 0;
@@ -1378,7 +1378,7 @@ int read_max6675()
   }
 #endif //BABYSTEPPING
 }
-*/
+
 /* TODO: FIXME */
 #ifdef PIDTEMP
 // Apply the scale factors to the PID values
