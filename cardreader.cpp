@@ -1,7 +1,6 @@
 #include "Marlin.h"
 #include "cardreader.h"
 /* TODO: FIXME */
-//#include "ultralcd.h"
 //#include "stepper.h"
 /* TODO: FIXME */
 #include "temperature.h"
@@ -364,7 +363,6 @@ void CardReader::openFile(char* name,bool read, bool replace_current/*=true*/)
       sdpos = 0;
       
       SERIAL_PROTOCOLLNPGM(MSG_SD_FILE_SELECTED);
-      //lcd_setstatus(fname);
     }
     else
     {
@@ -386,7 +384,6 @@ void CardReader::openFile(char* name,bool read, bool replace_current/*=true*/)
       saving = true;
       SERIAL_PROTOCOLPGM(MSG_SD_WRITE_TO_FILE);
       SERIAL_PROTOCOLLN(name);
-      //lcd_setstatus(fname);
     }
   }
   */

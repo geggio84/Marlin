@@ -29,7 +29,7 @@ CXXSRC = Marlin_main.cpp MarlinSerial.cpp cardreader.cpp \
 #	MarlinSerial.cpp Sd2Card.cpp SdBaseFile.cpp SdFatUtil.cpp	\
 #	SdFile.cpp SdVolume.cpp motion_control.cpp planner.cpp		\
 #	stepper.cpp temperature.cpp cardreader.cpp ConfigurationStore.cpp \
-#	watchdog.cpp SPI.cpp Servo.cpp Tone.cpp ultralcd.cpp \
+#	watchdog.cpp SPI.cpp Servo.cpp Tone.cpp \
 #	vector_3.cpp qr_solve.cpp
 
 # Name of this Makefile (used for "make depend").

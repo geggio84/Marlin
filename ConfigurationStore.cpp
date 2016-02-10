@@ -1,7 +1,6 @@
 #include "Marlin.h"
 #include "planner.h"
 #include "temperature.h"
-#include "ultralcd.h"
 #include "ConfigurationStore.h"
 
 void _EEPROM_writeData(int &pos, uint8_t* value, uint8_t size)
@@ -89,10 +88,6 @@ void Config_StoreSettings()
     EEPROM_WRITE_VAR(i,dummy);
     EEPROM_WRITE_VAR(i,dummy);
   #endif
-  #ifndef DOGLCD
-    int lcd_contrast = 32;
-  #endif
-  EEPROM_WRITE_VAR(i,lcd_contrast);
   char ver2[4]=EEPROM_VERSION;
   i=EEPROM_OFFSET;
   EEPROM_WRITE_VAR(i,ver2); // validate data
@@ -236,10 +231,6 @@ void Config_RetrieveSettings()
         EEPROM_READ_VAR(i,Kp);
         EEPROM_READ_VAR(i,Ki);
         EEPROM_READ_VAR(i,Kd);
-        #ifndef DOGLCD
-        int lcd_contrast;
-        #endif
-        EEPROM_READ_VAR(i,lcd_contrast);
 
 		// Call updatePID (similar to when we have processed M301)
 		updatePID();
@@ -297,9 +288,6 @@ void Config_ResetDefault()
 #endif
 #ifdef ENABLE_AUTO_BED_LEVELING
     zprobe_zoffset = -Z_PROBE_OFFSET_FROM_EXTRUDER;
-#endif
-#ifdef DOGLCD
-    lcd_contrast = DEFAULT_LCD_CONTRAST;
 #endif
 #ifdef PIDTEMP
     Kp = DEFAULT_Kp;
