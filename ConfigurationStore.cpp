@@ -3,11 +3,16 @@
 #include "temperature.h"
 #include "ConfigurationStore.h"
 
+extern FILE *config_file;
+
 void _EEPROM_writeData(int &pos, uint8_t* value, uint8_t size)
 {
     do
     {
-        eeprom_write_byte((unsigned char*)pos, *value);
+        //eeprom_write_byte((unsigned char*)pos, *value);
+		if(fseek(config_file, pos, SEEK_SET))
+			printf("_EEPROM_writeData fseek ERROR!!\n\r");
+		fputc( *value, config_file);
         pos++;
         value++;
     }while(--size);
@@ -17,19 +22,17 @@ void _EEPROM_readData(int &pos, uint8_t* value, uint8_t size)
 {
     do
     {
-        *value = eeprom_read_byte((unsigned char*)pos);
+		if(fseek(config_file, pos, SEEK_SET)) {
+			printf("_EEPROM_readData fseek ERROR!!\n\r");
+			*value = 0;
+		} else
+			*value = fgetc(config_file);
         pos++;
         value++;
     }while(--size);
 }
 #define EEPROM_READ_VAR(pos, value) _EEPROM_readData(pos, (uint8_t*)&value, sizeof(value))
 //======================================================================================
-
-
-
-
-#define EEPROM_OFFSET 100
-
 
 // IMPORTANT:  Whenever there are changes made to the variables stored in EEPROM
 // in the functions below, also increment the version number. This makes sure that
@@ -46,7 +49,7 @@ void _EEPROM_readData(int &pos, uint8_t* value, uint8_t size)
 void Config_StoreSettings() 
 {
   char ver[4]= "000";
-  int i=EEPROM_OFFSET;
+  int i=0;
   EEPROM_WRITE_VAR(i,ver); // invalidate data first 
   EEPROM_WRITE_VAR(i,axis_steps_per_unit);  
   EEPROM_WRITE_VAR(i,max_feedrate);  
@@ -89,7 +92,7 @@ void Config_StoreSettings()
     EEPROM_WRITE_VAR(i,dummy);
   #endif
   char ver2[4]=EEPROM_VERSION;
-  i=EEPROM_OFFSET;
+  i=0;
   EEPROM_WRITE_VAR(i,ver2); // validate data
   SERIAL_ECHO_START;
   SERIAL_ECHOLNPGM("Settings Stored");
@@ -183,7 +186,7 @@ void Config_PrintSettings()
 #ifdef EEPROM_SETTINGS
 void Config_RetrieveSettings()
 {
-    int i=EEPROM_OFFSET;
+    int i=0;
     char stored_ver[4];
     char ver[4]=EEPROM_VERSION;
     EEPROM_READ_VAR(i,stored_ver); //read stored version
