@@ -3554,6 +3554,14 @@ void kill()
   SERIAL_ERROR_START;
   SERIAL_ERRORLNPGM(MSG_ERR_KILLED);
   suicide();
+  if (serial_file != 0) {
+        printf("Now We Close Serial Port File: %s\n\r", SERIAL_PORT);
+        close(serial_file);
+  }
+  if (config_file != NULL) {
+	    fclose(config_file);
+		printf("Now We Close Config Store File: %s\n\r",CONFIG_FILE);
+  }
   printf("Exit MARLIN Firmware\n\r");
   // Terminate program
   exit(0);
@@ -3564,10 +3572,6 @@ void signal_callback_handler(int signum)
   switch (signum) {
         case SIGINT:
                 printf("\nPressed CTR-C\n");
-                if (serial_file != 0) {
-                        printf("Now We Close Serial Port File: %s\n\r", SERIAL_PORT);
-                        close(serial_file);
-                }
                 kill();
                 // Cleanup and close up stuff here
                 // Terminate program
