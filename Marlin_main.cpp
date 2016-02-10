@@ -480,7 +480,7 @@ void servo_init()
 
 void setup()
 {
-  config_file = fopen(CONFIG_FILE , "w+b");
+  config_file = fopen(CONFIG_FILE , "a+b");
   if (config_file == NULL)
 		printf("Error opening %s file\n",CONFIG_FILE);
   setup_killpin();
