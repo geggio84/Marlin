@@ -186,7 +186,7 @@
 unsigned long time_zero = 0;
 myFILE *gcode_file;
 myFILE *log_file;
-int config_file;
+FILE *config_file;
 int serial_file;
 
 #ifdef SDSUPPORT
