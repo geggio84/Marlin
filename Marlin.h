@@ -21,8 +21,6 @@
 #include <signal.h>
 #include "marlin_types.h"
 
-#include "util/pgmspace.h"
-
 #include "fastio.h"
 #include "Configuration.h"
 #include "pins.h"
@@ -74,13 +72,13 @@ typedef struct {
 
 #define SERIAL_PROTOCOL(x) (MYSERIAL.print(x))
 #define SERIAL_PROTOCOL_F(x,y) (MYSERIAL.print(x,y))
-#define SERIAL_PROTOCOLPGM(x) (serialprintPGM(PSTR(x)))
+#define SERIAL_PROTOCOLPGM(x) (serialprintPGM(x))
 #define SERIAL_PROTOCOLLN(x) (MYSERIAL.print(x),MYSERIAL.write_ser('\n'))
-#define SERIAL_PROTOCOLLNPGM(x) (serialprintPGM(PSTR(x)),MYSERIAL.write_ser('\n'))
+#define SERIAL_PROTOCOLLNPGM(x) (serialprintPGM(x),MYSERIAL.write_ser('\n'))
 
 
-const char errormagic[] PROGMEM ="Error:";
-const char echomagic[] PROGMEM ="echo:";
+const char errormagic[] ="Error:";
+const char echomagic[] ="echo:";
 #define SERIAL_ERROR_START (serialprintPGM(errormagic))
 #define SERIAL_ERROR(x) SERIAL_PROTOCOL(x)
 #define SERIAL_ERRORPGM(x) SERIAL_PROTOCOLPGM(x)
@@ -93,7 +91,7 @@ const char echomagic[] PROGMEM ="echo:";
 #define SERIAL_ECHOLN(x) SERIAL_PROTOCOLLN(x)
 #define SERIAL_ECHOLNPGM(x) SERIAL_PROTOCOLLNPGM(x)
 
-//#define SERIAL_ECHOPAIR(name,value) (serial_echopair_P(PSTR(name),(value)))
+//#define SERIAL_ECHOPAIR(name,value) (serial_echopair_P(name,(value)))
 #define SERIAL_ECHOPAIR(name,value) (serial_echopair_P(((const char *)(name)),(value)))
 
 void serial_echopair_P(const char *s_P, float v);

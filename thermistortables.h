@@ -7,7 +7,7 @@
 
 #if (THERMISTORHEATER_0 == 1) || (THERMISTORHEATER_1 == 1)  || (THERMISTORHEATER_2 == 1) || (THERMISTORBED == 1) //100k bed thermistor
 
-const short temptable_1[][2] PROGMEM = {
+const short temptable_1[][2] = {
 {       23*OVERSAMPLENR ,       300     },
 {       25*OVERSAMPLENR ,       295     },
 {       27*OVERSAMPLENR ,       290     },
@@ -72,7 +72,7 @@ const short temptable_1[][2] PROGMEM = {
 };
 #endif
 #if (THERMISTORHEATER_0 == 2) || (THERMISTORHEATER_1 == 2) || (THERMISTORHEATER_2 == 2) || (THERMISTORBED == 2) //200k bed thermistor
-const short temptable_2[][2] PROGMEM = {
+const short temptable_2[][2] = {
 //200k ATC Semitec 204GT-2
 //Verified by linagee. Source: http://shop.arcol.hu/static/datasheets/thermistors.pdf
 // Calculated using 4.7kohm pullup, voltage divider math, and manufacturer provided temp/resistance
@@ -112,7 +112,7 @@ const short temptable_2[][2] PROGMEM = {
 
 #endif
 #if (THERMISTORHEATER_0 == 3) || (THERMISTORHEATER_1 == 3) || (THERMISTORHEATER_2 == 3) || (THERMISTORBED == 3) //mendel-parts
-const short temptable_3[][2] PROGMEM = {
+const short temptable_3[][2] = {
                 {1*OVERSAMPLENR,864},
                 {21*OVERSAMPLENR,300},
                 {25*OVERSAMPLENR,290},
@@ -145,7 +145,7 @@ const short temptable_3[][2] PROGMEM = {
 
 #endif
 #if (THERMISTORHEATER_0 == 4) || (THERMISTORHEATER_1 == 4) || (THERMISTORHEATER_2 == 4) || (THERMISTORBED == 4) //10k thermistor
-const short temptable_4[][2] PROGMEM = {
+const short temptable_4[][2] = {
    {1*OVERSAMPLENR, 430},
    {54*OVERSAMPLENR, 137},
    {107*OVERSAMPLENR, 107},
@@ -170,7 +170,7 @@ const short temptable_4[][2] PROGMEM = {
 #endif
 
 #if (THERMISTORHEATER_0 == 5) || (THERMISTORHEATER_1 == 5) || (THERMISTORHEATER_2 == 5) || (THERMISTORBED == 5) //100k ParCan thermistor (104GT-2)
-const short temptable_5[][2] PROGMEM = {
+const short temptable_5[][2] = {
 // ATC Semitec 104GT-2 (Used in ParCan)
 // Verified by linagee. Source: http://shop.arcol.hu/static/datasheets/thermistors.pdf
 // Calculated using 4.7kohm pullup, voltage divider math, and manufacturer provided temp/resistance
@@ -210,7 +210,7 @@ const short temptable_5[][2] PROGMEM = {
 #endif
 
 #if (THERMISTORHEATER_0 == 6) || (THERMISTORHEATER_1 == 6) || (THERMISTORHEATER_2 == 6) || (THERMISTORBED == 6) // 100k Epcos thermistor
-const short temptable_6[][2] PROGMEM = {
+const short temptable_6[][2] = {
    {1*OVERSAMPLENR, 350},
    {28*OVERSAMPLENR, 250}, //top rating 250C
    {31*OVERSAMPLENR, 245},
@@ -253,7 +253,7 @@ const short temptable_6[][2] PROGMEM = {
 #endif
 
 #if (THERMISTORHEATER_0 == 7) || (THERMISTORHEATER_1 == 7) || (THERMISTORHEATER_2 == 7) || (THERMISTORBED == 7) // 100k Honeywell 135-104LAG-J01
-const short temptable_7[][2] PROGMEM = {
+const short temptable_7[][2] = {
    {1*OVERSAMPLENR, 941},
    {19*OVERSAMPLENR, 362},
    {37*OVERSAMPLENR, 299}, //top rating 300C
@@ -321,7 +321,7 @@ const short temptable_7[][2] PROGMEM = {
 // Beta = 3974
 // R1 = 0 Ohm
 // R2 = 4700 Ohm
-const short temptable_71[][2] PROGMEM = {
+const short temptable_71[][2] = {
    {35*OVERSAMPLENR, 300},
    {51*OVERSAMPLENR, 270},
    {54*OVERSAMPLENR, 265},
@@ -493,7 +493,7 @@ const short temptable_8[][2] PROGMEM = {
 #endif
 #if (THERMISTORHEATER_0 == 9) || (THERMISTORHEATER_1 == 9) || (THERMISTORHEATER_2 == 9) || (THERMISTORBED == 9)
 // 100k GE Sensing AL03006-58.2K-97-G1 (4.7k pullup)
-const short temptable_9[][2] PROGMEM = {
+const short temptable_9[][2] = {
 	{1*OVERSAMPLENR, 936},
 	{36*OVERSAMPLENR, 300},
 	{71*OVERSAMPLENR, 246},
@@ -529,7 +529,7 @@ const short temptable_9[][2] PROGMEM = {
 #endif
 #if (THERMISTORHEATER_0 == 10) || (THERMISTORHEATER_1 == 10) || (THERMISTORHEATER_2 == 10) || (THERMISTORBED == 10)
 // 100k RS thermistor 198-961 (4.7k pullup)
-const short temptable_10[][2] PROGMEM = {
+const short temptable_10[][2] = {
    {1*OVERSAMPLENR, 929},
    {36*OVERSAMPLENR, 299},
    {71*OVERSAMPLENR, 246},
@@ -640,7 +640,7 @@ This does not match the normal thermistor behaviour so we need to set the follow
 # define HEATER_BED_RAW_HI_TEMP 16383
 # define HEATER_BED_RAW_LO_TEMP 0
 #endif
-const short temptable_20[][2] PROGMEM = {
+const short temptable_20[][2] = {
 {         0*OVERSAMPLENR ,       0     },
 {       227*OVERSAMPLENR ,       1     },
 {       236*OVERSAMPLENR ,       10     },
@@ -846,7 +846,7 @@ const short temptable_55[][2] PROGMEM = {
 // beta: 3950
 // min adc: 1 at 0.0048828125 V
 // max adc: 1023 at 4.9951171875 V
-const short temptable_60[][2] PROGMEM = {
+const short temptable_60[][2] = {
    {51*OVERSAMPLENR, 272},
    {61*OVERSAMPLENR, 258},
    {71*OVERSAMPLENR, 247},
@@ -969,7 +969,7 @@ const short temptable_12[][2] PROGMEM = {
 #define PtLine(T,R0,Rup) { PtAdVal(T,R0,Rup)*OVERSAMPLENR, T },
 
 #if (THERMISTORHEATER_0 == 110) || (THERMISTORHEATER_1 == 110) || (THERMISTORHEATER_2 == 110) || (THERMISTORBED == 110) // Pt100 with 1k0 pullup
-const short temptable_110[][2] PROGMEM = {
+const short temptable_110[][2] = {
 // only few values are needed as the curve is very flat  
   PtLine(0,100,1000)
   PtLine(50,100,1000)
@@ -981,7 +981,7 @@ const short temptable_110[][2] PROGMEM = {
 };
 #endif
 #if (THERMISTORHEATER_0 == 147) || (THERMISTORHEATER_1 == 147) || (THERMISTORHEATER_2 == 147) || (THERMISTORBED == 147) // Pt100 with 4k7 pullup
-const short temptable_147[][2] PROGMEM = {
+const short temptable_147[][2] = {
 // only few values are needed as the curve is very flat  
   PtLine(0,100,4700)
   PtLine(50,100,4700)
@@ -993,7 +993,7 @@ const short temptable_147[][2] PROGMEM = {
 };
 #endif
 #if (THERMISTORHEATER_0 == 1010) || (THERMISTORHEATER_1 == 1010) || (THERMISTORHEATER_2 == 1010) || (THERMISTORBED == 1010) // Pt1000 with 1k0 pullup
-const short temptable_1010[][2] PROGMEM = {
+const short temptable_1010[][2] = {
   PtLine(0,1000,1000)
   PtLine(25,1000,1000)
   PtLine(50,1000,1000)
@@ -1010,7 +1010,7 @@ const short temptable_1010[][2] PROGMEM = {
 };
 #endif
 #if (THERMISTORHEATER_0 == 1047) || (THERMISTORHEATER_1 == 1047) || (THERMISTORHEATER_2 == 1047) || (THERMISTORBED == 1047) // Pt1000 with 4k7 pullup
-const short temptable_1047[][2] PROGMEM = {
+const short temptable_1047[][2] = {
 // only few values are needed as the curve is very flat  
   PtLine(0,1000,4700)
   PtLine(50,1000,4700)
@@ -1022,7 +1022,7 @@ const short temptable_1047[][2] PROGMEM = {
 };
 #endif
 #if (THERMISTORHEATER_0 == 70) || (THERMISTORHEATER_1 == 70) || (THERMISTORHEATER_2 == 70) || (THERMISTORBED == 70) // 500C thermistor for Pico hot end
-const short temptable_70[][2] PROGMEM = {
+const short temptable_70[][2] = {
   {  110.774119598719*OVERSAMPLENR ,  350 },
   {  118.214386957249*OVERSAMPLENR ,  345 },
   {  126.211418543166*OVERSAMPLENR ,  340 },

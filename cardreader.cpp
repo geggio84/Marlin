@@ -522,7 +522,7 @@ void CardReader::checkautostart(bool force)
   
   char autoname[30];
 /* TODO: FIXME */
-  //sprintf_P(autoname, PSTR("auto%i.g"), lastnr);
+  //sprintf_P(autoname, "auto%i.g", lastnr);
 /* TODO: FIXME */
   printf("%s auto%i.g",autoname, lastnr);
   for(int8_t i=0;i<(int8_t)strlen(autoname);i++)
