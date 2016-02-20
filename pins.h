@@ -19,20 +19,23 @@
 * BeagleBone Printer v1.0
 *
 ****************************************************************************************/
-#define X_STEP_PIN         GPIO(0,27)
-#define X_DIR_PIN          GPIO(2,24)
-#define X_STOP_PIN         GPIO(3,21)
+#define X_STEP_PIN         GPIO(1,12)
+#define X_DIR_PIN          GPIO(3,21)
+#define X_MIN_PIN          GPIO(2,2)
+#define X_MAX_PIN          GPIO(2,3)
 
-#define Y_STEP_PIN         GPIO(1,12)
-#define Y_DIR_PIN          GPIO(0,22)
-#define Y_STOP_PIN         GPIO(1,17)
+#define Y_STEP_PIN         GPIO(1,13)
+#define Y_DIR_PIN          GPIO(3,14)
+#define Y_MIN_PIN          GPIO(2,5)
+#define Y_MAX_PIN          GPIO(2,4)
 
-#define Z_STEP_PIN         GPIO(0,23)
-#define Z_DIR_PIN          GPIO(0,26)
-#define Z_STOP_PIN         GPIO(0,31)
+#define Z_STEP_PIN         GPIO(3,17)
+#define Z_DIR_PIN          GPIO(0,20)
+#define Z_MIN_PIN          GPIO(0,23)
+#define Z_MAX_PIN          GPIO(0,26)
 
-#define E0_STEP_PIN         GPIO(1,28)
-#define E0_DIR_PIN          GPIO(1,15)
+#define E0_STEP_PIN         GPIO(3,16)
+#define E0_DIR_PIN          GPIO(3,15)
 
 #define LED_PIN            -1
 
@@ -88,36 +91,6 @@
   #define _E2_PINS E2_STEP_PIN, E2_DIR_PIN, E2_ENABLE_PIN, HEATER_2_PIN,
 #else
   #define _E2_PINS
-#endif
-
-#ifdef X_STOP_PIN
-  #if X_HOME_DIR < 0
-    #define X_MIN_PIN X_STOP_PIN
-    #define X_MAX_PIN GPIO(0,3)
-  #else
-    #define X_MIN_PIN GPIO(0,3)
-    #define X_MAX_PIN X_STOP_PIN
-  #endif
-#endif
-
-#ifdef Y_STOP_PIN
-  #if Y_HOME_DIR < 0
-    #define Y_MIN_PIN Y_STOP_PIN
-    #define Y_MAX_PIN GPIO(1,19)
-  #else
-    #define Y_MIN_PIN GPIO(1,19)
-    #define Y_MAX_PIN Y_STOP_PIN
-  #endif
-#endif
-
-#ifdef Z_STOP_PIN
-  #if Z_HOME_DIR < 0
-    #define Z_MIN_PIN Z_STOP_PIN
-    #define Z_MAX_PIN GPIO(0,2)
-  #else
-    #define Z_MIN_PIN GPIO(0,2)
-    #define Z_MAX_PIN Z_STOP_PIN
-  #endif
 #endif
 
 #ifdef DISABLE_MAX_ENDSTOPS
