@@ -37,6 +37,9 @@
 #define E0_STEP_PIN         GPIO(3,16)
 #define E0_DIR_PIN          GPIO(3,15)
 
+#define STEPPER_ENABLEn_PIN GPIO(1,15)
+#define STEPPER_FLAG_PIN    GPIO(1,14)
+
 #define LED_PIN            -1
 
 #define FAN_PIN            -1
