@@ -22,6 +22,8 @@ TARGET = $(notdir $(CURDIR))
 VPATH = .
 VPATH += $(BUILD_DIR)
 
+SRC = easyspin.c
+
 CXXSRC = Marlin_main.cpp MarlinSerial.cpp cardreader.cpp \
 	planner.cpp stepper.cpp temperature.cpp motion_control.cpp \
 	ConfigurationStore.cpp gpio_lib.cpp
