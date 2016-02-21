@@ -1,8 +1,8 @@
 
-enum PIN_VALUE {
+typedef enum {
   LOW = 0,
   HIGH = 1
-};
+} PIN_VALUE;
 
 enum EDGE_VALUE {
   NONE = 0,
