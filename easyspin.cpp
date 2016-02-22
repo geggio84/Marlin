@@ -58,12 +58,12 @@ uint8_t easySPIN_Write_Byte(uint8_t byte) {
 	uint8_t rx;
 
 	struct spi_ioc_transfer tr = {
-		.tx_buf = (unsigned long)&byte,
-		.rx_buf = (unsigned long)&rx,
-		.len = sizeof(byte),
-		.delay_usecs = delay,
-		.speed_hz = speed,
-		.bits_per_word = bits,
+		tx_buf : (unsigned long)&byte,
+		rx_buf : (unsigned long)&rx,
+		len : sizeof(byte),
+		speed_hz : speed,
+		delay_usecs : delay,
+		bits_per_word : bits,
 	};
 
 	if (mode & SPI_TX_QUAD)
@@ -181,7 +181,7 @@ void easySPIN_Nop(void) {
  */
 void easySPIN_SetParam(easySPIN_Registers_TypeDef param, uint32_t value) {
 
-	//printf("####### easySPIN_SetParam nr. 0x%X with value 0x%X #######\n",param,value);
+	printf("####### easySPIN_SetParam nr. 0x%X with value 0x%X #######\n",param,value);
 	/* Send SetParam operation code to easySPIN */
 	easySPIN_Write_Byte(easySPIN_SET_PARAM | param);
 	switch (param) {
