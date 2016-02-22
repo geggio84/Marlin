@@ -21,6 +21,7 @@
 /* The timer calculations of this module informed by the 'RepRap cartesian firmware' by Zack Smith
    and Philipp Tiefenbacher. */
 
+#include "easyspin.h"
 #include "Marlin.h"
 #include "stepper.h"
 #include "planner.h"
@@ -28,6 +29,9 @@
 #include "language.h"
 #include "cardreader.h"
 #include "speed_lookuptable.h"
+#include <sys/ioctl.h>
+#include <linux/types.h>
+#include <linux/spi/spidev.h>
 #if defined(DIGIPOTSS_PIN) && DIGIPOTSS_PIN > -1
 #include <SPI.h>
 #endif
@@ -86,6 +90,14 @@ static bool check_endstops = true;
 
 volatile long count_position[NUM_AXIS] = { 0, 0, 0, 0};
 volatile signed char count_direction[NUM_AXIS] = { 1, 1, 1, 1};
+
+uint32_t easySPIN_rx_data = 0;
+const char *device = "/dev/spidev1.1";
+uint32_t mode;
+uint8_t bits = 8;
+uint32_t speed = 100000;
+uint16_t delay;
+int spi_fd;
 
 //===========================================================================
 //=============================functions         ============================
@@ -741,10 +753,113 @@ void ISR(int sign)// ISR(TIMER1_COMPA_vect)
   }
 #endif // ADVANCE
 
+void easyspin_setup() {
+
+	int ret = 0;
+
+	spi_fd = open(device, O_RDWR);
+	if (spi_fd < 0)
+		perror("can't open device");
+
+	/*
+	 * spi mode
+	 */
+	ret = ioctl(spi_fd, SPI_IOC_WR_MODE32, &mode);
+	if (ret == -1)
+		perror("can't set spi mode");
+
+	ret = ioctl(spi_fd, SPI_IOC_RD_MODE32, &mode);
+	if (ret == -1)
+		perror("can't get spi mode");
+
+	/*
+	 * bits per word
+	 */
+	ret = ioctl(spi_fd, SPI_IOC_WR_BITS_PER_WORD, &bits);
+	if (ret == -1)
+		perror("can't set bits per word");
+
+	ret = ioctl(spi_fd, SPI_IOC_RD_BITS_PER_WORD, &bits);
+	if (ret == -1)
+		perror("can't get bits per word");
+
+	/*
+	 * max speed hz
+	 */
+	ret = ioctl(spi_fd, SPI_IOC_WR_MAX_SPEED_HZ, &speed);
+	if (ret == -1)
+		perror("can't set max speed hz");
+
+	ret = ioctl(spi_fd, SPI_IOC_RD_MAX_SPEED_HZ, &speed);
+	if (ret == -1)
+		perror("can't get max speed hz");
+
+	printf("spi mode: 0x%x\n", mode);
+	printf("bits per word: %d\n", bits);
+	printf("max speed: %d Hz (%d KHz)\n", speed, speed/1000);
+
+	/* eMotionControl module initialization */
+	easySPIN_RegsStruct_TypeDef easySPIN_RegsStruct;
+
+	printf("##### eMotionControl_Init BEGIN #####\n");
+	/* easySPIN system init */
+	easySPIN_Init();
+
+	/* Structure initialization by default values, in order to avoid blank records */
+	easySPIN_Regs_Struct_Reset(&easySPIN_RegsStruct);
+
+	/* Program all easySPIN registers */
+	easySPIN_Registers_Set(&easySPIN_RegsStruct);
+
+	/* Customize target stepper-motor specific registers at easySPIN module level */
+	/* TVAL register setup */
+	easySPIN_SetParam(easySPIN_TVAL, 0x00);
+
+	/* T_FAST register setup */
+	easySPIN_SetParam(easySPIN_STEP_MODE, easySPIN_STEP_SEL_1
+			| easySPIN_SYNC_SEL_1_2);
+
+	/* TON_MIN register setup */
+	easySPIN_SetParam(easySPIN_TON_MIN, 0x00);
+
+	/* TOFF_MIN register setup */
+	easySPIN_SetParam(easySPIN_TOFF_MIN, 0x00);
+
+	/* OCD_TH register setup */
+	easySPIN_SetParam(easySPIN_OCD_TH, easySPIN_OCD_TH_2625mA);
+
+	/* STEP_MODE register setup  */
+	easySPIN_SetParam(easySPIN_STEP_MODE, easySPIN_STEP_SEL_1
+			| easySPIN_SYNC_SEL_1_2);
+
+	/* ALARM_EN register setup  */
+	easySPIN_SetParam(easySPIN_ALARM_EN, easySPIN_ALARM_EN_OVERCURRENT
+			| easySPIN_ALARM_EN_THERMAL_SHUTDOWN
+			| easySPIN_ALARM_EN_THERMAL_WARNING
+			| easySPIN_ALARM_EN_UNDERVOLTAGE | easySPIN_ALARM_EN_SW_TURN_ON
+			| easySPIN_ALARM_EN_WRONG_NPERF_CMD);
+
+	/* CONFIG register setup */
+	easySPIN_SetParam(easySPIN_CONFIG, easySPIN_CONFIG_INT_16MHZ
+			| easySPIN_CONFIG_EN_TQREG_INT_REG | easySPIN_CONFIG_OC_SD_ENABLE
+			| easySPIN_CONFIG_SR_180V_us | easySPIN_CONFIG_TSW_8_us);
+
+	/* Read STATUS register */
+	easySPIN_rx_data = easySPIN_Get_Status();
+
+	/* Enable easySPIN powerstage */
+	easySPIN_Enable();
+}
+
 void st_init()
 {
   digipot_init(); //Initialize Digipot Motor Current
   microstep_init(); //Initialize Microstepping Pins
+
+  SET_OUTPUT(STEPPER_ENABLEn_PIN);
+  SET_INPUT(STEPPER_FLAG_PIN);
+
+  easyspin_setup();
 
   //Initialize Dir Pins
   #if defined(X_DIR_PIN) && X_DIR_PIN > -1
