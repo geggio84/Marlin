@@ -450,10 +450,6 @@ const unsigned int dropsegments=5; //everything with less than this number of st
   #define THERMISTORHEATER_1 TEMP_SENSOR_1
   #define HEATER_1_USES_THERMISTOR
 #endif
-#if TEMP_SENSOR_2 > 0
-  #define THERMISTORHEATER_2 TEMP_SENSOR_2
-  #define HEATER_2_USES_THERMISTOR
-#endif
 #if TEMP_SENSOR_BED > 0
   #define THERMISTORBED TEMP_SENSOR_BED
   #define BED_USES_THERMISTOR
@@ -465,10 +461,6 @@ const unsigned int dropsegments=5; //everything with less than this number of st
 #if TEMP_SENSOR_1 == 0
   #undef HEATER_1_MINTEMP
   #undef HEATER_1_MAXTEMP
-#endif
-#if TEMP_SENSOR_2 == 0
-  #undef HEATER_2_MINTEMP
-  #undef HEATER_2_MAXTEMP
 #endif
 #if TEMP_SENSOR_BED == 0
   #undef BED_MINTEMP

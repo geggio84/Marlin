@@ -479,7 +479,6 @@ void check_axes_activity()
   {
     disable_e0();
     disable_e1();
-    disable_e2(); 
   }
 #if defined(FAN_PIN) && FAN_PIN > -1
   #ifdef FAN_KICKSTART_TIME
@@ -511,9 +510,6 @@ void check_axes_activity()
       analogWrite(HEATER_1_PIN,tail_valve_pressure);
   #endif
 
-  #if defined(HEATER_2_PIN) && HEATER_2_PIN > -1
-      analogWrite(HEATER_2_PIN,tail_e_to_p_pressure);
-  #endif
 #endif
 }
 
@@ -663,16 +659,15 @@ block->steps_y = labs((target[X_AXIS]-position[X_AXIS]) - (target[Y_AXIS]-positi
     {
       switch(extruder)
       {
-        case 0: enable_e0(); disable_e1(); disable_e2(); break;
-        case 1: disable_e0(); enable_e1(); disable_e2(); break;
-        case 2: disable_e0(); disable_e1(); enable_e2(); break;
+        case 0: enable_e0(); disable_e1(); break;
+        case 1: disable_e0(); enable_e1(); break;
+        case 2: disable_e0(); disable_e1(); break;
       }
     }
     else //enable all
     {
       enable_e0();
       enable_e1();
-      enable_e2(); 
     }
   }
 

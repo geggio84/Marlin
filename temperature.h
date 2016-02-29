@@ -134,16 +134,8 @@ FORCE_INLINE bool isCoolingBed() {
 #else
 #define setTargetHotend1(_celsius) do{}while(0)
 #endif
-#if EXTRUDERS > 2
-#define degHotend2() degHotend(2)
-#define degTargetHotend2() degTargetHotend(2)
-#define setTargetHotend2(_celsius) setTargetHotend((_celsius), 2)
-#define isHeatingHotend2() isHeatingHotend(2)
-#define isCoolingHotend2() isCoolingHotend(2)
-#else
 #define setTargetHotend2(_celsius) do{}while(0)
-#endif
-#if EXTRUDERS > 3
+#if EXTRUDERS > 2
 #error Invalid number of extruders
 #endif
 

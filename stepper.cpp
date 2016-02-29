@@ -685,21 +685,6 @@ void ISR(int sign)// ISR(TIMER1_COMPA_vect)
         }
       }
  #endif
- #if EXTRUDERS > 2
-      if (e_steps[2] != 0) {
-        WRITE(E2_STEP_PIN, INVERT_E_STEP_PIN);
-        if (e_steps[2] < 0) {
-          WRITE(E2_DIR_PIN, INVERT_E2_DIR);
-          e_steps[2]++;
-          WRITE(E2_STEP_PIN, !INVERT_E_STEP_PIN);
-        }
-        else if (e_steps[2] > 0) {
-          WRITE(E2_DIR_PIN, !INVERT_E2_DIR);
-          e_steps[2]--;
-          WRITE(E2_STEP_PIN, !INVERT_E_STEP_PIN);
-        }
-      }
- #endif
     }
   }
 #endif // ADVANCE
@@ -968,11 +953,6 @@ void st_init()
     WRITE(E1_STEP_PIN,INVERT_E_STEP_PIN);
     disable_e1();
   #endif
-  #if defined(E2_STEP_PIN) && (E2_STEP_PIN > -1)
-    SET_OUTPUT(E2_STEP_PIN);
-    WRITE(E2_STEP_PIN,INVERT_E_STEP_PIN);
-    disable_e2();
-  #endif
 
   // waveform generation = 0100 = CTC
 /* TODO: FIXME */
@@ -1074,7 +1054,6 @@ void finishAndDisableSteppers()
   disable_z();
   disable_e0();
   disable_e1();
-  disable_e2();
 }
 
 void quickStop()

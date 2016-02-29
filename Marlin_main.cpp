@@ -200,17 +200,11 @@ int extrudemultiply=100; //100->1 200->2
 int extruder_multiply[EXTRUDERS] = {100
   #if EXTRUDERS > 1
     , 100
-    #if EXTRUDERS > 2
-      , 100
-    #endif
   #endif
 };
 float volumetric_multiplier[EXTRUDERS] = {1.0
   #if EXTRUDERS > 1
     , 1.0
-    #if EXTRUDERS > 2
-      , 1.0
-    #endif
   #endif
 };
 float current_position[NUM_AXIS] = { 0.0, 0.0, 0.0, 0.0 };
@@ -252,17 +246,11 @@ int EtoPPressure=0;
   bool retracted[EXTRUDERS]={false
     #if EXTRUDERS > 1
     , false
-     #if EXTRUDERS > 2
-      , false
-     #endif
   #endif
   };
   bool retracted_swap[EXTRUDERS]={false
     #if EXTRUDERS > 1
     , false
-     #if EXTRUDERS > 2
-      , false
-     #endif
   #endif
   };
 
@@ -1712,7 +1700,6 @@ void process_commands()
         enable_z();
         enable_e0();
         enable_e1();
-        enable_e2();
       break;
 
 #ifdef SDSUPPORT
@@ -2099,21 +2086,6 @@ void process_commands()
           ValvePressure = 0;
           break;
       #endif //HEATER_1_PIN
-
-      // PWM for HEATER_2_PIN
-      #if defined(HEATER_2_PIN) && HEATER_2_PIN > -1
-        case 128: //M128 valve open
-          if (code_seen('S')){
-             EtoPPressure=constrain(code_value(),0,255);
-          }
-          else {
-            EtoPPressure=255;
-          }
-          break;
-        case 129: //M129 valve closed
-          EtoPPressure = 0;
-          break;
-      #endif //HEATER_2_PIN
     #endif
 
     #if defined(PS_ON_PIN) && PS_ON_PIN > -1
@@ -2140,7 +2112,6 @@ void process_commands()
         st_synchronize();
         disable_e0();
         disable_e1();
-        disable_e2();
         finishAndDisableSteppers();
         fanSpeed = 0;
         sleep(1); // Wait a little before to switch off
@@ -2175,7 +2146,6 @@ void process_commands()
           st_synchronize();
           disable_e0();
           disable_e1();
-          disable_e2();
           finishAndDisableSteppers();
         }
         else
@@ -2188,7 +2158,6 @@ void process_commands()
             if(code_seen('E')) {
               disable_e0();
               disable_e1();
-              disable_e2();
             }
           #endif
         }
@@ -2430,9 +2399,6 @@ void process_commands()
             #if EXTRUDERS > 1
               retracted[1]=false;
             #endif
-            #if EXTRUDERS > 2
-              retracted[2]=false;
-            #endif
           }break;
           case 1: 
           {
@@ -2440,9 +2406,6 @@ void process_commands()
             retracted[0]=false;
             #if EXTRUDERS > 1
               retracted[1]=false;
-            #endif
-            #if EXTRUDERS > 2
-              retracted[2]=false;
             #endif
           }break;
           default:
@@ -2891,7 +2854,6 @@ void process_commands()
         //disable extruder steppers so filament can be removed
         disable_e0();
         disable_e1();
-        disable_e2();
         delay(100);
         uint8_t cnt=0;
         while(!lcd_clicked()){
@@ -3402,9 +3364,6 @@ void controllerFan()
     lastMotorCheck = millis();
 
     if(!READ(X_ENABLE_PIN) || !READ(Y_ENABLE_PIN) || !READ(Z_ENABLE_PIN) || (soft_pwm_bed > 0)
-    #if EXTRUDERS > 2
-       || !READ(E2_ENABLE_PIN)
-    #endif
     #if EXTRUDER > 1
       #if defined(X2_ENABLE_PIN) && X2_ENABLE_PIN > -1
        || !READ(X2_ENABLE_PIN)
@@ -3481,7 +3440,6 @@ void manage_inactivity()
         disable_z();
         disable_e0();
         disable_e1();
-        disable_e2();
       }
     }
   }
@@ -3546,7 +3504,6 @@ void kill()
   disable_z();
   disable_e0();
   disable_e1();
-  disable_e2();
 
 #if defined(PS_ON_PIN) && PS_ON_PIN > -1
   pinMode(PS_ON_PIN,INPUT);
