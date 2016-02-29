@@ -26,7 +26,7 @@ void gpio_check_exported(int gpio_nr)
 		export_gpio(gpio_nr);
 };
 
-int export_gpio(int gpio_nr)
+void export_gpio(int gpio_nr)
 {
 	int fd;
 	char buf[256];
@@ -40,7 +40,7 @@ int export_gpio(int gpio_nr)
 	close(fd);
 };
 
-int unexport_gpio(int gpio_nr)
+void unexport_gpio(int gpio_nr)
 {
 	int fd;
 	char buf[256];
@@ -54,7 +54,7 @@ int unexport_gpio(int gpio_nr)
 	close(fd);
 }
 
-int set_gpio_output(int gpio_nr, PIN_VALUE value)
+void set_gpio_output(int gpio_nr, PIN_VALUE value)
 {
 	int fd;
 	char buf[256];
@@ -72,7 +72,7 @@ int set_gpio_output(int gpio_nr, PIN_VALUE value)
 	set_gpio_value(gpio_nr, value);
 }
 
-int set_gpio_input(int gpio_nr)
+void set_gpio_input(int gpio_nr)
 {
 	int fd;
 	char buf[256];
@@ -88,7 +88,7 @@ int set_gpio_input(int gpio_nr)
 	close(fd);
 }
 
-int set_gpio_value(int gpio_nr, PIN_VALUE value)
+void set_gpio_value(int gpio_nr, PIN_VALUE value)
 {
 	int fd;
 	char buf[256];
