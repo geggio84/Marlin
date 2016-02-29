@@ -53,11 +53,6 @@
 #define EXTRUDER_RUNOUT_SPEED 1500.  //extrusion speed
 #define EXTRUDER_RUNOUT_EXTRUDE 100
 
-//These defines help to calibrate the AD595 sensor in case you get wrong temperature measurements.
-//The measured temperature is defined as "actualTemp = (measuredTemp * TEMP_SENSOR_AD595_GAIN) + TEMP_SENSOR_AD595_OFFSET"
-#define TEMP_SENSOR_AD595_OFFSET 0.0
-#define TEMP_SENSOR_AD595_GAIN   1.0
-
 //This is for controlling a fan to cool down the stepper drivers
 //it will turn on when any driver is enabled
 //and turn off after the set amount of seconds from last driver being disabled again
@@ -462,21 +457,6 @@ const unsigned int dropsegments=5; //everything with less than this number of st
 #if TEMP_SENSOR_BED > 0
   #define THERMISTORBED TEMP_SENSOR_BED
   #define BED_USES_THERMISTOR
-#endif
-#if TEMP_SENSOR_0 == -1
-  #define HEATER_0_USES_AD595
-#endif
-#if TEMP_SENSOR_1 == -1
-  #define HEATER_1_USES_AD595
-#endif
-#if TEMP_SENSOR_2 == -1
-  #define HEATER_2_USES_AD595
-#endif
-#if TEMP_SENSOR_BED == -1
-  #define BED_USES_AD595
-#endif
-#if TEMP_SENSOR_0 == -2
-  #define HEATER_0_USES_MAX6675
 #endif
 #if TEMP_SENSOR_0 == 0
   #undef HEATER_0_MINTEMP

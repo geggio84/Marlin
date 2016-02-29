@@ -621,12 +621,6 @@ static float analog2temp(int raw, uint8_t e) {
       kill();
       return 0.0;
   } 
-  #ifdef HEATER_0_USES_MAX6675
-    if (e == 0)
-    {
-      return 0.25 * raw;
-    }
-  #endif
 
   if(heater_ttbl_map[e] != NULL)
   {
@@ -651,7 +645,6 @@ static float analog2temp(int raw, uint8_t e) {
 
     return celsius;
   }
-  return ((raw * ((5.0 * 100.0) / 1024.0) / OVERSAMPLENR) * TEMP_SENSOR_AD595_GAIN) + TEMP_SENSOR_AD595_OFFSET;
 }
 
 // Derived from RepRap FiveD extruder::getTemperature()
@@ -677,8 +670,6 @@ static float analog2tempBed(int raw) {
     if (i == BEDTEMPTABLE_LEN) celsius = PGM_RD_W(BEDTEMPTABLE[i-1][1]);
 
     return celsius;
-  #elif defined BED_USES_AD595
-    return ((raw * ((5.0 * 100.0) / 1024.0) / OVERSAMPLENR) * TEMP_SENSOR_AD595_GAIN) + TEMP_SENSOR_AD595_OFFSET;
   #else
     return 0;
   #endif
@@ -743,22 +734,6 @@ void tp_init()
     soft_pwm_fan = fanSpeedSoftPwm / 2;
     #endif
   #endif  
-
-  #ifdef HEATER_0_USES_MAX6675
-    #ifndef SDSUPPORT
-      SET_OUTPUT(MAX_SCK_PIN);
-      WRITE(MAX_SCK_PIN,0);
-    
-      SET_OUTPUT(MAX_MOSI_PIN);
-      WRITE(MAX_MOSI_PIN,1);
-    
-      SET_INPUT(MAX_MISO_PIN);
-      WRITE(MAX_MISO_PIN,1);
-    #endif
-    
-    SET_OUTPUT(MAX6675_SS);
-    WRITE(MAX6675_SS,1);
-  #endif
 
   // Set analog inputs
 /* TODO: FIXME */
@@ -1046,63 +1021,6 @@ void bed_max_temp_error(void) {
   #endif
 }
 
-#ifdef HEATER_0_USES_MAX6675
-#define MAX6675_HEAT_INTERVAL 250
-long max6675_previous_millis = -HEAT_INTERVAL;
-int max6675_temp = 2000;
-
-int read_max6675()
-{
-  if (millis() - max6675_previous_millis < MAX6675_HEAT_INTERVAL) 
-    return max6675_temp;
-  
-  max6675_previous_millis = millis();
-  max6675_temp = 0;
-    
-  #ifdef	PRR
-    PRR &= ~(1<<PRSPI);
-  #elif defined PRR0
-    PRR0 &= ~(1<<PRSPI);
-  #endif
-  
-  SPCR = (1<<MSTR) | (1<<SPE) | (1<<SPR0);
-  
-  // enable TT_MAX6675
-  WRITE(MAX6675_SS, 0);
-  
-  // ensure 100ns delay - a bit extra is fine
-  asm("nop");//50ns on 20Mhz, 62.5ns on 16Mhz
-  asm("nop");//50ns on 20Mhz, 62.5ns on 16Mhz
-  
-  // read MSB
-  SPDR = 0;
-  for (;(SPSR & (1<<SPIF)) == 0;);
-  max6675_temp = SPDR;
-  max6675_temp <<= 8;
-  
-  // read LSB
-  SPDR = 0;
-  for (;(SPSR & (1<<SPIF)) == 0;);
-  max6675_temp |= SPDR;
-  
-  // disable TT_MAX6675
-  WRITE(MAX6675_SS, 1);
-
-  if (max6675_temp & 4) 
-  {
-    // thermocouple open
-    max6675_temp = 2000;
-  }
-  else 
-  {
-    max6675_temp = max6675_temp >> 3;
-  }
-
-  return max6675_temp;
-}
-#endif
-
-
 // Timer 0 is shared with millies
 /* TODO: FIXME */
 void ISR(void)
@@ -1185,15 +1103,11 @@ void ISR(void)
         ADMUX = ((1 << REFS0) | (TEMP_0_PIN & 0x07));
         ADCSRA |= 1<<ADSC; // Start conversion
       #endif
-      lcd_buttons_update();
       temp_state = 1;
       break;
     case 1: // Measure TEMP_0
       #if defined(TEMP_0_PIN) && (TEMP_0_PIN > -1)
         raw_temp_0_value += ADC;
-      #endif
-      #ifdef HEATER_0_USES_MAX6675 // TODO remove the blocking
-        raw_temp_0_value = read_max6675();
       #endif
       temp_state = 2;
       break;
