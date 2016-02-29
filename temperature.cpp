@@ -1121,7 +1121,6 @@ void ISR(void)
         ADMUX = ((1 << REFS0) | (TEMP_BED_PIN & 0x07));
         ADCSRA |= 1<<ADSC; // Start conversion
       #endif
-      lcd_buttons_update();
       temp_state = 3;
       break;
     case 3: // Measure TEMP_BED
@@ -1140,7 +1139,6 @@ void ISR(void)
         ADMUX = ((1 << REFS0) | (TEMP_1_PIN & 0x07));
         ADCSRA |= 1<<ADSC; // Start conversion
       #endif
-      lcd_buttons_update();
       temp_state = 5;
       break;
     case 5: // Measure TEMP_1
@@ -1159,7 +1157,6 @@ void ISR(void)
         ADMUX = ((1 << REFS0) | (TEMP_2_PIN & 0x07));
         ADCSRA |= 1<<ADSC; // Start conversion
       #endif
-      lcd_buttons_update();
       temp_state = 7;
       break;
     case 7: // Measure TEMP_2
