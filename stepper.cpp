@@ -105,51 +105,6 @@ int spi_fd;
 
 #define CHECK_ENDSTOPS  if(check_endstops)
 
-// intRes = longIn1 * longIn2 >> 24
-// uses:
-// r26 to store 0
-// r27 to store the byte 1 of the 48bit result
-#define MultiU24X24toH16(intRes, longIn1, longIn2) \
-asm volatile ( \
-"clr r26 \n\t" \
-"mul %A1, %B2 \n\t" \
-"mov r27, r1 \n\t" \
-"mul %B1, %C2 \n\t" \
-"movw %A0, r0 \n\t" \
-"mul %C1, %C2 \n\t" \
-"add %B0, r0 \n\t" \
-"mul %C1, %B2 \n\t" \
-"add %A0, r0 \n\t" \
-"adc %B0, r1 \n\t" \
-"mul %A1, %C2 \n\t" \
-"add r27, r0 \n\t" \
-"adc %A0, r1 \n\t" \
-"adc %B0, r26 \n\t" \
-"mul %B1, %B2 \n\t" \
-"add r27, r0 \n\t" \
-"adc %A0, r1 \n\t" \
-"adc %B0, r26 \n\t" \
-"mul %C1, %A2 \n\t" \
-"add r27, r0 \n\t" \
-"adc %A0, r1 \n\t" \
-"adc %B0, r26 \n\t" \
-"mul %B1, %A2 \n\t" \
-"add r27, r1 \n\t" \
-"adc %A0, r26 \n\t" \
-"adc %B0, r26 \n\t" \
-"lsr r27 \n\t" \
-"adc %A0, r26 \n\t" \
-"adc %B0, r26 \n\t" \
-"clr r1 \n\t" \
-: \
-"=&r" (intRes) \
-: \
-"d" (longIn1), \
-"d" (longIn2) \
-: \
-"r26" , "r27" \
-)
-
 // Some useful constants
 
 #define ENABLE_STEPPER_DRIVER_INTERRUPT()  do{}while(0)//TIMSK1 |= (1<<OCIE1A)
@@ -628,9 +583,7 @@ void ISR(int sign)// ISR(TIMER1_COMPA_vect)
     unsigned short step_rate;
     if (step_events_completed <= (unsigned long int)current_block->accelerate_until) {
 
-      /* TODO: FIXME */
-      //MultiU24X24toH16(acc_step_rate, acceleration_time, current_block->acceleration_rate);
-      /* TODO: FIXME */
+      acc_step_rate = acceleration_time * current_block->acceleration_rate >> 24;
       acc_step_rate += current_block->initial_rate;
 
       // upper limit
@@ -653,9 +606,7 @@ void ISR(int sign)// ISR(TIMER1_COMPA_vect)
       #endif
     }
     else if (step_events_completed > (unsigned long int)current_block->decelerate_after) {
-      /* TODO: FIXME */
-      //MultiU24X24toH16(step_rate, deceleration_time, current_block->acceleration_rate);
-      /* TODO: FIXME */
+      step_rate = deceleration_time * current_block->acceleration_rate >> 24;
 
       if(step_rate > acc_step_rate) { // Check step_rate stays positive
         step_rate = current_block->final_rate;
