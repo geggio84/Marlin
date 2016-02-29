@@ -1075,39 +1075,35 @@ void st_synchronize()
 
 void st_set_position(const long &x, const long &y, const long &z, const long &e)
 {
-/* TODO: FIXME */
-  //CRITICAL_SECTION_START;
-/* TODO: FIXME */
+  CRITICAL_SECTION_START;
+
   count_position[X_AXIS] = x;
   count_position[Y_AXIS] = y;
   count_position[Z_AXIS] = z;
   count_position[E_AXIS] = e;
-/* TODO: FIXME */
-  //CRITICAL_SECTION_END;
-/* TODO: FIXME */
+
+  CRITICAL_SECTION_END;
 }
 
 void st_set_e_position(const long &e)
 {
-/* TODO: FIXME */
-  //CRITICAL_SECTION_START;
-/* TODO: FIXME */
+  CRITICAL_SECTION_START;
+
   count_position[E_AXIS] = e;
-/* TODO: FIXME */
-  //CRITICAL_SECTION_END;
-/* TODO: FIXME */
+
+  CRITICAL_SECTION_END;
 }
 
 long st_get_position(uint8_t axis)
 {
   long count_pos;
-/* TODO: FIXME */
-  //CRITICAL_SECTION_START;
-/* TODO: FIXME */
+
+  CRITICAL_SECTION_START;
+
   count_pos = count_position[axis];
-/* TODO: FIXME */
-  //CRITICAL_SECTION_END;
-/* TODO: FIXME */
+
+  CRITICAL_SECTION_END;
+
   return count_pos;
 }
 

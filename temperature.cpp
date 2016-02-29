@@ -699,13 +699,11 @@ static void updateTemperaturesFromRawValues()
     //Reset the watchdog after we know we have a temperature measurement.
     watchdog_reset();
 
-/* TODO: FIXME */
-    //CRITICAL_SECTION_START;
-/* TODO: FIXME */
+    CRITICAL_SECTION_START;
+
     temp_meas_ready = false;
-/* TODO: FIXME */
-    //CRITICAL_SECTION_END;
-/* TODO: FIXME */
+
+    CRITICAL_SECTION_END;
 }
 
 void tp_init()
