@@ -882,9 +882,6 @@ void ISR(void)
       WRITE(HEATER_1_PIN,0);
       #endif
     }
-  #if EXTRUDERS > 1
-  if(soft_pwm_1 < pwm_count) WRITE(HEATER_1_PIN,0);
-  #endif
   #if defined(HEATER_BED_PIN) && HEATER_BED_PIN > -1
   if(soft_pwm_b < pwm_count) WRITE(HEATER_BED_PIN,0);
   #endif
@@ -894,61 +891,57 @@ void ISR(void)
   
   pwm_count += (1 << SOFT_PWM_SCALE);
   pwm_count &= 0x7f;
-  
+
+  char buf[256];
+  int fd;
+  char value[4];
+
   switch(temp_state) {
     case 0: // Prepare TEMP_0
       #if defined(TEMP_0_PIN) && (TEMP_0_PIN > -1)
-        #if TEMP_0_PIN > 7
-          ADCSRB = 1<<MUX5;
-        #else
-          ADCSRB = 0;
-        #endif
-        ADMUX = ((1 << REFS0) | (TEMP_0_PIN & 0x07));
-        ADCSRA |= 1<<ADSC; // Start conversion
-      #endif
+		sprintf(buf,"/sys/bus/iio/devices/iio:device0/in_voltage%d_raw",TEMP_0_PIN);
+	  #endif
       temp_state = 1;
       break;
     case 1: // Measure TEMP_0
       #if defined(TEMP_0_PIN) && (TEMP_0_PIN > -1)
-        raw_temp_0_value += ADC;
+		fd = open(buf, O_RDONLY);
+		read(fd, &value, 4);
+		close(fd);
+        raw_temp_0_value += atoi(value);
       #endif
       temp_state = 2;
       break;
     case 2: // Prepare TEMP_BED
       #if defined(TEMP_BED_PIN) && (TEMP_BED_PIN > -1)
-        #if TEMP_BED_PIN > 7
-          ADCSRB = 1<<MUX5;
-        #else
-          ADCSRB = 0;
-        #endif
-        ADMUX = ((1 << REFS0) | (TEMP_BED_PIN & 0x07));
-        ADCSRA |= 1<<ADSC; // Start conversion
+		sprintf(buf,"/sys/bus/iio/devices/iio:device0/in_voltage%d_raw",TEMP_BED_PIN);
       #endif
       temp_state = 3;
       break;
     case 3: // Measure TEMP_BED
       #if defined(TEMP_BED_PIN) && (TEMP_BED_PIN > -1)
-        raw_temp_bed_value += ADC;
+		fd = open(buf, O_RDONLY);
+		read(fd, &value, 4);
+		close(fd);
+        raw_temp_bed_value += atoi(value);
       #endif
       temp_state = 4;
       break;
     case 4: // Prepare TEMP_1
       #if defined(TEMP_1_PIN) && (TEMP_1_PIN > -1)
-        #if TEMP_1_PIN > 7
-          ADCSRB = 1<<MUX5;
-        #else
-          ADCSRB = 0;
-        #endif
-        ADMUX = ((1 << REFS0) | (TEMP_1_PIN & 0x07));
-        ADCSRA |= 1<<ADSC; // Start conversion
+		sprintf(buf,"/sys/bus/iio/devices/iio:device0/in_voltage%d_raw",TEMP_1_PIN);
       #endif
       temp_state = 5;
       break;
     case 5: // Measure TEMP_1
       #if defined(TEMP_1_PIN) && (TEMP_1_PIN > -1)
-        raw_temp_1_value += ADC;
+		fd = open(buf, O_RDONLY);
+		read(fd, &value, 4);
+		close(fd);
+        raw_temp_1_value += atoi(value);
       #endif
-      temp_state = 6;
+      temp_state = 0;
+      temp_count++;
       break;
     case 6: //Startup, delay initial temp reading a tiny bit so the hardware can settle.
       temp_state = 0;
