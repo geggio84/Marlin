@@ -851,7 +851,6 @@ void temp_ISR(void)
   static unsigned long raw_temp_0_value = 0;
   static unsigned long raw_temp_1_value = 0;
   static unsigned long raw_temp_bed_value = 0;
-  static unsigned char temp_state = 6;
   static unsigned char pwm_count = (1 << SOFT_PWM_SCALE);
   static unsigned char soft_pwm_0;
   #if HEATER_BED_PIN > -1
@@ -896,62 +895,33 @@ void temp_ISR(void)
   int fd;
   char value[4];
 
-  switch(temp_state) {
-    case 0: // Prepare TEMP_0
-      #if defined(TEMP_0_PIN) && (TEMP_0_PIN > -1)
+	// Measure TEMP_0
+	#if defined(TEMP_0_PIN) && (TEMP_0_PIN > -1)
 		sprintf(buf,"/sys/bus/iio/devices/iio:device0/in_voltage%d_raw",TEMP_0_PIN);
-	  #endif
-      temp_state = 1;
-      break;
-    case 1: // Measure TEMP_0
-      #if defined(TEMP_0_PIN) && (TEMP_0_PIN > -1)
 		fd = open(buf, O_RDONLY);
 		read(fd, &value, 4);
 		close(fd);
-        raw_temp_0_value += atoi(value);
-      #endif
-      temp_state = 2;
-      break;
-    case 2: // Prepare TEMP_BED
-      #if defined(TEMP_BED_PIN) && (TEMP_BED_PIN > -1)
+		raw_temp_0_value += atoi(value);
+	#endif
+	// Measure TEMP_BED
+	#if defined(TEMP_BED_PIN) && (TEMP_BED_PIN > -1)
 		sprintf(buf,"/sys/bus/iio/devices/iio:device0/in_voltage%d_raw",TEMP_BED_PIN);
-      #endif
-      temp_state = 3;
-      break;
-    case 3: // Measure TEMP_BED
-      #if defined(TEMP_BED_PIN) && (TEMP_BED_PIN > -1)
 		fd = open(buf, O_RDONLY);
 		read(fd, &value, 4);
 		close(fd);
-        raw_temp_bed_value += atoi(value);
-      #endif
-      temp_state = 4;
-      break;
-    case 4: // Prepare TEMP_1
-      #if defined(TEMP_1_PIN) && (TEMP_1_PIN > -1)
+		raw_temp_bed_value += atoi(value);
+	#endif
+	// Measure TEMP_1
+	#if defined(TEMP_1_PIN) && (TEMP_1_PIN > -1)
 		sprintf(buf,"/sys/bus/iio/devices/iio:device0/in_voltage%d_raw",TEMP_1_PIN);
-      #endif
-      temp_state = 5;
-      break;
-    case 5: // Measure TEMP_1
-      #if defined(TEMP_1_PIN) && (TEMP_1_PIN > -1)
 		fd = open(buf, O_RDONLY);
 		read(fd, &value, 4);
 		close(fd);
-        raw_temp_1_value += atoi(value);
-      #endif
-      temp_state = 0;
-      temp_count++;
-      break;
-    case 6: //Startup, delay initial temp reading a tiny bit so the hardware can settle.
-      temp_state = 0;
-      break;
-//    default:
-//      SERIAL_ERROR_START;
-//      SERIAL_ERRORLNPGM("Temp measurement error!");
-//      break;
-  }
-    
+		raw_temp_1_value += atoi(value);
+	#endif
+
+	temp_count++;
+
   if(temp_count >= OVERSAMPLENR) // 8 * 16 * 1/(16000000/64/256)  = 131ms.
   {
     if (!temp_meas_ready) //Only update the raw values if they have been read. Else we could be updating them during reading.
