@@ -83,11 +83,6 @@
 
 //List of pins which to ignore when asked to change by gcode, 0 and 1 are RX and TX, do not mess with those!
 #define _E0_PINS E0_STEP_PIN, E0_DIR_PIN, E0_ENABLE_PIN, HEATER_0_PIN,
-#if EXTRUDERS > 1
-  #define _E1_PINS E1_STEP_PIN, E1_DIR_PIN, E1_ENABLE_PIN, HEATER_1_PIN,
-#else
-  #define _E1_PINS
-#endif
 
 #ifdef DISABLE_MAX_ENDSTOPS
 #define X_MAX_PIN          -1
@@ -102,8 +97,7 @@
 #endif
 
 #define SENSITIVE_PINS {0, 1, X_STEP_PIN, X_DIR_PIN, X_ENABLE_PIN, X_MIN_PIN, X_MAX_PIN, Y_STEP_PIN, Y_DIR_PIN, Y_ENABLE_PIN, Y_MIN_PIN, Y_MAX_PIN, Z_STEP_PIN, Z_DIR_PIN, Z_ENABLE_PIN, Z_MIN_PIN, Z_MAX_PIN, PS_ON_PIN, \
-                        HEATER_BED_PIN, FAN_PIN,                  \
-                        _E0_PINS _E1_PINS             \
+                        HEATER_BED_PIN, FAN_PIN, _E0_PINS \
                         TEMP_0_PIN, TEMP_1_PIN, TEMP_BED_PIN }
 #endif
 

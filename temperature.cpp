@@ -36,16 +36,12 @@
 //===========================================================================
 //=============================public variables============================
 //===========================================================================
-int target_temperature[EXTRUDERS] = { 0 };
+int target_temperature = 0;
 int target_temperature_bed = 0;
-int current_temperature_raw[EXTRUDERS] = { 0 };
-float current_temperature[EXTRUDERS] = { 0.0 };
+int current_temperature_raw = 0;
+float current_temperature = 0.0;
 int current_temperature_bed_raw = 0;
 float current_temperature_bed = 0.0;
-#ifdef TEMP_SENSOR_1_AS_REDUNDANT
-  int redundant_temperature_raw = 0;
-  float redundant_temperature = 0.0;
-#endif
 #ifdef PIDTEMP
   float Kp=DEFAULT_Kp;
   float Ki=(DEFAULT_Ki*PID_dT);
@@ -78,23 +74,23 @@ static volatile bool temp_meas_ready = false;
 
 #ifdef PIDTEMP
   //static cannot be external:
-  static float temp_iState[EXTRUDERS] = { 0 };
-  static float temp_dState[EXTRUDERS] = { 0 };
-  static float pTerm[EXTRUDERS];
-  static float iTerm[EXTRUDERS];
-  static float dTerm[EXTRUDERS];
+  static float temp_iState = 0;
+  static float temp_dState = 0;
+  static float pTerm;
+  static float iTerm;
+  static float dTerm;
   //int output;
-  static float pid_error[EXTRUDERS];
-  static float temp_iState_min[EXTRUDERS];
-  static float temp_iState_max[EXTRUDERS];
-  // static float pid_input[EXTRUDERS];
-  // static float pid_output[EXTRUDERS];
-  static bool pid_reset[EXTRUDERS];
+  static float pid_error;
+  static float temp_iState_min;
+  static float temp_iState_max;
+  // static float pid_input;
+  // static float pid_output;
+  static bool pid_reset;
 #endif //PIDTEMP
 #ifdef PIDTEMPBED
   //static cannot be external:
-  static float temp_iState_bed = { 0 };
-  static float temp_dState_bed = { 0 };
+  static float temp_iState_bed = 0;
+  static float temp_dState_bed = 0;
   static float pTerm_bed;
   static float iTerm_bed;
   static float dTerm_bed;
@@ -105,50 +101,32 @@ static volatile bool temp_meas_ready = false;
 #else //PIDTEMPBED
 	static unsigned long  previous_millis_bed_heater;
 #endif //PIDTEMPBED
-  static unsigned char soft_pwm[EXTRUDERS];
+  static unsigned char soft_pwm;
 
 #ifdef FAN_SOFT_PWM
   static unsigned char soft_pwm_fan;
 #endif
-#if (defined(EXTRUDER_0_AUTO_FAN_PIN) && EXTRUDER_0_AUTO_FAN_PIN > -1) || \
-    (defined(EXTRUDER_1_AUTO_FAN_PIN) && EXTRUDER_1_AUTO_FAN_PIN > -1) || \
-    (defined(EXTRUDER_2_AUTO_FAN_PIN) && EXTRUDER_2_AUTO_FAN_PIN > -1)
+#if (defined(EXTRUDER_0_AUTO_FAN_PIN) && EXTRUDER_0_AUTO_FAN_PIN > -1)
   static unsigned long extruder_autofan_last_check;
 #endif  
 
-#if EXTRUDERS > 2
-  # error Unsupported number of extruders
-#elif EXTRUDERS > 1
-  # define ARRAY_BY_EXTRUDERS(v1, v2) { v1, v2 }
-#else
-  # define ARRAY_BY_EXTRUDERS(v1, v2) { v1 }
-#endif
-
 // Init min and max temp with extreme values to prevent false errors during startup
-static int minttemp_raw[EXTRUDERS] = ARRAY_BY_EXTRUDERS( HEATER_0_RAW_LO_TEMP , HEATER_1_RAW_LO_TEMP );
-static int maxttemp_raw[EXTRUDERS] = ARRAY_BY_EXTRUDERS( HEATER_0_RAW_HI_TEMP , HEATER_1_RAW_HI_TEMP );
-static int minttemp[EXTRUDERS] = ARRAY_BY_EXTRUDERS( 0, 0 );
-static int maxttemp[EXTRUDERS] = ARRAY_BY_EXTRUDERS( 16383, 16383 );
+static int minttemp_raw = HEATER_0_RAW_LO_TEMP;
+static int maxttemp_raw = HEATER_0_RAW_HI_TEMP;
+static int minttemp = 0;
+static int maxttemp = 16383;
 //static int bed_minttemp_raw = HEATER_BED_RAW_LO_TEMP; /* No bed mintemp error implemented?!? */
 #ifdef BED_MAXTEMP
 static int bed_maxttemp_raw = HEATER_BED_RAW_HI_TEMP;
 #endif
 
-#ifdef TEMP_SENSOR_1_AS_REDUNDANT
-  static void *heater_ttbl_map[2] = {(void *)HEATER_0_TEMPTABLE, (void *)HEATER_1_TEMPTABLE };
-  static uint8_t heater_ttbllen_map[2] = { HEATER_0_TEMPTABLE_LEN, HEATER_1_TEMPTABLE_LEN };
-#else
-  static void *heater_ttbl_map[EXTRUDERS] = ARRAY_BY_EXTRUDERS( (void *)HEATER_0_TEMPTABLE, (void *)HEATER_1_TEMPTABLE );
-  static uint8_t heater_ttbllen_map[EXTRUDERS] = ARRAY_BY_EXTRUDERS( HEATER_0_TEMPTABLE_LEN, HEATER_1_TEMPTABLE_LEN );
-#endif
-
-static float analog2temp(int raw, uint8_t e);
+static float analog2temp(int raw);
 static float analog2tempBed(int raw);
 static void updateTemperaturesFromRawValues();
 
 #ifdef WATCH_TEMP_PERIOD
-int watch_start_temp[EXTRUDERS] = ARRAY_BY_EXTRUDERS(0,0);
-unsigned long watchmillis[EXTRUDERS] = ARRAY_BY_EXTRUDERS(0,0);
+int watch_start_temp = 0;
+unsigned long watchmillis = 0;
 #endif //WATCH_TEMP_PERIOD
 
 #ifndef SOFT_PWM_SCALE
@@ -177,15 +155,6 @@ void PID_autotune(float temp, int extruder, int ncycles)
   float Kp, Ki, Kd;
   float max = 0, min = 10000;
 
-  if ((extruder >= EXTRUDERS)
-  #if (TEMP_BED_PIN <= -1)
-       ||(extruder < 0)
-  #endif
-       ){
-          SERIAL_ECHOLN("PID Autotune failed. Bad extruder number.");
-          return;
-        }
-	
   SERIAL_ECHOLN("PID Autotune start");
   
   disable_heater(); // switch off all heaters.
@@ -197,7 +166,7 @@ void PID_autotune(float temp, int extruder, int ncycles)
    }
    else
    {
-     soft_pwm[extruder] = (PID_MAX)/2;
+     soft_pwm = (PID_MAX)/2;
      bias = d = (PID_MAX)/2;
   }
 
@@ -209,7 +178,7 @@ void PID_autotune(float temp, int extruder, int ncycles)
     if(temp_meas_ready == true) { // temp sample ready
       updateTemperaturesFromRawValues();
 
-      input = (extruder<0)?current_temperature_bed:current_temperature[extruder];
+      input = (extruder<0)?current_temperature_bed:current_temperature;
 
       max=max(max,input);
       min=min(min,input);
@@ -219,7 +188,7 @@ void PID_autotune(float temp, int extruder, int ncycles)
           if (extruder<0)
             soft_pwm_bed = (bias - d) >> 1;
           else
-            soft_pwm[extruder] = (bias - d) >> 1;
+            soft_pwm = (bias - d) >> 1;
           t1=millis();
           t_high=t1 - t2;
           max=temp;
@@ -273,7 +242,7 @@ void PID_autotune(float temp, int extruder, int ncycles)
           if (extruder<0)
             soft_pwm_bed = (bias + d) >> 1;
           else
-            soft_pwm[extruder] = (bias + d) >> 1;
+            soft_pwm = (bias + d) >> 1;
           cycles++;
           min=temp;
         }
@@ -289,7 +258,7 @@ void PID_autotune(float temp, int extruder, int ncycles)
         p=soft_pwm_bed;       
         SERIAL_PROTOCOLPGM("ok B:");
       }else{
-        p=soft_pwm[extruder];       
+        p=soft_pwm;
         SERIAL_PROTOCOLPGM("ok T:");
       }
 			
@@ -314,36 +283,26 @@ void PID_autotune(float temp, int extruder, int ncycles)
 void updatePID()
 {
 #ifdef PIDTEMP
-  for(int e = 0; e < EXTRUDERS; e++) { 
-     temp_iState_max[e] = PID_INTEGRAL_DRIVE_MAX / Ki;  
-  }
+     temp_iState_max = PID_INTEGRAL_DRIVE_MAX / Ki;
 #endif
 #ifdef PIDTEMPBED
-  temp_iState_max_bed = PID_INTEGRAL_DRIVE_MAX / bedKi;  
+  temp_iState_max_bed = PID_INTEGRAL_DRIVE_MAX / bedKi;
 #endif
 }
   
 int getHeaterPower(int heater) {
 	if (heater<0)
 		return soft_pwm_bed;
-  return soft_pwm[heater];
+  return soft_pwm;
 }
 
-#if (defined(EXTRUDER_0_AUTO_FAN_PIN) && EXTRUDER_0_AUTO_FAN_PIN > -1) || \
-    (defined(EXTRUDER_1_AUTO_FAN_PIN) && EXTRUDER_1_AUTO_FAN_PIN > -1) || \
-    (defined(EXTRUDER_2_AUTO_FAN_PIN) && EXTRUDER_2_AUTO_FAN_PIN > -1)
+#if (defined(EXTRUDER_0_AUTO_FAN_PIN) && EXTRUDER_0_AUTO_FAN_PIN > -1)
 
   #if defined(FAN_PIN) && FAN_PIN > -1
     #if EXTRUDER_0_AUTO_FAN_PIN == FAN_PIN 
        #error "You cannot set EXTRUDER_0_AUTO_FAN_PIN equal to FAN_PIN"
     #endif
-    #if EXTRUDER_1_AUTO_FAN_PIN == FAN_PIN 
-       #error "You cannot set EXTRUDER_1_AUTO_FAN_PIN equal to FAN_PIN"
-    #endif
-    #if EXTRUDER_2_AUTO_FAN_PIN == FAN_PIN 
-       #error "You cannot set EXTRUDER_2_AUTO_FAN_PIN equal to FAN_PIN"
-    #endif
-  #endif 
+  #endif
 
 void setExtruderAutoFanState(int pin, bool state)
 {
@@ -360,42 +319,13 @@ void checkExtruderAutoFans()
 
   // which fan pins need to be turned on?      
   #if defined(EXTRUDER_0_AUTO_FAN_PIN) && EXTRUDER_0_AUTO_FAN_PIN > -1
-    if (current_temperature[0] > EXTRUDER_AUTO_FAN_TEMPERATURE) 
+    if (current_temperature > EXTRUDER_AUTO_FAN_TEMPERATURE) 
       fanState |= 1;
   #endif
-  #if defined(EXTRUDER_1_AUTO_FAN_PIN) && EXTRUDER_1_AUTO_FAN_PIN > -1
-    if (current_temperature[1] > EXTRUDER_AUTO_FAN_TEMPERATURE) 
-    {
-      if (EXTRUDER_1_AUTO_FAN_PIN == EXTRUDER_0_AUTO_FAN_PIN) 
-        fanState |= 1;
-      else
-        fanState |= 2;
-    }
-  #endif
-  #if defined(EXTRUDER_2_AUTO_FAN_PIN) && EXTRUDER_2_AUTO_FAN_PIN > -1
-    if (current_temperature[2] > EXTRUDER_AUTO_FAN_TEMPERATURE) 
-    {
-      if (EXTRUDER_2_AUTO_FAN_PIN == EXTRUDER_0_AUTO_FAN_PIN) 
-        fanState |= 1;
-      else if (EXTRUDER_2_AUTO_FAN_PIN == EXTRUDER_1_AUTO_FAN_PIN) 
-        fanState |= 2;
-      else
-        fanState |= 4;
-    }
-  #endif
-  
+
   // update extruder auto fan states
   #if defined(EXTRUDER_0_AUTO_FAN_PIN) && EXTRUDER_0_AUTO_FAN_PIN > -1
     setExtruderAutoFanState(EXTRUDER_0_AUTO_FAN_PIN, (fanState & 1) != 0);
-  #endif 
-  #if defined(EXTRUDER_1_AUTO_FAN_PIN) && EXTRUDER_1_AUTO_FAN_PIN > -1
-    if (EXTRUDER_1_AUTO_FAN_PIN != EXTRUDER_0_AUTO_FAN_PIN) 
-      setExtruderAutoFanState(EXTRUDER_1_AUTO_FAN_PIN, (fanState & 2) != 0);
-  #endif 
-  #if defined(EXTRUDER_2_AUTO_FAN_PIN) && EXTRUDER_2_AUTO_FAN_PIN > -1
-    if (EXTRUDER_2_AUTO_FAN_PIN != EXTRUDER_0_AUTO_FAN_PIN 
-        && EXTRUDER_2_AUTO_FAN_PIN != EXTRUDER_1_AUTO_FAN_PIN)
-      setExtruderAutoFanState(EXTRUDER_2_AUTO_FAN_PIN, (fanState & 4) != 0);
   #endif 
 }
 
@@ -403,7 +333,9 @@ void checkExtruderAutoFans()
 
 void manage_heater()
 {
+#ifdef PIDTEMP
   float pid_input;
+#endif
   float pid_output;
 
   if(temp_meas_ready != true)   //better readability
@@ -411,124 +343,103 @@ void manage_heater()
 
   updateTemperaturesFromRawValues();
 
-  for(int e = 0; e < EXTRUDERS; e++) 
-  {
-
   #if defined(THERMAL_RUNAWAY_PROTECTION_PERIOD)&&(THERMAL_RUNAWAY_PROTECTION_PERIOD > 0)
-    thermal_runaway_protection(&thermal_runaway_state_machine[e], &thermal_runaway_timer[e], current_temperature[e], target_temperature[e], e, THERMAL_RUNAWAY_PROTECTION_PERIOD, THERMAL_RUNAWAY_PROTECTION_HYSTERESIS);
+    thermal_runaway_protection(&thermal_runaway_state_machine, &thermal_runaway_timer, current_temperature, target_temperature, THERMAL_RUNAWAY_PROTECTION_PERIOD, THERMAL_RUNAWAY_PROTECTION_HYSTERESIS);
   #endif
 
   #ifdef PIDTEMP
-    pid_input = current_temperature[e];
+    pid_input = current_temperature;
 
     #ifndef PID_OPENLOOP
-        pid_error[e] = target_temperature[e] - pid_input;
-        if(pid_error[e] > PID_FUNCTIONAL_RANGE) {
+        pid_error = target_temperature - pid_input;
+        if(pid_error > PID_FUNCTIONAL_RANGE) {
           pid_output = BANG_MAX;
-          pid_reset[e] = true;
+          pid_reset = true;
         }
-        else if(pid_error[e] < -PID_FUNCTIONAL_RANGE || target_temperature[e] == 0) {
+        else if(pid_error < -PID_FUNCTIONAL_RANGE || target_temperature == 0) {
           pid_output = 0;
-          pid_reset[e] = true;
+          pid_reset = true;
         }
         else {
-          if(pid_reset[e] == true) {
-            temp_iState[e] = 0.0;
-            pid_reset[e] = false;
+          if(pid_reset == true) {
+            temp_iState = 0.0;
+            pid_reset = false;
           }
-          pTerm[e] = Kp * pid_error[e];
-          temp_iState[e] += pid_error[e];
-          temp_iState[e] = constrain(temp_iState[e], temp_iState_min[e], temp_iState_max[e]);
-          iTerm[e] = Ki * temp_iState[e];
+          pTerm = Kp * pid_error;
+          temp_iState += pid_error;
+          temp_iState = constrain(temp_iState, temp_iState_min, temp_iState_max);
+          iTerm = Ki * temp_iState;
 
           //K1 defined in Configuration.h in the PID settings
           #define K2 (1.0-K1)
-          dTerm[e] = (Kd * (pid_input - temp_dState[e]))*K2 + (K1 * dTerm[e]);
-          pid_output = constrain(pTerm[e] + iTerm[e] - dTerm[e], 0, PID_MAX);
+          dTerm = (Kd * (pid_input - temp_dState))*K2 + (K1 * dTerm);
+          pid_output = constrain(pTerm + iTerm - dTerm, 0, PID_MAX);
         }
-        temp_dState[e] = pid_input;
+        temp_dState = pid_input;
     #else 
-          pid_output = constrain(target_temperature[e], 0, PID_MAX);
+          pid_output = constrain(target_temperature, 0, PID_MAX);
     #endif //PID_OPENLOOP
     #ifdef PID_DEBUG
     SERIAL_ECHO_START;
     SERIAL_ECHO(" PID_DEBUG ");
-    SERIAL_ECHO(e);
     SERIAL_ECHO(": Input ");
     SERIAL_ECHO(pid_input);
     SERIAL_ECHO(" Output ");
     SERIAL_ECHO(pid_output);
     SERIAL_ECHO(" pTerm ");
-    SERIAL_ECHO(pTerm[e]);
+    SERIAL_ECHO(pTerm);
     SERIAL_ECHO(" iTerm ");
-    SERIAL_ECHO(iTerm[e]);
+    SERIAL_ECHO(iTerm);
     SERIAL_ECHO(" dTerm ");
-    SERIAL_ECHOLN(dTerm[e]);  
+    SERIAL_ECHOLN(dTerm);  
     #endif //PID_DEBUG
   #else /* PID off */
     pid_output = 0;
-    if(current_temperature[e] < target_temperature[e]) {
+    if(current_temperature < target_temperature) {
       pid_output = PID_MAX;
     }
   #endif
 
     // Check if temperature is within the correct range
-    if((current_temperature[e] > minttemp[e]) && (current_temperature[e] < maxttemp[e])) 
+    if((current_temperature > minttemp) && (current_temperature < maxttemp)) 
     {
-      soft_pwm[e] = (int)pid_output >> 1;
+      soft_pwm = (int)pid_output >> 1;
     }
     else {
-      soft_pwm[e] = 0;
+      soft_pwm = 0;
     }
 
     #ifdef WATCH_TEMP_PERIOD
-    if(watchmillis[e] && millis() - watchmillis[e] > WATCH_TEMP_PERIOD)
+    if(watchmillis && millis() - watchmillis > WATCH_TEMP_PERIOD)
     {
-        if(degHotend(e) < watch_start_temp[e] + WATCH_TEMP_INCREASE)
+        if(degHotend() < watch_start_temp + WATCH_TEMP_INCREASE)
         {
-            setTargetHotend(0, e);
+            setTargetHotend(0);
             SERIAL_ECHO_START;
             SERIAL_ECHOLN("Heating failed");
         }else{
-            watchmillis[e] = 0;
+            watchmillis = 0;
         }
     }
     #endif
-    #ifdef TEMP_SENSOR_1_AS_REDUNDANT
-      if(fabs(current_temperature[0] - redundant_temperature) > MAX_REDUNDANT_TEMP_SENSOR_DIFF) {
-        disable_heater();
-        if(IsStopped() == false) {
-          SERIAL_ERROR_START;
-          SERIAL_ERRORLNPGM("Extruder switched off. Temperature difference between temp sensors is too high !");
-        }
-        #ifndef BOGUS_TEMPERATURE_FAILSAFE_OVERRIDE
-          Stop();
-        #endif
-      }
-    #endif
-  } // End extruder for loop
 
-  #if (defined(EXTRUDER_0_AUTO_FAN_PIN) && EXTRUDER_0_AUTO_FAN_PIN > -1) || \
-      (defined(EXTRUDER_1_AUTO_FAN_PIN) && EXTRUDER_1_AUTO_FAN_PIN > -1) || \
-      (defined(EXTRUDER_2_AUTO_FAN_PIN) && EXTRUDER_2_AUTO_FAN_PIN > -1)
+  #if (defined(EXTRUDER_0_AUTO_FAN_PIN) && EXTRUDER_0_AUTO_FAN_PIN > -1)
   if(millis() - extruder_autofan_last_check > 2500)  // only need to check fan state very infrequently
   {
     checkExtruderAutoFans();
     extruder_autofan_last_check = millis();
   }  
   #endif       
- 
-/* TODO: FIXME */
-  /*#ifndef PIDTEMPBED
+
+  #ifndef PIDTEMPBED
   if(millis() - previous_millis_bed_heater < BED_CHECK_INTERVAL)
     return;
   previous_millis_bed_heater = millis();
-  #endif*/
-/* TODO: FIXME */
+  #endif
 
   #if TEMP_SENSOR_BED != 0
   
-    #ifdef THERMAL_RUNAWAY_PROTECTION_PERIOD && THERMAL_RUNAWAY_PROTECTION_PERIOD > 0
+    #if defined(THERMAL_RUNAWAY_PROTECTION_PERIOD) && (THERMAL_RUNAWAY_PROTECTION_PERIOD > 0)
       thermal_runaway_protection(&thermal_runaway_bed_state_machine, &thermal_runaway_bed_timer, current_temperature_bed, target_temperature_bed, 9, THERMAL_RUNAWAY_PROTECTION_BED_PERIOD, THERMAL_RUNAWAY_PROTECTION_BED_HYSTERESIS);
     #endif
 
@@ -601,48 +512,36 @@ void manage_heater()
   #endif
 }
 
-/* TODO: FIXME */
-#define PGM_RD_W(x)   (x)//(short)pgm_read_word(&x)
-/* TODO: FIXME */
 // Derived from RepRap FiveD extruder::getTemperature()
 // For hot end temperature measurement.
-static float analog2temp(int raw, uint8_t e) {
-#ifdef TEMP_SENSOR_1_AS_REDUNDANT
-  if(e > EXTRUDERS)
-#else
-  if(e >= EXTRUDERS)
-#endif
-  {
-      SERIAL_ERROR_START;
-      SERIAL_ERROR((int)e);
-      SERIAL_ERRORLNPGM(" - Invalid extruder number !");
-      kill();
-      return 0.0;
-  } 
+static float analog2temp(int raw) {
 
-  if(heater_ttbl_map[e] != NULL)
-  {
-    float celsius = 0;
-    uint8_t i;
-    short (*tt)[][2] = (short (*)[][2])(heater_ttbl_map[e]);
+  float voltage = (raw / (4095.0 * OVERSAMPLENR));
+  float res_val;
+  float celsius = 0;
+  uint16_t i;
+  //""" Convert the voltage to a resistance value """
+  if (voltage < 0.001)
+	res_val = 10000000.0;
+  else
+	res_val = ( 4700 * voltage ) / ( 1.0 - voltage);
 
-    for (i=1; i<heater_ttbllen_map[e]; i++)
+    for (i=1; i<HEATER_0_TEMPTABLE_LEN; i++)
     {
-      if (PGM_RD_W((*tt)[i][0]) > raw)
+      if (HEATER_0_TEMPTABLE[i][0] > res_val)
       {
-        celsius = PGM_RD_W((*tt)[i-1][1]) + 
-          (raw - PGM_RD_W((*tt)[i-1][0])) * 
-          (float)(PGM_RD_W((*tt)[i][1]) - PGM_RD_W((*tt)[i-1][1])) /
-          (float)(PGM_RD_W((*tt)[i][0]) - PGM_RD_W((*tt)[i-1][0]));
+        celsius  = HEATER_0_TEMPTABLE[i-1][1] + 
+          (res_val - HEATER_0_TEMPTABLE[i-1][0]) * 
+          (float)(HEATER_0_TEMPTABLE[i][1] - HEATER_0_TEMPTABLE[i-1][1]) /
+          (float)(HEATER_0_TEMPTABLE[i][0] - HEATER_0_TEMPTABLE[i-1][0]);
         break;
       }
     }
 
     // Overflow: Set to last value in the table
-    if (i == heater_ttbllen_map[e]) celsius = PGM_RD_W((*tt)[i-1][1]);
+    if (i == HEATER_0_TEMPTABLE_LEN) celsius = HEATER_0_TEMPTABLE[i-1][1];
 
     return celsius;
-  }
 }
 
 // Derived from RepRap FiveD extruder::getTemperature()
@@ -650,22 +549,30 @@ static float analog2temp(int raw, uint8_t e) {
 static float analog2tempBed(int raw) {
   #ifdef BED_USES_THERMISTOR
     float celsius = 0;
-    byte i;
+    uint16_t i;
+
+  float voltage = (raw / (4095.0 * OVERSAMPLENR));
+  float res_val;
+  //""" Convert the voltage to a resistance value """
+  if (voltage < 0.001)
+	res_val = 10000000.0;
+  else
+	res_val = ( 4700 * voltage ) / ( 1.0 - voltage);
 
     for (i=1; i<BEDTEMPTABLE_LEN; i++)
     {
-      if (PGM_RD_W(BEDTEMPTABLE[i][0]) > raw)
+      if (BEDTEMPTABLE[i][0] > res_val)
       {
-        celsius  = PGM_RD_W(BEDTEMPTABLE[i-1][1]) + 
-          (raw - PGM_RD_W(BEDTEMPTABLE[i-1][0])) * 
-          (float)(PGM_RD_W(BEDTEMPTABLE[i][1]) - PGM_RD_W(BEDTEMPTABLE[i-1][1])) /
-          (float)(PGM_RD_W(BEDTEMPTABLE[i][0]) - PGM_RD_W(BEDTEMPTABLE[i-1][0]));
+        celsius  = BEDTEMPTABLE[i-1][1] + 
+          (res_val - BEDTEMPTABLE[i-1][0]) * 
+          (float)(BEDTEMPTABLE[i][1] - BEDTEMPTABLE[i-1][1]) /
+          (float)(BEDTEMPTABLE[i][0] - BEDTEMPTABLE[i-1][0]);
         break;
       }
     }
 
     // Overflow: Set to last value in the table
-    if (i == BEDTEMPTABLE_LEN) celsius = PGM_RD_W(BEDTEMPTABLE[i-1][1]);
+    if (i == BEDTEMPTABLE_LEN) celsius = BEDTEMPTABLE[i-1][1];
 
     return celsius;
   #else
@@ -677,14 +584,8 @@ static float analog2tempBed(int raw) {
     and this function is called from normal context as it is too slow to run in interrupts and will block the stepper routine otherwise */
 static void updateTemperaturesFromRawValues()
 {
-    for(uint8_t e=0;e<EXTRUDERS;e++)
-    {
-        current_temperature[e] = analog2temp(current_temperature_raw[e], e);
-    }
+    current_temperature = analog2temp(current_temperature_raw);
     current_temperature_bed = analog2tempBed(current_temperature_bed_raw);
-    #ifdef TEMP_SENSOR_1_AS_REDUNDANT
-      redundant_temperature = analog2temp(redundant_temperature_raw, 1);
-    #endif
     //Reset the watchdog after we know we have a temperature measurement.
     watchdog_reset();
 
@@ -697,19 +598,16 @@ static void updateTemperaturesFromRawValues()
 
 void tp_init()
 {
-  // Finish init of mult extruder arrays 
-  for(int e = 0; e < EXTRUDERS; e++) {
-    // populate with the first value 
-    maxttemp[e] = maxttemp[0];
+    // populate with the first value
+    maxttemp = maxttemp;
 #ifdef PIDTEMP
-    temp_iState_min[e] = 0.0;
-    temp_iState_max[e] = PID_INTEGRAL_DRIVE_MAX / Ki;
+    temp_iState_min = 0.0;
+    temp_iState_max = PID_INTEGRAL_DRIVE_MAX / Ki;
 #endif //PIDTEMP
 #ifdef PIDTEMPBED
     temp_iState_min_bed = 0.0;
     temp_iState_max_bed = PID_INTEGRAL_DRIVE_MAX / bedKi;
 #endif //PIDTEMPBED
-  }
 
   #if defined(HEATER_0_PIN) && (HEATER_0_PIN > -1) 
     SET_OUTPUT(HEATER_0_PIN);
@@ -735,41 +633,34 @@ void tp_init()
 //  ADCSRA = 1<<ADEN | 1<<ADSC | 1<<ADIF | 0x07;
 //  DIDR0 = 0;
 /* TODO: FIXME */
-  #ifdef DIDR2
-    DIDR2 = 0;
-  #endif
-  #if defined(TEMP_0_PIN) && (TEMP_0_PIN > -1)
-    #if TEMP_0_PIN < 8
-/* TODO: FIXME */
-       //DIDR0 |= 1 << TEMP_0_PIN; 
-/* TODO: FIXME */
-    #else
-       DIDR2 |= 1<<(TEMP_0_PIN - 8); 
-    #endif
-  #endif
-  #if defined(TEMP_1_PIN) && (TEMP_1_PIN > -1)
-    #if TEMP_1_PIN < 8
-       DIDR0 |= 1<<TEMP_1_PIN; 
-    #else
-       DIDR2 |= 1<<(TEMP_1_PIN - 8); 
-    #endif
-  #endif
-  #if defined(TEMP_2_PIN) && (TEMP_2_PIN > -1)
-    #if TEMP_2_PIN < 8
-       DIDR0 |= 1 << TEMP_2_PIN; 
-    #else
-       DIDR2 |= 1<<(TEMP_2_PIN - 8); 
-    #endif
-  #endif
-  #if defined(TEMP_BED_PIN) && (TEMP_BED_PIN > -1)
-    #if TEMP_BED_PIN < 8
-/* TODO: FIXME */
-       //DIDR0 |= 1<<TEMP_BED_PIN; 
-/* TODO: FIXME */
-    #else
-       DIDR2 |= 1<<(TEMP_BED_PIN - 8); 
-    #endif
-  #endif
+//  #ifdef DIDR2
+//    DIDR2 = 0;
+//  #endif
+//  #if defined(TEMP_0_PIN) && (TEMP_0_PIN > -1)
+//    #if TEMP_0_PIN < 8
+///* TODO: FIXME */
+//       //DIDR0 |= 1 << TEMP_0_PIN; 
+///* TODO: FIXME */
+//    #else
+//       DIDR2 |= 1<<(TEMP_0_PIN - 8); 
+//    #endif
+//  #endif
+//  #if defined(TEMP_1_PIN) && (TEMP_1_PIN > -1)
+//    #if TEMP_1_PIN < 8
+//       DIDR0 |= 1<<TEMP_1_PIN; 
+//    #else
+//       DIDR2 |= 1<<(TEMP_1_PIN - 8); 
+//    #endif
+//  #endif
+//  #if defined(TEMP_BED_PIN) && (TEMP_BED_PIN > -1)
+//    #if TEMP_BED_PIN < 8
+///* TODO: FIXME */
+//       //DIDR0 |= 1<<TEMP_BED_PIN; 
+///* TODO: FIXME */
+//    #else
+//       DIDR2 |= 1<<(TEMP_BED_PIN - 8); 
+//    #endif
+//  #endif
   
   // Use timer0 for temperature measurement
   // Interleave temperature interrupt with millies interrupt
@@ -782,46 +673,25 @@ void tp_init()
 /* TODO: FIXME */
 
 #ifdef HEATER_0_MINTEMP
-  minttemp[0] = HEATER_0_MINTEMP;
-  while(analog2temp(minttemp_raw[0], 0) < HEATER_0_MINTEMP) {
+  minttemp = HEATER_0_MINTEMP;
+  while(analog2temp(minttemp_raw) < HEATER_0_MINTEMP) {
 #if HEATER_0_RAW_LO_TEMP < HEATER_0_RAW_HI_TEMP
-    minttemp_raw[0] += OVERSAMPLENR;
+    minttemp_raw += OVERSAMPLENR;
 #else
-    minttemp_raw[0] -= OVERSAMPLENR;
+    minttemp_raw -= OVERSAMPLENR;
 #endif
   }
 #endif //MINTEMP
 #ifdef HEATER_0_MAXTEMP
-  maxttemp[0] = HEATER_0_MAXTEMP;
-  while(analog2temp(maxttemp_raw[0], 0) > HEATER_0_MAXTEMP) {
+  maxttemp = HEATER_0_MAXTEMP;
+  while(analog2temp(maxttemp_raw) > HEATER_0_MAXTEMP) {
 #if HEATER_0_RAW_LO_TEMP < HEATER_0_RAW_HI_TEMP
-    maxttemp_raw[0] -= OVERSAMPLENR;
+    maxttemp_raw -= OVERSAMPLENR;
 #else
-    maxttemp_raw[0] += OVERSAMPLENR;
+    maxttemp_raw += OVERSAMPLENR;
 #endif
   }
 #endif //MAXTEMP
-
-#if (EXTRUDERS > 1) && defined(HEATER_1_MINTEMP)
-  minttemp[1] = HEATER_1_MINTEMP;
-  while(analog2temp(minttemp_raw[1], 1) < HEATER_1_MINTEMP) {
-#if HEATER_1_RAW_LO_TEMP < HEATER_1_RAW_HI_TEMP
-    minttemp_raw[1] += OVERSAMPLENR;
-#else
-    minttemp_raw[1] -= OVERSAMPLENR;
-#endif
-  }
-#endif // MINTEMP 1
-#if (EXTRUDERS > 1) && defined(HEATER_1_MAXTEMP)
-  maxttemp[1] = HEATER_1_MAXTEMP;
-  while(analog2temp(maxttemp_raw[1], 1) > HEATER_1_MAXTEMP) {
-#if HEATER_1_RAW_LO_TEMP < HEATER_1_RAW_HI_TEMP
-    maxttemp_raw[1] -= OVERSAMPLENR;
-#else
-    maxttemp_raw[1] += OVERSAMPLENR;
-#endif
-  }
-#endif //MAXTEMP 1
 
 #ifdef BED_MINTEMP
   /* No bed MINTEMP error implemented?!? */ /*
@@ -848,15 +718,12 @@ void tp_init()
 void setWatch() 
 {  
 #ifdef WATCH_TEMP_PERIOD
-  for (int e = 0; e < EXTRUDERS; e++)
-  {
-    if(degHotend(e) < degTargetHotend(e) - (WATCH_TEMP_INCREASE * 2))
+    if(degHotend() < degTargetHotend() - (WATCH_TEMP_INCREASE * 2))
     {
-      watch_start_temp[e] = degHotend(e);
-      watchmillis[e] = millis();
-    } 
-  }
-#endif 
+      watch_start_temp = degHotend();
+      watchmillis = millis();
+    }
+#endif
 }
 
 #if defined(THERMAL_RUNAWAY_PROTECTION_PERIOD)&&(THERMAL_RUNAWAY_PROTECTION_PERIOD > 0)
@@ -919,23 +786,14 @@ void thermal_runaway_protection(int *state, unsigned long *timer, float temperat
 
 void disable_heater()
 {
-  for(int i=0;i<EXTRUDERS;i++)
-    setTargetHotend(0,i);
+  setTargetHotend(0);
   setTargetBed(0);
   #if defined(TEMP_0_PIN) && TEMP_0_PIN > -1
-  target_temperature[0]=0;
-  soft_pwm[0]=0;
+  target_temperature=0;
+  soft_pwm=0;
    #if defined(HEATER_0_PIN) && HEATER_0_PIN > -1  
      WRITE(HEATER_0_PIN,LOW);
    #endif
-  #endif
-     
-  #if defined(TEMP_1_PIN) && TEMP_1_PIN > -1 && EXTRUDERS > 1
-    target_temperature[1]=0;
-    soft_pwm[1]=0;
-    #if defined(HEATER_1_PIN) && HEATER_1_PIN > -1 
-      WRITE(HEATER_1_PIN,LOW);
-    #endif
   #endif
 
   #if defined(TEMP_BED_PIN) && TEMP_BED_PIN > -1
@@ -947,11 +805,10 @@ void disable_heater()
   #endif 
 }
 
-void max_temp_error(uint8_t e) {
+void max_temp_error() {
   disable_heater();
   if(IsStopped() == false) {
     SERIAL_ERROR_START;
-    SERIAL_ERRORLN((int)e);
     SERIAL_ERRORLNPGM(": Extruder switched off. MAXTEMP triggered !");
   }
   #ifndef BOGUS_TEMPERATURE_FAILSAFE_OVERRIDE
@@ -959,11 +816,10 @@ void max_temp_error(uint8_t e) {
   #endif
 }
 
-void min_temp_error(uint8_t e) {
+void min_temp_error() {
   disable_heater();
   if(IsStopped() == false) {
     SERIAL_ERROR_START;
-    SERIAL_ERRORLN((int)e);
     SERIAL_ERRORLNPGM(": Extruder switched off. MINTEMP triggered !");
   }
   #ifndef BOGUS_TEMPERATURE_FAILSAFE_OVERRIDE
@@ -995,29 +851,22 @@ void ISR(void)
   static unsigned long raw_temp_0_value = 0;
   static unsigned long raw_temp_1_value = 0;
   static unsigned long raw_temp_bed_value = 0;
-  static unsigned char temp_state = 8;
+  static unsigned char temp_state = 6;
   static unsigned char pwm_count = (1 << SOFT_PWM_SCALE);
   static unsigned char soft_pwm_0;
-  #if (EXTRUDERS > 1) || defined(HEATERS_PARALLEL)
-  static unsigned char soft_pwm_1;
-  #endif
   #if HEATER_BED_PIN > -1
   static unsigned char soft_pwm_b;
   #endif
   
   if(pwm_count == 0){
-    soft_pwm_0 = soft_pwm[0];
+    soft_pwm_0 = soft_pwm;
     if(soft_pwm_0 > 0) { 
       WRITE(HEATER_0_PIN,1);
       #ifdef HEATERS_PARALLEL
       WRITE(HEATER_1_PIN,1);
       #endif
     } else WRITE(HEATER_0_PIN,0);
-	
-    #if EXTRUDERS > 1
-    soft_pwm_1 = soft_pwm[1];
-    if(soft_pwm_1 > 0) WRITE(HEATER_1_PIN,1); else WRITE(HEATER_1_PIN,0);
-    #endif
+
     #if defined(HEATER_BED_PIN) && HEATER_BED_PIN > -1
     soft_pwm_b = soft_pwm_bed;
     if(soft_pwm_b > 0) WRITE(HEATER_BED_PIN,1); else WRITE(HEATER_BED_PIN,0);
@@ -1114,13 +963,7 @@ void ISR(void)
   {
     if (!temp_meas_ready) //Only update the raw values if they have been read. Else we could be updating them during reading.
     {
-      current_temperature_raw[0] = raw_temp_0_value;
-#if EXTRUDERS > 1
-      current_temperature_raw[1] = raw_temp_1_value;
-#endif
-#ifdef TEMP_SENSOR_1_AS_REDUNDANT
-      redundant_temperature_raw = raw_temp_1_value;
-#endif
+      current_temperature_raw = raw_temp_0_value;
       current_temperature_bed_raw = raw_temp_bed_value;
     }
     
@@ -1131,35 +974,19 @@ void ISR(void)
     raw_temp_bed_value = 0;
 
 #if HEATER_0_RAW_LO_TEMP > HEATER_0_RAW_HI_TEMP
-    if(current_temperature_raw[0] <= maxttemp_raw[0]) {
+    if(current_temperature_raw <= maxttemp_raw) {
 #else
-    if(current_temperature_raw[0] >= maxttemp_raw[0]) {
+    if(current_temperature_raw >= maxttemp_raw) {
 #endif
-        max_temp_error(0);
+        max_temp_error();
     }
 #if HEATER_0_RAW_LO_TEMP > HEATER_0_RAW_HI_TEMP
-    if(current_temperature_raw[0] >= minttemp_raw[0]) {
+    if(current_temperature_raw >= minttemp_raw) {
 #else
-    if(current_temperature_raw[0] <= minttemp_raw[0]) {
+    if(current_temperature_raw <= minttemp_raw) {
 #endif
-        min_temp_error(0);
+        min_temp_error();
     }
-#if EXTRUDERS > 1
-#if HEATER_1_RAW_LO_TEMP > HEATER_1_RAW_HI_TEMP
-    if(current_temperature_raw[1] <= maxttemp_raw[1]) {
-#else
-    if(current_temperature_raw[1] >= maxttemp_raw[1]) {
-#endif
-        max_temp_error(1);
-    }
-#if HEATER_1_RAW_LO_TEMP > HEATER_1_RAW_HI_TEMP
-    if(current_temperature_raw[1] >= minttemp_raw[1]) {
-#else
-    if(current_temperature_raw[1] <= minttemp_raw[1]) {
-#endif
-        min_temp_error(1);
-    }
-#endif
 
   // No bed MINTEMP error? 
 #if defined(BED_MAXTEMP) && (TEMP_SENSOR_BED != 0)
@@ -1194,7 +1021,6 @@ void ISR(void)
 #endif //BABYSTEPPING
 }
 
-/* TODO: FIXME */
 #ifdef PIDTEMP
 // Apply the scale factors to the PID values
 

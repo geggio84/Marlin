@@ -405,7 +405,7 @@ void getHighESpeed()
   if(!autotemp_enabled){
     return;
   }
-  if(degTargetHotend0()+2<autotemp_min) {  //probably temperature set to zero.
+  if(degTargetHotend()+2<autotemp_min) {  //probably temperature set to zero.
     return; //do nothing
   }
 
@@ -437,7 +437,7 @@ void getHighESpeed()
     t=AUTOTEMP_OLDWEIGHT*oldt+(1-AUTOTEMP_OLDWEIGHT)*t;
   }
   oldt=t;
-  setTargetHotend0(t);
+  setTargetHotend(t);
 }
 #endif
 
@@ -478,7 +478,6 @@ void check_axes_activity()
   if((DISABLE_E) && (e_active == 0))
   {
     disable_e0();
-    disable_e1();
   }
 #if defined(FAN_PIN) && FAN_PIN > -1
   #ifdef FAN_KICKSTART_TIME
@@ -519,9 +518,9 @@ float junction_deviation = 0.1;
 // mm. Microseconds specify how many microseconds the move should take to perform. To aid acceleration
 // calculation the caller must also provide the physical length of the line in millimeters.
 #ifdef ENABLE_AUTO_BED_LEVELING
-void plan_buffer_line(float x, float y, float z, const float &e, float feed_rate, const uint8_t &extruder)
+void plan_buffer_line(float x, float y, float z, const float &e, float feed_rate)
 #else
-void plan_buffer_line(const float &x, const float &y, const float &z, const float &e, float feed_rate, const uint8_t &extruder)
+void plan_buffer_line(const float &x, const float &y, const float &z, const float &e, float feed_rate)
 #endif  //ENABLE_AUTO_BED_LEVELING
 {
   // Calculate the buffer head after we push this byte
@@ -551,7 +550,7 @@ void plan_buffer_line(const float &x, const float &y, const float &z, const floa
   #ifdef PREVENT_DANGEROUS_EXTRUDE
   if(target[E_AXIS]!=position[E_AXIS])
   {
-    if(degHotend(active_extruder)<extrude_min_temp)
+    if(degHotend()<extrude_min_temp)
     {
       position[E_AXIS]=target[E_AXIS]; //behave as if the move really took place, but ignore E part
       SERIAL_ECHO_START;
@@ -588,7 +587,7 @@ block->steps_y = labs((target[X_AXIS]-position[X_AXIS]) - (target[Y_AXIS]-positi
 #endif
   block->steps_z = labs(target[Z_AXIS]-position[Z_AXIS]);
   block->steps_e = labs(target[E_AXIS]-position[E_AXIS]);
-  block->steps_e *= volumetric_multiplier[active_extruder];
+  block->steps_e *= volumetric_multiplier;
   block->steps_e *= extrudemultiply;
   block->steps_e /= 100;
   block->step_event_count = max(block->steps_x, max(block->steps_y, max(block->steps_z, block->steps_e)));
@@ -635,8 +634,6 @@ block->steps_y = labs((target[X_AXIS]-position[X_AXIS]) - (target[Y_AXIS]-positi
     block->direction_bits |= (1<<E_AXIS); 
   }
 
-  block->active_extruder = extruder;
-
   //enable active axes
   #ifdef COREXY
   if((block->steps_x != 0) || (block->steps_y != 0))
@@ -653,23 +650,10 @@ block->steps_y = labs((target[X_AXIS]-position[X_AXIS]) - (target[Y_AXIS]-positi
 #endif
 
   // Enable extruder(s)
-  if(block->steps_e != 0)
-  {
-    if (DISABLE_INACTIVE_EXTRUDER) //enable only selected extruder
-    {
-      switch(extruder)
-      {
-        case 0: enable_e0(); disable_e1(); break;
-        case 1: disable_e0(); enable_e1(); break;
-        case 2: disable_e0(); disable_e1(); break;
-      }
-    }
-    else //enable all
-    {
+  if((block->steps_e == 0) && (DISABLE_INACTIVE_EXTRUDER))
+		disable_e0(); //enable only selected extruder
+  else //enable all
       enable_e0();
-      enable_e1();
-    }
-  }
 
   if (block->steps_e == 0)
   {
@@ -689,7 +673,7 @@ block->steps_y = labs((target[X_AXIS]-position[X_AXIS]) - (target[Y_AXIS]-positi
     delta_mm[Y_AXIS] = ((target[X_AXIS]-position[X_AXIS]) - (target[Y_AXIS]-position[Y_AXIS]))/axis_steps_per_unit[Y_AXIS];
   #endif
   delta_mm[Z_AXIS] = (target[Z_AXIS]-position[Z_AXIS])/axis_steps_per_unit[Z_AXIS];
-  delta_mm[E_AXIS] = ((target[E_AXIS]-position[E_AXIS])/axis_steps_per_unit[E_AXIS])*volumetric_multiplier[active_extruder]*extrudemultiply/100.0;
+  delta_mm[E_AXIS] = ((target[E_AXIS]-position[E_AXIS])/axis_steps_per_unit[E_AXIS])*volumetric_multiplier*extrudemultiply/100.0;
   if ( block->steps_x <=(int)dropsegments && block->steps_y <=(int)dropsegments && block->steps_z <=(int)dropsegments )
   {
     block->millimeters = fabs(delta_mm[E_AXIS]);
