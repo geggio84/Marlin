@@ -556,6 +556,7 @@ int loop()
     bufindr = (bufindr + 1)%BUFSIZE;
   }
   //check heater every n milliseconds
+  temp_ISR();
   manage_heater();
   manage_inactivity();
   checkHitEndstops();
