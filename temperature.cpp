@@ -516,15 +516,15 @@ void manage_heater()
 // For hot end temperature measurement.
 static float analog2temp(int raw) {
 
-  float voltage = (raw / (4095.0 * OVERSAMPLENR));
+  float voltage = (raw / (4095.0 * OVERSAMPLENR))* 1.8;
   float res_val;
   float celsius = 0;
   uint16_t i;
   //""" Convert the voltage to a resistance value """
-  if (voltage < 0.001)
+  if (fabs(voltage - 1.8) < 0.001)
 	res_val = 10000000.0;
   else
-	res_val = ( 4700 * voltage ) / ( 1.0 - voltage);
+	res_val = 4700 / ((1.8 / voltage) - 1.0);
 
     for (i=1; i<HEATER_0_TEMPTABLE_LEN; i++)
     {
@@ -551,13 +551,13 @@ static float analog2tempBed(int raw) {
     float celsius = 0;
     uint16_t i;
 
-  float voltage = (raw / (4095.0 * OVERSAMPLENR));
+  float voltage = (raw / (4095.0 * OVERSAMPLENR))* 1.8;
   float res_val;
   //""" Convert the voltage to a resistance value """
-  if (voltage < 0.001)
+  if (fabs(voltage - 1.8) < 0.001)
 	res_val = 10000000.0;
   else
-	res_val = ( 4700 * voltage ) / ( 1.0 - voltage);
+	res_val = 4700 / ((1.8 / voltage) - 1.0);
 
     for (i=1; i<BEDTEMPTABLE_LEN; i++)
     {
