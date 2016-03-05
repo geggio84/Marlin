@@ -66,20 +66,20 @@
 #define PS_ON_PIN          -1
 #define KILL_PIN           -1
 
-#define HEATER_0_PIN       13 // (extruder)
+#define HEATER_0_PIN       -1//13 // (extruder)
 #define HEATER_1_PIN       -1
 
- #define HEATER_BED_PIN     12 // (bed)
- #define X_ENABLE_PIN       14
- #define Y_ENABLE_PIN       14
- #define Z_ENABLE_PIN       26
- #define E0_ENABLE_PIN      14
+ #define HEATER_BED_PIN     -1//12 // (bed)
+ #define X_ENABLE_PIN       -1//14
+ #define Y_ENABLE_PIN       -1//14
+ #define Z_ENABLE_PIN       -1//26
+ #define E0_ENABLE_PIN      -1//14
 
-#define TEMP_0_PIN          7   // MUST USE ANALOG INPUT NUMBERING NOT DIGITAL OUTPUT NUMBERING!!!!!!!!! (pin 33 extruder)
-#define TEMP_1_PIN         -1
-#define TEMP_BED_PIN        6   // MUST USE ANALOG INPUT NUMBERING NOT DIGITAL OUTPUT NUMBERING!!!!!!!!! (pin 34 bed)
+#define TEMP_0_PIN          5
+#define TEMP_1_PIN          -1//4
+#define TEMP_BED_PIN        6
 #define SDPOWER            -1
-#define SDSS               31
+#define SDSS               -1//31
 
 //List of pins which to ignore when asked to change by gcode, 0 and 1 are RX and TX, do not mess with those!
 #define _E0_PINS E0_STEP_PIN, E0_DIR_PIN, E0_ENABLE_PIN, HEATER_0_PIN,
