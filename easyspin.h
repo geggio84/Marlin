@@ -317,22 +317,35 @@ typedef enum {
  * @}
  */
 
+typedef struct {
+	char device[20];
+	uint32_t mode;
+	uint8_t bits;
+	uint32_t speed;
+	uint16_t delay;
+	int spi_fd;
+} spidev;
+
+typedef struct {
+	spidev	spi_device;
+	easySPIN_RegsStruct_TypeDef		regs;
+} easySPIN_stepper;
+
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */
 void easySPIN_Peripherals_Init(void);
-void easySPIN_Init(void);
 
 void easySPIN_Regs_Struct_Reset(
 		easySPIN_RegsStruct_TypeDef* easySPIN_RegsStruct);
-void easySPIN_Registers_Set(easySPIN_RegsStruct_TypeDef* easySPIN_RegsStruct);
+void easySPIN_Registers_Set(spidev *spi_dev, easySPIN_RegsStruct_TypeDef* easySPIN_RegsStruct);
 
 /* Application Commands implementation ------------------------------------ */
-void easySPIN_Nop(void);
-void easySPIN_SetParam(easySPIN_Registers_TypeDef param, uint32_t value);
+void easySPIN_Nop(spidev *spi_dev);
+void easySPIN_SetParam(spidev *spi_dev, easySPIN_Registers_TypeDef param, uint32_t value);
 uint32_t easySPIN_GetParam(easySPIN_Registers_TypeDef param);
-void easySPIN_Enable(void);
-void easySPIN_Disable(void);
-uint16_t easySPIN_Get_Status(void);
+void easySPIN_Enable(spidev *spi_dev);
+void easySPIN_Disable(spidev *spi_dev);
+uint16_t easySPIN_Get_Status(spidev *spi_dev);
 
 /* Additional Commands implementation ------------------------------------ */
 void easySPIN_Reset(int gpio);

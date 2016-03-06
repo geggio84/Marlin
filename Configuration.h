@@ -18,6 +18,12 @@
 // Serial port 0 is still used by the Arduino bootloader regardless of this setting.
 #define SERIAL_PORT "/dev/ttyGS0"
 
+#define SPI_DEVICE_BUS_NR 1
+#define X_STEPPER_SPI_DEVICE 1
+#define Y_STEPPER_SPI_DEVICE 2
+#define Z_STEPPER_SPI_DEVICE 3
+#define E_STEPPER_SPI_DEVICE 4
+
 // This determines the communication speed of the printer
 // This determines the communication speed of the printer
 #define BAUDRATE 115200

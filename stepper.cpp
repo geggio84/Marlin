@@ -91,13 +91,8 @@ static bool check_endstops = true;
 volatile long count_position[NUM_AXIS] = { 0, 0, 0, 0};
 volatile signed char count_direction[NUM_AXIS] = { 1, 1, 1, 1};
 
+easySPIN_stepper steppers[4] = { 0, 0, 0, 0};
 uint32_t easySPIN_rx_data = 0;
-const char *device = "/dev/spidev1.1";
-uint32_t mode;
-uint8_t bits = 8;
-uint32_t speed = 100000;
-uint16_t delay;
-int spi_fd;
 
 //===========================================================================
 //=============================functions         ============================
@@ -567,102 +562,130 @@ void ISR(int sign)// ISR(TIMER1_COMPA_vect)
   }
 #endif // ADVANCE
 
-void easyspin_setup() {
+/* Init steppers structs */
+void stepper_setup() {
+	/* X stepper driver */
+	sprintf(steppers[X_AXIS].spi_device.device,"/dev/spidev%d.%d",SPI_DEVICE_BUS_NR,X_STEPPER_SPI_DEVICE);
+	steppers[X_AXIS].spi_device.mode = 0;
+	steppers[X_AXIS].spi_device.bits = 8;
+	steppers[X_AXIS].spi_device.speed = 100000;
+	steppers[X_AXIS].spi_device.delay = 100;
+
+	/* Y stepper driver */
+	sprintf(steppers[Y_AXIS].spi_device.device,"/dev/spidev%d.%d",SPI_DEVICE_BUS_NR,Y_STEPPER_SPI_DEVICE);
+	steppers[Y_AXIS].spi_device.mode = 0;
+	steppers[Y_AXIS].spi_device.bits = 8;
+	steppers[Y_AXIS].spi_device.speed = 100000;
+	steppers[Y_AXIS].spi_device.delay = 100;
+
+	/* Z stepper driver */
+	sprintf(steppers[Z_AXIS].spi_device.device,"/dev/spidev%d.%d",SPI_DEVICE_BUS_NR,Z_STEPPER_SPI_DEVICE);
+	steppers[Z_AXIS].spi_device.mode = 0;
+	steppers[Z_AXIS].spi_device.bits = 8;
+	steppers[Z_AXIS].spi_device.speed = 100000;
+	steppers[Z_AXIS].spi_device.delay = 100;
+
+	/* E stepper driver */
+	sprintf(steppers[E_AXIS].spi_device.device,"/dev/spidev%d.%d",SPI_DEVICE_BUS_NR,E_STEPPER_SPI_DEVICE);
+	steppers[E_AXIS].spi_device.mode = 0;
+	steppers[E_AXIS].spi_device.bits = 8;
+	steppers[E_AXIS].spi_device.speed = 100000;
+	steppers[E_AXIS].spi_device.delay = 100;
+}
+
+void easyspin_setup(easySPIN_stepper *stepper) {
 
 	int ret = 0;
 
-	spi_fd = open(device, O_RDWR);
-	if (spi_fd < 0)
+	stepper->spi_device.spi_fd = open(stepper->spi_device.device, O_RDWR);
+	if (stepper->spi_device.spi_fd < 0)
 		perror("can't open device");
 
 	/*
 	 * spi mode
 	 */
-	ret = ioctl(spi_fd, SPI_IOC_WR_MODE32, &mode);
+	ret = ioctl(stepper->spi_device.spi_fd, SPI_IOC_WR_MODE32, &stepper->spi_device.mode);
 	if (ret == -1)
 		perror("can't set spi mode");
 
-	ret = ioctl(spi_fd, SPI_IOC_RD_MODE32, &mode);
+	ret = ioctl(stepper->spi_device.spi_fd, SPI_IOC_RD_MODE32, &stepper->spi_device.mode);
 	if (ret == -1)
 		perror("can't get spi mode");
 
 	/*
 	 * bits per word
 	 */
-	ret = ioctl(spi_fd, SPI_IOC_WR_BITS_PER_WORD, &bits);
+	ret = ioctl(stepper->spi_device.spi_fd, SPI_IOC_WR_BITS_PER_WORD, &stepper->spi_device.bits);
 	if (ret == -1)
 		perror("can't set bits per word");
 
-	ret = ioctl(spi_fd, SPI_IOC_RD_BITS_PER_WORD, &bits);
+	ret = ioctl(stepper->spi_device.spi_fd, SPI_IOC_RD_BITS_PER_WORD, &stepper->spi_device.bits);
 	if (ret == -1)
 		perror("can't get bits per word");
 
 	/*
 	 * max speed hz
 	 */
-	ret = ioctl(spi_fd, SPI_IOC_WR_MAX_SPEED_HZ, &speed);
+	ret = ioctl(stepper->spi_device.spi_fd, SPI_IOC_WR_MAX_SPEED_HZ, &stepper->spi_device.speed);
 	if (ret == -1)
 		perror("can't set max speed hz");
 
-	ret = ioctl(spi_fd, SPI_IOC_RD_MAX_SPEED_HZ, &speed);
+	ret = ioctl(stepper->spi_device.spi_fd, SPI_IOC_RD_MAX_SPEED_HZ, &stepper->spi_device.speed);
 	if (ret == -1)
 		perror("can't get max speed hz");
 
-	printf("spi mode: 0x%x\n", mode);
-	printf("bits per word: %d\n", bits);
-	printf("max speed: %d Hz (%d KHz)\n", speed, speed/1000);
-
-	/* eMotionControl module initialization */
-	easySPIN_RegsStruct_TypeDef easySPIN_RegsStruct;
+	printf("spi mode: 0x%x\n", stepper->spi_device.mode);
+	printf("bits per word: %d\n", stepper->spi_device.bits);
+	printf("max speed: %d Hz (%d KHz)\n", stepper->spi_device.speed, stepper->spi_device.speed/1000);
 
 	printf("##### eMotionControl_Init BEGIN #####\n");
 	/* easySPIN system init */
-	easySPIN_Init();
+	easySPIN_Disable(&stepper->spi_device);
 
 	/* Structure initialization by default values, in order to avoid blank records */
-	easySPIN_Regs_Struct_Reset(&easySPIN_RegsStruct);
+	easySPIN_Regs_Struct_Reset(&stepper->regs);
 
 	/* Program all easySPIN registers */
-	easySPIN_Registers_Set(&easySPIN_RegsStruct);
+	easySPIN_Registers_Set(&stepper->spi_device, &stepper->regs);
 
 	/* Customize target stepper-motor specific registers at easySPIN module level */
 	/* TVAL register setup */
-	easySPIN_SetParam(easySPIN_TVAL, 0x00);
+	easySPIN_SetParam(&stepper->spi_device, easySPIN_TVAL, 0x00);
 
 	/* T_FAST register setup */
-	easySPIN_SetParam(easySPIN_STEP_MODE, easySPIN_STEP_SEL_1
+	easySPIN_SetParam(&stepper->spi_device, easySPIN_STEP_MODE, easySPIN_STEP_SEL_1
 			| easySPIN_SYNC_SEL_1_2);
 
 	/* TON_MIN register setup */
-	easySPIN_SetParam(easySPIN_TON_MIN, 0x00);
+	easySPIN_SetParam(&stepper->spi_device, easySPIN_TON_MIN, 0x00);
 
 	/* TOFF_MIN register setup */
-	easySPIN_SetParam(easySPIN_TOFF_MIN, 0x00);
+	easySPIN_SetParam(&stepper->spi_device, easySPIN_TOFF_MIN, 0x00);
 
 	/* OCD_TH register setup */
-	easySPIN_SetParam(easySPIN_OCD_TH, easySPIN_OCD_TH_2625mA);
+	easySPIN_SetParam(&stepper->spi_device, easySPIN_OCD_TH, easySPIN_OCD_TH_2625mA);
 
 	/* STEP_MODE register setup  */
-	easySPIN_SetParam(easySPIN_STEP_MODE, easySPIN_STEP_SEL_1
+	easySPIN_SetParam(&stepper->spi_device, easySPIN_STEP_MODE, easySPIN_STEP_SEL_1
 			| easySPIN_SYNC_SEL_1_2);
 
 	/* ALARM_EN register setup  */
-	easySPIN_SetParam(easySPIN_ALARM_EN, easySPIN_ALARM_EN_OVERCURRENT
+	easySPIN_SetParam(&stepper->spi_device, easySPIN_ALARM_EN, easySPIN_ALARM_EN_OVERCURRENT
 			| easySPIN_ALARM_EN_THERMAL_SHUTDOWN
 			| easySPIN_ALARM_EN_THERMAL_WARNING
 			| easySPIN_ALARM_EN_UNDERVOLTAGE | easySPIN_ALARM_EN_SW_TURN_ON
 			| easySPIN_ALARM_EN_WRONG_NPERF_CMD);
 
 	/* CONFIG register setup */
-	easySPIN_SetParam(easySPIN_CONFIG, easySPIN_CONFIG_INT_16MHZ
+	easySPIN_SetParam(&stepper->spi_device, easySPIN_CONFIG, easySPIN_CONFIG_INT_16MHZ
 			| easySPIN_CONFIG_EN_TQREG_INT_REG | easySPIN_CONFIG_OC_SD_ENABLE
 			| easySPIN_CONFIG_SR_180V_us | easySPIN_CONFIG_TSW_8_us);
 
 	/* Read STATUS register */
-	easySPIN_rx_data = easySPIN_Get_Status();
+	easySPIN_rx_data = easySPIN_Get_Status(&stepper->spi_device);
 
 	/* Enable easySPIN powerstage */
-	easySPIN_Enable();
+	easySPIN_Enable(&stepper->spi_device);
 }
 
 void st_init()
@@ -674,7 +697,17 @@ void st_init()
   SET_OUTPUT(STEPPER_ENABLEn_PIN);
   SET_INPUT(STEPPER_FLAG_PIN);
 
-  easyspin_setup();
+	/* Standby-reset deactivation */
+	easySPIN_Reset(easySPIN_STBY_RESET_GPIO);
+	sleep(1);
+	/* Standby-reset deactivation */
+	easySPIN_ReleaseReset(easySPIN_STBY_RESET_GPIO);
+
+	stepper_setup();
+	easyspin_setup(&steppers[X_AXIS]);
+	easyspin_setup(&steppers[Y_AXIS]);
+	easyspin_setup(&steppers[Z_AXIS]);
+	easyspin_setup(&steppers[E_AXIS]);
 
   //Initialize Dir Pins
   #if defined(X_DIR_PIN) && X_DIR_PIN > -1
