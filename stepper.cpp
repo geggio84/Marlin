@@ -287,7 +287,7 @@ void ISR(int sign)// ISR(TIMER1_COMPA_vect)
     out_bits = current_block->direction_bits;
 
 
-    // Set the direction bits (X_AXIS=A_AXIS and Y_AXIS=B_AXIS for COREXY)
+    // Set the direction bits
     if((out_bits & (1<<X_AXIS))!=0){
         WRITE(X_DIR_PIN, INVERT_X_DIR);
       count_direction[X_AXIS]=-1;
@@ -308,11 +308,7 @@ void ISR(int sign)// ISR(TIMER1_COMPA_vect)
     }
 
     // Set direction en check limit switches
-    #ifndef COREXY
     if ((out_bits & (1<<X_AXIS)) != 0) {   // stepping along -X axis
-    #else
-    if ((((out_bits & (1<<X_AXIS)) != 0)&&(out_bits & (1<<Y_AXIS)) != 0)) {   //-X occurs for -A and -B
-    #endif
       CHECK_ENDSTOPS
       {
           #if defined(X_MIN_PIN) && X_MIN_PIN > -1
@@ -341,11 +337,7 @@ void ISR(int sign)// ISR(TIMER1_COMPA_vect)
       }
     }
 
-    #ifndef COREXY
     if ((out_bits & (1<<Y_AXIS)) != 0) {   // -direction
-    #else
-    if ((((out_bits & (1<<X_AXIS)) != 0)&&(out_bits & (1<<Y_AXIS)) == 0)) {   // -Y occurs for -A and +B
-    #endif
       CHECK_ENDSTOPS
       {
         #if defined(Y_MIN_PIN) && Y_MIN_PIN > -1
