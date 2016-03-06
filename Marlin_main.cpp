@@ -498,7 +498,6 @@ int main(int argc, char *argv[])
     
     // Register signal and signal handler
     signal(SIGALRM, ISR);
-    alarm(3);
     signal(SIGINT, signal_callback_handler);
     gettimeofday(&tv,NULL);
     time_zero = tv.tv_sec * 1000 + tv.tv_usec / 1000L;
@@ -506,7 +505,9 @@ int main(int argc, char *argv[])
 
     // Setup
     setup();
-    
+
+	alarm(3);
+
     while(1)
     {
         if(loop() < 0) break;
