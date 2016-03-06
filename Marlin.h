@@ -124,32 +124,32 @@ void manage_inactivity();
 
 
 #if defined(X_ENABLE_PIN) && X_ENABLE_PIN > -1
-  #define  enable_x() WRITE(X_ENABLE_PIN, X_ENABLE_ON)
-  #define disable_x() { WRITE(X_ENABLE_PIN,!X_ENABLE_ON); axis_known_position[X_AXIS] = false; }
+  #define  enable_x() easySPIN_Enable(&steppers[X_AXIS]->spi_device)
+  #define disable_x() { easySPIN_Disable(&steppers[X_AXIS]->spi_device); axis_known_position[X_AXIS] = false; }
 #else
   #define enable_x() ;
   #define disable_x() ;
 #endif
 
 #if defined(Y_ENABLE_PIN) && Y_ENABLE_PIN > -1
-    #define  enable_y() WRITE(Y_ENABLE_PIN, Y_ENABLE_ON)
-    #define disable_y() { WRITE(Y_ENABLE_PIN,!Y_ENABLE_ON); axis_known_position[Y_AXIS] = false; }
+    #define  enable_y() easySPIN_Enable(&steppers[Y_AXIS]->spi_device)
+    #define disable_y() { easySPIN_Disable(&steppers[Y_AXIS]->spi_device); axis_known_position[Y_AXIS] = false; }
 #else
   #define enable_y() ;
   #define disable_y() ;
 #endif
 
 #if defined(Z_ENABLE_PIN) && Z_ENABLE_PIN > -1
-    #define  enable_z() WRITE(Z_ENABLE_PIN, Z_ENABLE_ON)
-    #define disable_z() { WRITE(Z_ENABLE_PIN,!Z_ENABLE_ON); axis_known_position[Z_AXIS] = false; }
+    #define  enable_z() easySPIN_Enable(&steppers[Z_AXIS]->spi_device)
+    #define disable_z() { easySPIN_Disable(&steppers[Z_AXIS]->spi_device); axis_known_position[Z_AXIS] = false; }
 #else
   #define enable_z() ;
   #define disable_z() ;
 #endif
 
 #if defined(E0_ENABLE_PIN) && (E0_ENABLE_PIN > -1)
-  #define enable_e0() WRITE(E0_ENABLE_PIN, E_ENABLE_ON)
-  #define disable_e0() WRITE(E0_ENABLE_PIN,!E_ENABLE_ON)
+  #define enable_e0() easySPIN_Enable(&steppers[E_AXIS]->spi_device)
+  #define disable_e0() easySPIN_Disable(&steppers[E_AXIS]->spi_device)
 #else
   #define enable_e0()  /* nothing */
   #define disable_e0() /* nothing */
