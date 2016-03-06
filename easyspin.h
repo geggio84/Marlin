@@ -334,9 +334,6 @@ typedef struct {
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */
 void easySPIN_Peripherals_Init(void);
-
-void easySPIN_Regs_Struct_Reset(
-		easySPIN_RegsStruct_TypeDef* easySPIN_RegsStruct);
 void easySPIN_Registers_Set(spidev *spi_dev, easySPIN_RegsStruct_TypeDef* easySPIN_RegsStruct);
 
 /* Application Commands implementation ------------------------------------ */

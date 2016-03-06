@@ -89,43 +89,6 @@ uint8_t easySPIN_Write_Byte(spidev *spi_dev, uint8_t byte) {
 }
 
 /**
- * @brief  Fills-in easySPIN configuration structure with default values.
- * @param  Structure address (pointer to struct)
- * @retval None
- */
-void easySPIN_Regs_Struct_Reset(
-		easySPIN_RegsStruct_TypeDef* easySPIN_RegsStruct) {
-	easySPIN_RegsStruct->ABS_POS = 0x00;
-	easySPIN_RegsStruct->EL_POS = 0x00;
-	easySPIN_RegsStruct->MARK = 0x00;
-
-	easySPIN_RegsStruct->TVAL = 0x00;
-	easySPIN_RegsStruct->T_FAST = easySPIN_TOFF_FAST_8_0_us
-			| easySPIN_FAST_STEP_8_0_us;
-	easySPIN_RegsStruct->TON_MIN = 0x00;
-	easySPIN_RegsStruct->TOFF_MIN = 0x01;
-
-	/* OCD_TH register setup */
-	easySPIN_RegsStruct->OCD_TH = easySPIN_OCD_TH_2625mA;
-
-	/* STEP_MODE register */
-	easySPIN_RegsStruct->STEP_MODE = easySPIN_STEP_SEL_1
-			| easySPIN_SYNC_SEL_1_2;
-
-	/* ALARM_EN register setup */
-	easySPIN_RegsStruct->ALARM_EN = easySPIN_ALARM_EN_OVERCURRENT
-			| easySPIN_ALARM_EN_THERMAL_SHUTDOWN
-			| easySPIN_ALARM_EN_THERMAL_WARNING
-			| easySPIN_ALARM_EN_UNDERVOLTAGE | easySPIN_ALARM_EN_SW_TURN_ON
-			| easySPIN_ALARM_EN_WRONG_NPERF_CMD;
-
-	/* CONFIG register setup */
-	easySPIN_RegsStruct->CONFIG = easySPIN_CONFIG_INT_16MHZ
-			| easySPIN_CONFIG_EN_TQREG_INT_REG | easySPIN_CONFIG_OC_SD_ENABLE
-			| easySPIN_CONFIG_SR_180V_us | easySPIN_CONFIG_TSW_8_us;
-}
-
-/**
  * @brief  Configures easySPIN internal registers with values in the config structure.
  * @param  Configuration structure address (pointer to configuration structure)
  * @retval None
