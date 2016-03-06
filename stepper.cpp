@@ -564,33 +564,85 @@ void ISR(int sign)// ISR(TIMER1_COMPA_vect)
 
 /* Init steppers structs */
 void stepper_setup() {
-	/* X stepper driver */
+	/* X stepper driver SPI Config */
 	sprintf(steppers[X_AXIS].spi_device.device,"/dev/spidev%d.%d",SPI_DEVICE_BUS_NR,X_STEPPER_SPI_DEVICE);
 	steppers[X_AXIS].spi_device.mode = 0;
 	steppers[X_AXIS].spi_device.bits = 8;
 	steppers[X_AXIS].spi_device.speed = 100000;
 	steppers[X_AXIS].spi_device.delay = 100;
 
-	/* Y stepper driver */
+	/* X stepper driver config */
+	steppers[X_AXIS].regs.ABS_POS = 0;
+	steppers[X_AXIS].regs.EL_POS = 0;
+	steppers[X_AXIS].regs.MARK = 0;
+	steppers[X_AXIS].regs.TVAL = X_TVAL;
+	steppers[X_AXIS].regs.T_FAST = X_T_FAST;
+	steppers[X_AXIS].regs.TON_MIN = X_TON_MIN;
+	steppers[X_AXIS].regs.TOFF_MIN = X_TOFF_MIN;
+	steppers[X_AXIS].regs.OCD_TH = X_OCD_TH;
+	steppers[X_AXIS].regs.STEP_MODE = X_STEP_MODE;
+	steppers[X_AXIS].regs.ALARM_EN = X_ALARM_EN;
+	steppers[X_AXIS].regs.CONFIG = X_CONFIG;
+
+	/* Y stepper driver SPI Config */
 	sprintf(steppers[Y_AXIS].spi_device.device,"/dev/spidev%d.%d",SPI_DEVICE_BUS_NR,Y_STEPPER_SPI_DEVICE);
 	steppers[Y_AXIS].spi_device.mode = 0;
 	steppers[Y_AXIS].spi_device.bits = 8;
 	steppers[Y_AXIS].spi_device.speed = 100000;
 	steppers[Y_AXIS].spi_device.delay = 100;
 
-	/* Z stepper driver */
+	/* Y stepper driver config */
+	steppers[Y_AXIS].regs.ABS_POS = 0;
+	steppers[Y_AXIS].regs.EL_POS = 0;
+	steppers[Y_AXIS].regs.MARK = 0;
+	steppers[Y_AXIS].regs.TVAL = Y_TVAL;
+	steppers[Y_AXIS].regs.T_FAST = Y_T_FAST;
+	steppers[Y_AXIS].regs.TON_MIN = Y_TON_MIN;
+	steppers[Y_AXIS].regs.TOFF_MIN = Y_TOFF_MIN;
+	steppers[Y_AXIS].regs.OCD_TH = Y_OCD_TH;
+	steppers[Y_AXIS].regs.STEP_MODE = Y_STEP_MODE;
+	steppers[Y_AXIS].regs.ALARM_EN = Y_ALARM_EN;
+	steppers[Y_AXIS].regs.CONFIG = Y_CONFIG;
+
+	/* Z stepper driver SPI Config */
 	sprintf(steppers[Z_AXIS].spi_device.device,"/dev/spidev%d.%d",SPI_DEVICE_BUS_NR,Z_STEPPER_SPI_DEVICE);
 	steppers[Z_AXIS].spi_device.mode = 0;
 	steppers[Z_AXIS].spi_device.bits = 8;
 	steppers[Z_AXIS].spi_device.speed = 100000;
 	steppers[Z_AXIS].spi_device.delay = 100;
 
-	/* E stepper driver */
+	/* Z stepper driver config */
+	steppers[Z_AXIS].regs.ABS_POS = 0;
+	steppers[Z_AXIS].regs.EL_POS = 0;
+	steppers[Z_AXIS].regs.MARK = 0;
+	steppers[Z_AXIS].regs.TVAL = Z_TVAL;
+	steppers[Z_AXIS].regs.T_FAST = Z_T_FAST;
+	steppers[Z_AXIS].regs.TON_MIN = Z_TON_MIN;
+	steppers[Z_AXIS].regs.TOFF_MIN = Z_TOFF_MIN;
+	steppers[Z_AXIS].regs.OCD_TH = Z_OCD_TH;
+	steppers[Z_AXIS].regs.STEP_MODE = Z_STEP_MODE;
+	steppers[Z_AXIS].regs.ALARM_EN = Z_ALARM_EN;
+	steppers[Z_AXIS].regs.CONFIG = Z_CONFIG;
+
+	/* E stepper driver SPI Config */
 	sprintf(steppers[E_AXIS].spi_device.device,"/dev/spidev%d.%d",SPI_DEVICE_BUS_NR,E_STEPPER_SPI_DEVICE);
 	steppers[E_AXIS].spi_device.mode = 0;
 	steppers[E_AXIS].spi_device.bits = 8;
 	steppers[E_AXIS].spi_device.speed = 100000;
 	steppers[E_AXIS].spi_device.delay = 100;
+
+	/* E stepper driver config */
+	steppers[E_AXIS].regs.ABS_POS = 0;
+	steppers[E_AXIS].regs.EL_POS = 0;
+	steppers[E_AXIS].regs.MARK = 0;
+	steppers[E_AXIS].regs.TVAL = E_TVAL;
+	steppers[E_AXIS].regs.T_FAST = E_T_FAST;
+	steppers[E_AXIS].regs.TON_MIN = E_TON_MIN;
+	steppers[E_AXIS].regs.TOFF_MIN = E_TOFF_MIN;
+	steppers[E_AXIS].regs.OCD_TH = E_OCD_TH;
+	steppers[E_AXIS].regs.STEP_MODE = E_STEP_MODE;
+	steppers[E_AXIS].regs.ALARM_EN = E_ALARM_EN;
+	steppers[E_AXIS].regs.CONFIG = E_CONFIG;
 }
 
 void easyspin_setup(easySPIN_stepper *stepper) {
@@ -642,44 +694,8 @@ void easyspin_setup(easySPIN_stepper *stepper) {
 	/* easySPIN system init */
 	easySPIN_Disable(&stepper->spi_device);
 
-	/* Structure initialization by default values, in order to avoid blank records */
-	easySPIN_Regs_Struct_Reset(&stepper->regs);
-
 	/* Program all easySPIN registers */
 	easySPIN_Registers_Set(&stepper->spi_device, &stepper->regs);
-
-	/* Customize target stepper-motor specific registers at easySPIN module level */
-	/* TVAL register setup */
-	easySPIN_SetParam(&stepper->spi_device, easySPIN_TVAL, 0x00);
-
-	/* T_FAST register setup */
-	easySPIN_SetParam(&stepper->spi_device, easySPIN_STEP_MODE, easySPIN_STEP_SEL_1
-			| easySPIN_SYNC_SEL_1_2);
-
-	/* TON_MIN register setup */
-	easySPIN_SetParam(&stepper->spi_device, easySPIN_TON_MIN, 0x00);
-
-	/* TOFF_MIN register setup */
-	easySPIN_SetParam(&stepper->spi_device, easySPIN_TOFF_MIN, 0x00);
-
-	/* OCD_TH register setup */
-	easySPIN_SetParam(&stepper->spi_device, easySPIN_OCD_TH, easySPIN_OCD_TH_2625mA);
-
-	/* STEP_MODE register setup  */
-	easySPIN_SetParam(&stepper->spi_device, easySPIN_STEP_MODE, easySPIN_STEP_SEL_1
-			| easySPIN_SYNC_SEL_1_2);
-
-	/* ALARM_EN register setup  */
-	easySPIN_SetParam(&stepper->spi_device, easySPIN_ALARM_EN, easySPIN_ALARM_EN_OVERCURRENT
-			| easySPIN_ALARM_EN_THERMAL_SHUTDOWN
-			| easySPIN_ALARM_EN_THERMAL_WARNING
-			| easySPIN_ALARM_EN_UNDERVOLTAGE | easySPIN_ALARM_EN_SW_TURN_ON
-			| easySPIN_ALARM_EN_WRONG_NPERF_CMD);
-
-	/* CONFIG register setup */
-	easySPIN_SetParam(&stepper->spi_device, easySPIN_CONFIG, easySPIN_CONFIG_INT_16MHZ
-			| easySPIN_CONFIG_EN_TQREG_INT_REG | easySPIN_CONFIG_OC_SD_ENABLE
-			| easySPIN_CONFIG_SR_180V_us | easySPIN_CONFIG_TSW_8_us);
 
 	/* Read STATUS register */
 	easySPIN_rx_data = easySPIN_Get_Status(&stepper->spi_device);
