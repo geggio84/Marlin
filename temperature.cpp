@@ -599,7 +599,6 @@ static void updateTemperaturesFromRawValues()
 void tp_init()
 {
     // populate with the first value
-    maxttemp = maxttemp;
 #ifdef PIDTEMP
     temp_iState_min = 0.0;
     temp_iState_max = PID_INTEGRAL_DRIVE_MAX / Ki;
