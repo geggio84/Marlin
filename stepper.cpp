@@ -825,17 +825,6 @@ void st_init()
     disable_e0();
   #endif
 
-	WRITE(X_DIR_PIN,LOW);
-	for (i=0; i<200; i++){
-		WRITE(X_STEP_PIN,(i%2));
-		usleep(1000);
-	};
-	WRITE(X_DIR_PIN,HIGH);
-	for (i=0; i<200; i++){
-		WRITE(X_STEP_PIN,(i%2));
-		usleep(1000);
-	};
-
   // waveform generation = 0100 = CTC
 /* TODO: FIXME */
   //TCCR1B &= ~(1<<WGM13);
