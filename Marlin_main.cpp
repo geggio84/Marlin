@@ -2722,12 +2722,10 @@ void ClearToSend()
 
 void get_coordinates()
 {
-  bool seen[4]={false,false,false,false};
   for(int8_t i=0; i < NUM_AXIS; i++) {
     if(code_seen(axis_codes[i]))
     {
       destination[i] = (float)code_value() + (axis_relative_modes[i] || relative_mode)*current_position[i];
-      seen[i]=true;
     }
     else destination[i] = current_position[i]; //Are these else lines really needed?
   }
@@ -2973,6 +2971,7 @@ void signal_callback_handler(int signum)
         case SIGINT:
                 printf("\nPressed CTR-C\n");
                 kill();
+                break;
                 // Cleanup and close up stuff here
                 // Terminate program
       default : break;
