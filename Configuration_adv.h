@@ -288,9 +288,6 @@ const unsigned int dropsegments=5; //everything with less than this number of st
   #define PS_ON_ASLEEP LOW
 #endif
 
-// Control heater 0 and heater 1 in parallel.
-//#define HEATERS_PARALLEL
-
 //===========================================================================
 //=============================Buffers           ============================
 //===========================================================================

@@ -692,9 +692,6 @@ const bool Z_MAX_ENDSTOP_INVERTING = true; // set to true to invert the logic of
 // SF send wrong arc g-codes when using Arc Point as fillet procedure
 //#define SF_ARC_FIX
 
-// Support for the BariCUDA Paste Extruder.
-//#define BARICUDA
-
 //define BlinkM/CyzRgb Support
 //#define BLINKM
 

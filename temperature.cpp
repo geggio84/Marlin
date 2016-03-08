@@ -611,9 +611,6 @@ void tp_init()
   #if defined(HEATER_0_PIN) && (HEATER_0_PIN > -1) 
     SET_OUTPUT(HEATER_0_PIN);
   #endif  
-  #if defined(HEATER_1_PIN) && (HEATER_1_PIN > -1) 
-    SET_OUTPUT(HEATER_1_PIN);
-  #endif  
   #if defined(HEATER_BED_PIN) && (HEATER_BED_PIN > -1) 
     SET_OUTPUT(HEATER_BED_PIN);
   #endif  
@@ -860,9 +857,6 @@ void temp_ISR(void)
     soft_pwm_0 = soft_pwm;
     if(soft_pwm_0 > 0) { 
       WRITE(HEATER_0_PIN,1);
-      #ifdef HEATERS_PARALLEL
-      WRITE(HEATER_1_PIN,1);
-      #endif
     } else WRITE(HEATER_0_PIN,0);
 
     #if defined(HEATER_BED_PIN) && HEATER_BED_PIN > -1
@@ -876,9 +870,6 @@ void temp_ISR(void)
   }
   if(soft_pwm_0 < pwm_count) { 
       WRITE(HEATER_0_PIN,0);
-      #ifdef HEATERS_PARALLEL
-      WRITE(HEATER_1_PIN,0);
-      #endif
     }
   #if defined(HEATER_BED_PIN) && HEATER_BED_PIN > -1
   if(soft_pwm_b < pwm_count) WRITE(HEATER_BED_PIN,0);

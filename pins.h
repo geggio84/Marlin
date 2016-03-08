@@ -67,7 +67,6 @@
 #define KILL_PIN           -1
 
 #define HEATER_0_PIN       -1//13 // (extruder)
-#define HEATER_1_PIN       -1
 
  #define HEATER_BED_PIN     -1//12 // (bed)
  #define X_ENABLE_PIN       -1//14

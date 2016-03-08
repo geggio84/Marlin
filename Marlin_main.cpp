@@ -124,10 +124,6 @@
 // M115 - Capabilities string
 // M117 - display message
 // M119 - Output Endstop status to serial port
-// M126 - Solenoid Air Valve Open (BariCUDA support by jmil)
-// M127 - Solenoid Air Valve Closed (BariCUDA vent to atmospheric pressure by jmil)
-// M128 - EtoP Open (BariCUDA EtoP = electricity to air pressure transducer by jmil)
-// M129 - EtoP Closed (BariCUDA EtoP = electricity to air pressure transducer by jmil)
 // M140 - Set bed target temp
 // M150 - Set BlinkM Color Output R: Red<0-255> U(!): Green<0-255> B: Blue<0-255> over i2c, G for green does not work.
 // M190 - Sxxx Wait for bed current temp to reach target temp. Waits only when heating
@@ -210,10 +206,6 @@ int fanSpeed=0;
 #ifdef SERVO_ENDSTOPS
   int servo_endstops[] = SERVO_ENDSTOPS;
   int servo_endstop_angles[] = SERVO_ENDSTOP_ANGLES;
-#endif
-#ifdef BARICUDA
-int ValvePressure=0;
-int EtoPPressure=0;
 #endif
 
 #ifdef FWRETRACT
@@ -1862,22 +1854,6 @@ void process_commands()
         fanSpeed = 0;
         break;
     #endif //FAN_PIN
-    #ifdef BARICUDA
-      // PWM for HEATER_1_PIN
-      #if defined(HEATER_1_PIN) && HEATER_1_PIN > -1
-        case 126: //M126 valve open
-          if (code_seen('S')){
-             ValvePressure=constrain(code_value(),0,255);
-          }
-          else {
-            ValvePressure=255;
-          }
-          break;
-        case 127: //M127 valve closed
-          ValvePressure = 0;
-          break;
-      #endif //HEATER_1_PIN
-    #endif
 
     #if defined(PS_ON_PIN) && PS_ON_PIN > -1
       case 80: // M80 - Turn on Power Supply

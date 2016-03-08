@@ -197,10 +197,6 @@ extern float max_pos[3];
 extern bool axis_known_position[3];
 extern float zprobe_zoffset;
 extern int fanSpeed;
-#ifdef BARICUDA
-extern int ValvePressure;
-extern int EtoPPressure;
-#endif
 
 #ifdef FAN_SOFT_PWM
 extern unsigned char fanSpeedSoftPwm;
