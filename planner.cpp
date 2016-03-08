@@ -608,10 +608,11 @@ block->steps_y = labs(target[Y_AXIS]-position[Y_AXIS]);
 #endif
 
   // Enable extruder(s)
-  if((block->steps_e == 0) && (DISABLE_INACTIVE_EXTRUDER))
+  if((block->steps_e == 0) && (DISABLE_INACTIVE_EXTRUDER)) {
 		disable_e0(); //enable only selected extruder
-  else //enable all
+  } else { //enable all
       enable_e0();
+  }
 
   if (block->steps_e == 0)
   {
