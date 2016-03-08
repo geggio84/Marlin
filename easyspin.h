@@ -329,6 +329,7 @@ typedef struct {
 typedef struct {
 	spidev	spi_device;
 	easySPIN_RegsStruct_TypeDef		regs;
+	bool enabled;
 } easySPIN_stepper;
 
 /* Exported macro ------------------------------------------------------------*/

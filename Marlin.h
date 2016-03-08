@@ -123,37 +123,17 @@ unsigned long millis(void);
 void manage_inactivity();
 
 
-#if defined(X_ENABLE_PIN) && X_ENABLE_PIN > -1
-  #define  enable_x() easySPIN_Enable(&steppers[X_AXIS]->spi_device)
-  #define disable_x() { easySPIN_Disable(&steppers[X_AXIS]->spi_device); axis_known_position[X_AXIS] = false; }
-#else
-  #define enable_x() ;
-  #define disable_x() ;
-#endif
+#define  enable_x() { easySPIN_Enable(&steppers[X_AXIS].spi_device); steppers[X_AXIS].enabled = true; }
+#define disable_x() { easySPIN_Disable(&steppers[X_AXIS].spi_device); axis_known_position[X_AXIS] = false; steppers[X_AXIS].enabled = false; }
 
-#if defined(Y_ENABLE_PIN) && Y_ENABLE_PIN > -1
-    #define  enable_y() easySPIN_Enable(&steppers[Y_AXIS]->spi_device)
-    #define disable_y() { easySPIN_Disable(&steppers[Y_AXIS]->spi_device); axis_known_position[Y_AXIS] = false; }
-#else
-  #define enable_y() ;
-  #define disable_y() ;
-#endif
+#define  enable_y() { easySPIN_Enable(&steppers[Y_AXIS].spi_device); steppers[Y_AXIS].enabled = true; }
+#define disable_y() { easySPIN_Disable(&steppers[Y_AXIS].spi_device); axis_known_position[Y_AXIS] = false; steppers[Y_AXIS].enabled = false; }
 
-#if defined(Z_ENABLE_PIN) && Z_ENABLE_PIN > -1
-    #define  enable_z() easySPIN_Enable(&steppers[Z_AXIS]->spi_device)
-    #define disable_z() { easySPIN_Disable(&steppers[Z_AXIS]->spi_device); axis_known_position[Z_AXIS] = false; }
-#else
-  #define enable_z() ;
-  #define disable_z() ;
-#endif
+#define  enable_z() { easySPIN_Enable(&steppers[Z_AXIS].spi_device); steppers[Z_AXIS].enabled = true; }
+#define disable_z() { easySPIN_Disable(&steppers[Z_AXIS].spi_device); axis_known_position[Z_AXIS] = false; steppers[Z_AXIS].enabled = false; }
 
-#if defined(E0_ENABLE_PIN) && (E0_ENABLE_PIN > -1)
-  #define enable_e0() easySPIN_Enable(&steppers[E_AXIS]->spi_device)
-  #define disable_e0() easySPIN_Disable(&steppers[E_AXIS]->spi_device)
-#else
-  #define enable_e0()  /* nothing */
-  #define disable_e0() /* nothing */
-#endif
+#define enable_e0() { easySPIN_Enable(&steppers[E_AXIS].spi_device); steppers[E_AXIS].enabled = true; }
+#define disable_e0() { easySPIN_Disable(&steppers[E_AXIS].spi_device); steppers[E_AXIS].enabled = false; }
 
 enum AxisEnum {X_AXIS=0, Y_AXIS=1, Z_AXIS=2, E_AXIS=3};
 
@@ -197,6 +177,7 @@ extern float max_pos[3];
 extern bool axis_known_position[3];
 extern float zprobe_zoffset;
 extern int fanSpeed;
+extern easySPIN_stepper steppers[4];
 
 #ifdef FAN_SOFT_PWM
 extern unsigned char fanSpeedSoftPwm;

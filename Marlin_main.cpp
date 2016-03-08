@@ -1919,11 +1919,7 @@ void process_commands()
           if(code_seen('X')) disable_x();
           if(code_seen('Y')) disable_y();
           if(code_seen('Z')) disable_z();
-          #if (E0_ENABLE_PIN != X_ENABLE_PIN) // Only enable on boards that have seperate ENABLE_PINS
-            if(code_seen('E')) {
-              disable_e0();
-            }
-          #endif
+          if(code_seen('E')) disable_e0();
         }
       }
       break;
@@ -2801,7 +2797,7 @@ void controllerFan()
   {
     lastMotorCheck = millis();
 
-    if(!READ(X_ENABLE_PIN) || !READ(Y_ENABLE_PIN) || !READ(Z_ENABLE_PIN) || (soft_pwm_bed > 0) || !READ(E0_ENABLE_PIN)) //If any of the drivers are enabled...
+    if(steppers[X_AXIS].enabled || steppers[Y_AXIS].enabled || steppers[Z_AXIS].enabled || (soft_pwm_bed > 0) || steppers[E_AXIS].enabled) //If any of the drivers are enabled...
     {
       lastMotor = millis(); //... set time to NOW so the fan will turn on
     }
@@ -2892,7 +2888,7 @@ void manage_inactivity()
     if( (millis() - previous_millis_cmd) >  EXTRUDER_RUNOUT_SECONDS*1000 )
     if(degHotend()>EXTRUDER_RUNOUT_MINTEMP)
     {
-     bool oldstatus=READ(E0_ENABLE_PIN);
+     bool oldstatus=steppers[E_AXIS].enabled;
      enable_e0();
      float oldepos=current_position[E_AXIS];
      float oldedes=destination[E_AXIS];
@@ -2904,7 +2900,7 @@ void manage_inactivity()
      plan_set_e_position(oldepos);
      previous_millis_cmd=millis();
      st_synchronize();
-     WRITE(E0_ENABLE_PIN,oldstatus);
+     if(oldstatus) enable_e0(); else disable_e0();
     }
   #endif
   #ifdef TEMP_STAT_LEDS

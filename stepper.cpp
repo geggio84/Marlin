@@ -721,9 +721,13 @@ void st_init()
 
 	stepper_setup();
 	easyspin_setup(&steppers[X_AXIS]);
+	disable_x();
 	easyspin_setup(&steppers[Y_AXIS]);
+	disable_y();
 	easyspin_setup(&steppers[Z_AXIS]);
+	disable_z();
 	easyspin_setup(&steppers[E_AXIS]);
+	disable_e0();
 
   //Initialize Dir Pins
   #if defined(X_DIR_PIN) && X_DIR_PIN > -1
@@ -737,25 +741,6 @@ void st_init()
   #endif
   #if defined(E0_DIR_PIN) && E0_DIR_PIN > -1
     SET_OUTPUT(E0_DIR_PIN);
-  #endif
-
-  //Initialize Enable Pins - steppers default to disabled.
-
-  #if defined(X_ENABLE_PIN) && X_ENABLE_PIN > -1
-    SET_OUTPUT(X_ENABLE_PIN);
-    if(!X_ENABLE_ON) WRITE(X_ENABLE_PIN,HIGH);
-  #endif
-  #if defined(Y_ENABLE_PIN) && Y_ENABLE_PIN > -1
-    SET_OUTPUT(Y_ENABLE_PIN);
-    if(!Y_ENABLE_ON) WRITE(Y_ENABLE_PIN,HIGH);
-  #endif
-  #if defined(Z_ENABLE_PIN) && Z_ENABLE_PIN > -1
-    SET_OUTPUT(Z_ENABLE_PIN);
-    if(!Z_ENABLE_ON) WRITE(Z_ENABLE_PIN,HIGH);
-  #endif
-  #if defined(E0_ENABLE_PIN) && (E0_ENABLE_PIN > -1)
-    SET_OUTPUT(E0_ENABLE_PIN);
-    if(!E_ENABLE_ON) WRITE(E0_ENABLE_PIN,HIGH);
   #endif
 
   //endstops and pullups
