@@ -706,7 +706,6 @@ void easyspin_setup(easySPIN_stepper *stepper) {
 
 void st_init()
 {
-	int i;
   digipot_init(); //Initialize Digipot Motor Current
   microstep_init(); //Initialize Microstepping Pins
 
@@ -810,27 +809,6 @@ void st_init()
     disable_e0();
   #endif
 
-  // waveform generation = 0100 = CTC
-/* TODO: FIXME */
-  //TCCR1B &= ~(1<<WGM13);
-  //TCCR1B |=  (1<<WGM12);
-  //TCCR1A &= ~(1<<WGM11);
-  //TCCR1A &= ~(1<<WGM10);
-
-  // output mode = 00 (disconnected)
-  //TCCR1A &= ~(3<<COM1A0);
-  //TCCR1A &= ~(3<<COM1B0);
-
-  // Set the timer pre-scaler
-  // Generally we use a divider of 8, resulting in a 2MHz timer
-  // frequency on a 16MHz MCU. If you are going to change this, be
-  // sure to regenerate speed_lookuptable.h with
-  // create_speed_lookuptable.py
-  //TCCR1B = (TCCR1B & ~(0x07<<CS10)) | (2<<CS10);
-
-  //OCR1A = 0x4000;
-  //TCNT1 = 0;
-/* TODO: FIXME */
   ENABLE_STEPPER_DRIVER_INTERRUPT();
 
   #ifdef ADVANCE
