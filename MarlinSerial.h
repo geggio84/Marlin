@@ -93,17 +93,21 @@ class MarlinSerial //: public Stream
     FORCE_INLINE void checkRx(void)
     {
         unsigned char c;
-        read(serial_file,&c,1);
-        int i = (unsigned int)(rx_buffer.head + 1) % RX_BUFFER_SIZE;
+        if (read(serial_file,&c,1)>0){
+			if (c != EOF)
+			{
+				int i = (unsigned int)(rx_buffer.head + 1) % RX_BUFFER_SIZE;
 
-        // if we should be storing the received character into the location
-        // just before the tail (meaning that the head would advance to the
-        // current location of the tail), we're about to overflow the buffer
-        // and so we don't write the character or advance the head.
-        if (i != rx_buffer.tail) {
-          rx_buffer.buffer[rx_buffer.head] = c;
-          rx_buffer.head = i;
-        }
+				// if we should be storing the received character into the location
+				// just before the tail (meaning that the head would advance to the
+				// current location of the tail), we're about to overflow the buffer
+				// and so we don't write the character or advance the head.
+				if (i != rx_buffer.tail) {
+					rx_buffer.buffer[rx_buffer.head] = c;
+					rx_buffer.head = i;
+				}
+			}
+		}
     }
     
     
