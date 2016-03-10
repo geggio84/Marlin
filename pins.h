@@ -40,6 +40,8 @@
 #define STEPPER_ENABLEn_PIN GPIO(1,15)
 #define STEPPER_FLAG_PIN    GPIO(1,14)
 
+#define PWM_ENABLE_PIN		GPIO(0,27)
+
 #define LED_PIN            -1
 
 #define FAN_PIN            -1

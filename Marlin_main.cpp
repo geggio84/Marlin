@@ -448,8 +448,9 @@ void setup()
   setup_photpin();
   servo_init();
 
-  #if defined(CONTROLLERFAN_PIN) && CONTROLLERFAN_PIN > -1
-    SET_OUTPUT(CONTROLLERFAN_PIN); //Set pin used for driver cooling fan
+  #if defined(PWM_ENABLE_PIN) && PWM_ENABLE_PIN > -1
+  SET_OUTPUT(PWM_ENABLE_PIN);
+  WRITE(PWM_ENABLE_PIN,LOW); // Enable I2C PWM outputs
   #endif
 
   #ifdef DIGIPOT_I2C
@@ -2916,6 +2917,14 @@ void kill()
   disable_y();
   disable_z();
   disable_e0();
+
+  #if defined(STEPPER_ENABLEn_PIN) && STEPPER_ENABLEn_PIN > -1
+  WRITE(STEPPER_ENABLEn_PIN, HIGH);
+	#endif
+
+  #if defined(PWM_ENABLE_PIN) && PWM_ENABLE_PIN > -1
+  WRITE(PWM_ENABLE_PIN,HIGH); // disable I2C PWM outputs
+  #endif
 
 #if defined(PS_ON_PIN) && PS_ON_PIN > -1
   pinMode(PS_ON_PIN,INPUT);
