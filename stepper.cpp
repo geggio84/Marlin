@@ -244,8 +244,8 @@ FORCE_INLINE void trapezoid_generator_reset() {
 // It pops blocks from the block_buffer and executes them by pulsing the stepper pins appropriately.
 void ISR(int sign)// ISR(TIMER1_COMPA_vect)
 {
-  signal(SIGALRM, ISR); //Set alarm clock for 3 seconds.
-  alarm(3);
+  signal(SIGALRM, ISR); //Set alarm clock for 1 second
+  alarm(1);
   printf("I'm Alive\n\r");
   // If there is no current block, attempt to pop one from the buffer
   if (current_block == NULL) {
