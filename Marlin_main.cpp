@@ -46,7 +46,7 @@
 #include "language.h"
 //#include "pins_arduino.h"
 //#include "math.h"
-/*
+
 #ifdef BLINKM
 #include "BlinkM.h"
 #include "Wire.h"
@@ -59,7 +59,6 @@
 #if defined(DIGIPOTSS_PIN) && DIGIPOTSS_PIN > -1
 #include <SPI.h>
 #endif
-*/
 
 #define VERSION_STRING  "0.9.0"
 

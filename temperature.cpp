@@ -139,8 +139,7 @@ unsigned long watchmillis = 0;
 
 void PID_autotune(float temp, int extruder, int ncycles)
 {
-/* TODO: FIXME */
-/*  float input = 0.0;
+  float input = 0.0;
   int cycles=0;
   bool heating = true;
 
@@ -169,9 +168,6 @@ void PID_autotune(float temp, int extruder, int ncycles)
      soft_pwm = (PID_MAX)/2;
      bias = d = (PID_MAX)/2;
   }
-
-
-
 
  for(;;) {
 
@@ -276,8 +272,7 @@ void PID_autotune(float temp, int extruder, int ncycles)
       SERIAL_PROTOCOLLNPGM("PID Autotune finished! Put the last Kp, Ki and Kd constants from above into Configuration.h");
       return;
     }
-  }*/
-/* TODO: FIXME */
+  }
 }
 
 void updatePID()
