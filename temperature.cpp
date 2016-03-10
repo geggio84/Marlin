@@ -498,19 +498,17 @@ void manage_heater()
   #endif
 }
 
+#define RES_VAL_SCALE (4095.0 * OVERSAMPLENR)
+
 // Derived from RepRap FiveD extruder::getTemperature()
 // For hot end temperature measurement.
 static float analog2temp(int raw) {
 
-  float voltage = (raw / (4095.0 * OVERSAMPLENR))* 1.8;
   float res_val;
   float celsius = 0;
   uint16_t i;
   //""" Convert the voltage to a resistance value """
-  if (fabs(voltage - 1.8) < 0.001)
-	res_val = 10000000.0;
-  else
-	res_val = 4700 / ((1.8 / voltage) - 1.0);
+	res_val = (raw * 4700) / (RES_VAL_SCALE - raw);
 
     for (i=1; i<HEATER_0_TEMPTABLE_LEN; i++)
     {
@@ -537,13 +535,9 @@ static float analog2tempBed(int raw) {
     float celsius = 0;
     uint16_t i;
 
-  float voltage = (raw / (4095.0 * OVERSAMPLENR))* 1.8;
   float res_val;
   //""" Convert the voltage to a resistance value """
-  if (fabs(voltage - 1.8) < 0.001)
-	res_val = 10000000.0;
-  else
-	res_val = 4700 / ((1.8 / voltage) - 1.0);
+	res_val = (raw * 4700) / (RES_VAL_SCALE - raw);
 
     for (i=1; i<BEDTEMPTABLE_LEN; i++)
     {
