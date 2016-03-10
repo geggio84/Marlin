@@ -2974,12 +2974,23 @@ void Stop()
 
 bool IsStopped() { return Stopped; };
 
-#ifdef FAST_PWM_FAN
-void setPwmFrequency(uint8_t pin, int val)
+void setPwmFrequency(const char *pin, int val)
 {
-	// Not Yet Implemented
+	int fd;
+	char buf[256];
+	char num[3];
+
+	printf("Set %s to pwm %d\n\r",pin,val);
+	sprintf(buf, "/sys/class/leds/%s/brightness", pin);
+	fd = open(buf, O_WRONLY);
+
+	if(val >= 255) val = 255;
+
+	sprintf(num, "%d", val);
+	write(fd, num, 3);
+
+	close(fd);
 }
-#endif //FAST_PWM_FAN
 
 bool setTargetedHotend(int code){
   return false;
