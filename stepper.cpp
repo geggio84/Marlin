@@ -701,7 +701,8 @@ void easyspin_setup(easySPIN_stepper *stepper) {
 	easySPIN_rx_data = easySPIN_Get_Status(&stepper->spi_device);
 
 	/* Enable easySPIN powerstage */
-	easySPIN_Enable(&stepper->spi_device);
+	easySPIN_Disable(&stepper->spi_device);
+	stepper->enabled = false;
 }
 
 void st_init()
@@ -720,13 +721,9 @@ void st_init()
 
 	stepper_setup();
 	easyspin_setup(&steppers[X_AXIS]);
-	disable_x();
 	easyspin_setup(&steppers[Y_AXIS]);
-	disable_y();
 	easyspin_setup(&steppers[Z_AXIS]);
-	disable_z();
 	easyspin_setup(&steppers[E_AXIS]);
-	disable_e0();
 
   //Initialize Dir Pins
   #if defined(X_DIR_PIN) && X_DIR_PIN > -1

@@ -124,17 +124,17 @@ unsigned long millis(void);
 void manage_inactivity();
 
 
-#define  enable_x() { easySPIN_Enable(&steppers[X_AXIS].spi_device); steppers[X_AXIS].enabled = true; }
-#define disable_x() { easySPIN_Disable(&steppers[X_AXIS].spi_device); axis_known_position[X_AXIS] = false; steppers[X_AXIS].enabled = false; }
+#define  enable_x() { if(steppers[X_AXIS].enabled == false) easySPIN_Enable(&steppers[X_AXIS].spi_device); steppers[X_AXIS].enabled = true; }
+#define disable_x() { if(steppers[X_AXIS].enabled == true) easySPIN_Disable(&steppers[X_AXIS].spi_device); axis_known_position[X_AXIS] = false; steppers[X_AXIS].enabled = false; }
 
-#define  enable_y() { easySPIN_Enable(&steppers[Y_AXIS].spi_device); steppers[Y_AXIS].enabled = true; }
-#define disable_y() { easySPIN_Disable(&steppers[Y_AXIS].spi_device); axis_known_position[Y_AXIS] = false; steppers[Y_AXIS].enabled = false; }
+#define  enable_y() { if(steppers[Y_AXIS].enabled == false) easySPIN_Enable(&steppers[Y_AXIS].spi_device); steppers[Y_AXIS].enabled = true; }
+#define disable_y() { if(steppers[Y_AXIS].enabled == true) easySPIN_Disable(&steppers[Y_AXIS].spi_device); axis_known_position[Y_AXIS] = false; steppers[Y_AXIS].enabled = false; }
 
-#define  enable_z() { easySPIN_Enable(&steppers[Z_AXIS].spi_device); steppers[Z_AXIS].enabled = true; }
-#define disable_z() { easySPIN_Disable(&steppers[Z_AXIS].spi_device); axis_known_position[Z_AXIS] = false; steppers[Z_AXIS].enabled = false; }
+#define  enable_z() { if(steppers[Z_AXIS].enabled == false) easySPIN_Enable(&steppers[Z_AXIS].spi_device); steppers[Z_AXIS].enabled = true; }
+#define disable_z() { if(steppers[Z_AXIS].enabled == true) easySPIN_Disable(&steppers[Z_AXIS].spi_device); axis_known_position[Z_AXIS] = false; steppers[Z_AXIS].enabled = false; }
 
-#define enable_e0() { easySPIN_Enable(&steppers[E_AXIS].spi_device); steppers[E_AXIS].enabled = true; }
-#define disable_e0() { easySPIN_Disable(&steppers[E_AXIS].spi_device); steppers[E_AXIS].enabled = false; }
+#define  enable_e0() { if(steppers[E_AXIS].enabled == false) easySPIN_Enable(&steppers[E_AXIS].spi_device); steppers[E_AXIS].enabled = true; }
+#define disable_e0() { if(steppers[E_AXIS].enabled == true) easySPIN_Disable(&steppers[E_AXIS].spi_device); steppers[E_AXIS].enabled = false; }
 
 enum AxisEnum {X_AXIS=0, Y_AXIS=1, Z_AXIS=2, E_AXIS=3};
 
