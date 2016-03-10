@@ -42,7 +42,7 @@ extern float current_temperature;
 extern int target_temperature_bed;
 extern float current_temperature_bed;
 
-#if defined(CONTROLLERFAN_PIN) && CONTROLLERFAN_PIN > -1
+#if defined(CONTROLLERFAN_PIN)
   extern unsigned char soft_pwm_bed;
 #endif
 

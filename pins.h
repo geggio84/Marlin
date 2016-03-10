@@ -43,9 +43,6 @@
 #define LED_PIN            -1
 
 #define FAN_PIN            -1
- #if FAN_PIN == 12 || FAN_PIN ==13
-  #define FAN_SOFT_PWM
-#endif
 
 #ifdef NUM_SERVOS
   #define SERVO0_PIN          -1
@@ -66,9 +63,9 @@
 #define PS_ON_PIN          -1
 #define KILL_PIN           -1
 
-#define HEATER_0_PIN       -1//13 // (extruder)
-
- #define HEATER_BED_PIN     -1//12 // (bed)
+// HEATERS PWM nr.
+#define HEATER_0_PIN       "extruder" // HEATER_EXT (extruder)
+#define HEATER_BED_PIN     "hotbed" // HEATER_HPB (bed)
 
 #define TEMP_0_PIN          5
 #define TEMP_1_PIN          -1//4
@@ -77,7 +74,7 @@
 #define SDSS               -1//31
 
 //List of pins which to ignore when asked to change by gcode, 0 and 1 are RX and TX, do not mess with those!
-#define _E0_PINS E0_STEP_PIN, E0_DIR_PIN, HEATER_0_PIN,
+#define _E0_PINS E0_STEP_PIN, E0_DIR_PIN,
 
 #ifdef DISABLE_MAX_ENDSTOPS
 #define X_MAX_PIN          -1
@@ -91,8 +88,7 @@
 #define Z_MIN_PIN          -1
 #endif
 
-#define SENSITIVE_PINS {0, 1, X_STEP_PIN, X_DIR_PIN, X_MIN_PIN, X_MAX_PIN, Y_STEP_PIN, Y_DIR_PIN, Y_MIN_PIN, Y_MAX_PIN, Z_STEP_PIN, Z_DIR_PIN, Z_MIN_PIN, Z_MAX_PIN, PS_ON_PIN, \
-                        HEATER_BED_PIN, FAN_PIN, _E0_PINS \
-                        TEMP_0_PIN, TEMP_1_PIN, TEMP_BED_PIN }
+#define SENSITIVE_PINS {0, 1, X_STEP_PIN, X_DIR_PIN, X_MIN_PIN, X_MAX_PIN, Y_STEP_PIN, Y_DIR_PIN, Y_MIN_PIN, Y_MAX_PIN, Z_STEP_PIN, Z_DIR_PIN, Z_MIN_PIN, Z_MAX_PIN, PS_ON_PIN, _E0_PINS }
+
 #endif
 

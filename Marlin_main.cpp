@@ -1635,7 +1635,7 @@ void process_commands()
       if (code_seen('S'))
       {
         int pin_status = code_value();
-        int pin_number = LED_PIN;
+        int pin_number;
         if (code_seen('P') && pin_status >= 0 && pin_status <= 255)
           pin_number = code_value();
         for(int8_t i = 0; i < (int8_t)(sizeof(sensitive_pins)/sizeof(int)); i++)
@@ -2780,16 +2780,11 @@ void prepare_arc_move(char isclockwise) {
   previous_millis_cmd = millis();
 }
 
-#if defined(CONTROLLERFAN_PIN) && CONTROLLERFAN_PIN > -1
-
-#if defined(FAN_PIN)
-  #if CONTROLLERFAN_PIN == FAN_PIN
-    #error "You cannot set CONTROLLERFAN_PIN equal to FAN_PIN"
-  #endif
-#endif
+#if defined(CONTROLLERFAN_PIN)
 
 unsigned long lastMotor = 0; //Save the time for when a motor was turned on last
 unsigned long lastMotorCheck = 0;
+bool controllerfan_ON = false;
 
 void controllerFan()
 {
@@ -2804,14 +2799,18 @@ void controllerFan()
 
     if ((millis() - lastMotor) >= (CONTROLLERFAN_SECS*1000UL) || lastMotor == 0) //If the last time any driver was enabled, is longer since than CONTROLLERSEC...
     {
-        digitalWrite(CONTROLLERFAN_PIN, 0);
-        analogWrite(CONTROLLERFAN_PIN, 0);
+		if (controllerfan_ON) {
+			setPwmFrequency(CONTROLLERFAN_PIN, 0);
+			controllerfan_ON = false;
+		}
     }
     else
     {
-        // allows digital or PWM fan output to be used (see M42 handling)
-        digitalWrite(CONTROLLERFAN_PIN, CONTROLLERFAN_SPEED);
-        analogWrite(CONTROLLERFAN_PIN, CONTROLLERFAN_SPEED);
+		if (!controllerfan_ON) {
+			// allows digital or PWM fan output to be used (see M42 handling)
+			setPwmFrequency(CONTROLLERFAN_PIN, CONTROLLERFAN_SPEED);
+			controllerfan_ON = true;
+		}
     }
   }
 }
@@ -2881,7 +2880,7 @@ void manage_inactivity()
     if( 0 == READ(KILL_PIN) )
       kill();
   #endif
-  #if defined(CONTROLLERFAN_PIN) && CONTROLLERFAN_PIN > -1
+  #if defined(CONTROLLERFAN_PIN)
     controllerFan(); //Check if fan should be turned on to cool stepper drivers down
   #endif
   #ifdef EXTRUDER_RUNOUT_PREVENT

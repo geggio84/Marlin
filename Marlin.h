@@ -155,9 +155,7 @@ void clamp_to_software_endstops(float target[3]);
 
 void refresh_cmd_timeout(void);
 
-#ifdef FAST_PWM_FAN
-void setPwmFrequency(uint8_t pin, int val);
-#endif
+void setPwmFrequency(const char *pin, int val);
 
 #ifndef CRITICAL_SECTION_START
   #define CRITICAL_SECTION_START  unsigned char _sreg = SREG; cli();

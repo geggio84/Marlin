@@ -106,7 +106,7 @@ static volatile bool temp_meas_ready = false;
 #ifdef FAN_SOFT_PWM
   static unsigned char soft_pwm_fan;
 #endif
-#if (defined(EXTRUDER_0_AUTO_FAN_PIN) && EXTRUDER_0_AUTO_FAN_PIN > -1)
+#if defined(EXTRUDER_0_AUTO_FAN_PIN)
   static unsigned long extruder_autofan_last_check;
 #endif  
 
@@ -296,37 +296,23 @@ int getHeaterPower(int heater) {
   return soft_pwm;
 }
 
-#if (defined(EXTRUDER_0_AUTO_FAN_PIN) && EXTRUDER_0_AUTO_FAN_PIN > -1)
+#if defined(EXTRUDER_0_AUTO_FAN_PIN)
 
-  #if defined(FAN_PIN) && FAN_PIN > -1
-    #if EXTRUDER_0_AUTO_FAN_PIN == FAN_PIN 
-       #error "You cannot set EXTRUDER_0_AUTO_FAN_PIN equal to FAN_PIN"
-    #endif
-  #endif
-
-void setExtruderAutoFanState(int pin, bool state)
-{
-  unsigned char newFanSpeed = (state != 0) ? EXTRUDER_AUTO_FAN_SPEED : 0;
-  // this idiom allows both digital and PWM fan outputs (see M42 handling).
-  pinMode(pin, OUTPUT);
-  digitalWrite(pin, newFanSpeed);
-  analogWrite(pin, newFanSpeed);
-}
+bool extruderfan_ON = false;
 
 void checkExtruderAutoFans()
 {
-  uint8_t fanState = 0;
-
-  // which fan pins need to be turned on?      
-  #if defined(EXTRUDER_0_AUTO_FAN_PIN) && EXTRUDER_0_AUTO_FAN_PIN > -1
-    if (current_temperature > EXTRUDER_AUTO_FAN_TEMPERATURE) 
-      fanState |= 1;
+  // which fan pins need to be turned on?
+  #if defined(EXTRUDER_0_AUTO_FAN_PIN)
+    if ((current_temperature > EXTRUDER_AUTO_FAN_TEMPERATURE) && (extruderfan_ON == false)) {
+		setPwmFrequency(EXTRUDER_0_AUTO_FAN_PIN, EXTRUDER_AUTO_FAN_SPEED);
+		extruderfan_ON = true;
+	}
+    if ((current_temperature < EXTRUDER_AUTO_FAN_TEMPERATURE) && (extruderfan_ON == true)) {
+		setPwmFrequency(EXTRUDER_0_AUTO_FAN_PIN, 0);
+		extruderfan_ON = false;
+	}
   #endif
-
-  // update extruder auto fan states
-  #if defined(EXTRUDER_0_AUTO_FAN_PIN) && EXTRUDER_0_AUTO_FAN_PIN > -1
-    setExtruderAutoFanState(EXTRUDER_0_AUTO_FAN_PIN, (fanState & 1) != 0);
-  #endif 
 }
 
 #endif // any extruder auto fan pins set
@@ -423,7 +409,7 @@ void manage_heater()
     }
     #endif
 
-  #if (defined(EXTRUDER_0_AUTO_FAN_PIN) && EXTRUDER_0_AUTO_FAN_PIN > -1)
+  #if defined(EXTRUDER_0_AUTO_FAN_PIN)
   if(millis() - extruder_autofan_last_check > 2500)  // only need to check fan state very infrequently
   {
     checkExtruderAutoFans();
@@ -488,7 +474,7 @@ void manage_heater()
       else
       {
         soft_pwm_bed = 0;
-        WRITE(HEATER_BED_PIN,LOW);
+        setPwmFrequency(HEATER_BED_PIN,0);
       }
     #else //#ifdef BED_LIMIT_SWITCHING
       // Check if temperature is within the correct band
@@ -506,7 +492,7 @@ void manage_heater()
       else
       {
         soft_pwm_bed = 0;
-        WRITE(HEATER_BED_PIN,LOW);
+        setPwmFrequency(HEATER_BED_PIN,0);
       }
     #endif
   #endif
@@ -608,17 +594,14 @@ void tp_init()
     temp_iState_max_bed = PID_INTEGRAL_DRIVE_MAX / bedKi;
 #endif //PIDTEMPBED
 
-  #if defined(HEATER_0_PIN) && (HEATER_0_PIN > -1) 
-    SET_OUTPUT(HEATER_0_PIN);
+  #if defined(HEATER_0_PIN)
+    setPwmFrequency(HEATER_0_PIN, 0);
   #endif  
-  #if defined(HEATER_BED_PIN) && (HEATER_BED_PIN > -1) 
-    SET_OUTPUT(HEATER_BED_PIN);
+  #if defined(HEATER_BED_PIN)
+    setPwmFrequency(HEATER_BED_PIN, 0);
   #endif  
   #if defined(FAN_PIN) && (FAN_PIN > -1) 
-    SET_OUTPUT(FAN_PIN);
-    #ifdef FAST_PWM_FAN
-    setPwmFrequency(FAN_PIN, 1); // No prescaling. Pwm frequency = F_CPU/256/8
-    #endif
+   setPwmFrequency(FAN_PIN, 0);
     #ifdef FAN_SOFT_PWM
     soft_pwm_fan = fanSpeedSoftPwm / 2;
     #endif
@@ -787,16 +770,16 @@ void disable_heater()
   #if defined(TEMP_0_PIN) && TEMP_0_PIN > -1
   target_temperature=0;
   soft_pwm=0;
-   #if defined(HEATER_0_PIN) && HEATER_0_PIN > -1  
-     WRITE(HEATER_0_PIN,LOW);
+   #if defined(HEATER_0_PIN)
+     setPwmFrequency(HEATER_0_PIN,0);
    #endif
   #endif
 
   #if defined(TEMP_BED_PIN) && TEMP_BED_PIN > -1
     target_temperature_bed=0;
     soft_pwm_bed=0;
-    #if defined(HEATER_BED_PIN) && HEATER_BED_PIN > -1  
-      WRITE(HEATER_BED_PIN,LOW);
+    #if defined(HEATER_BED_PIN)
+      setPwmFrequency(HEATER_BED_PIN,0);
     #endif
   #endif 
 }
@@ -824,11 +807,11 @@ void min_temp_error() {
 }
 
 void bed_max_temp_error(void) {
-/* TODO: FIXME */
-/*#if HEATER_BED_PIN > -1
-  WRITE(HEATER_BED_PIN, 0);
-#endif*/
-/* TODO: FIXME */
+
+#if defined (HEATER_BED_PIN)
+  setPwmFrequency(HEATER_BED_PIN, 0);
+#endif
+
   if(IsStopped() == false) {
     SERIAL_ERROR_START;
     SERIAL_ERRORLNPGM("Temperature heated bed switched off. MAXTEMP triggered !!");
@@ -847,39 +830,27 @@ void temp_ISR(void)
   static unsigned long raw_temp_0_value = 0;
   static unsigned long raw_temp_1_value = 0;
   static unsigned long raw_temp_bed_value = 0;
-  static unsigned char pwm_count = (1 << SOFT_PWM_SCALE);
   static unsigned char soft_pwm_0;
-  #if HEATER_BED_PIN > -1
+  #if defined(HEATER_BED_PIN)
   static unsigned char soft_pwm_b;
   #endif
   
-  if(pwm_count == 0){
+  if(soft_pwm_0 != soft_pwm){
     soft_pwm_0 = soft_pwm;
-    if(soft_pwm_0 > 0) { 
-      WRITE(HEATER_0_PIN,1);
-    } else WRITE(HEATER_0_PIN,0);
+    setPwmFrequency(HEATER_0_PIN,soft_pwm);
+  }
 
-    #if defined(HEATER_BED_PIN) && HEATER_BED_PIN > -1
+#if defined(HEATER_BED_PIN)
+  if(soft_pwm_b != soft_pwm_bed){
     soft_pwm_b = soft_pwm_bed;
-    if(soft_pwm_b > 0) WRITE(HEATER_BED_PIN,1); else WRITE(HEATER_BED_PIN,0);
-    #endif
+    setPwmFrequency(HEATER_BED_PIN,soft_pwm_bed);
+  }
+#endif
+
     #ifdef FAN_SOFT_PWM
     soft_pwm_fan = fanSpeedSoftPwm / 2;
-    if(soft_pwm_fan > 0) WRITE(FAN_PIN,1); else WRITE(FAN_PIN,0);
+    if(soft_pwm_fan > 0) setPwmFrequency(FAN_PIN,soft_pwm_fan);
     #endif
-  }
-  if(soft_pwm_0 < pwm_count) { 
-      WRITE(HEATER_0_PIN,0);
-    }
-  #if defined(HEATER_BED_PIN) && HEATER_BED_PIN > -1
-  if(soft_pwm_b < pwm_count) WRITE(HEATER_BED_PIN,0);
-  #endif
-  #ifdef FAN_SOFT_PWM
-  if(soft_pwm_fan < pwm_count) WRITE(FAN_PIN,0);
-  #endif
-  
-  pwm_count += (1 << SOFT_PWM_SCALE);
-  pwm_count &= 0x7f;
 
   char buf[256];
   int fd;
