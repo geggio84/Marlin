@@ -448,6 +448,9 @@ void setup()
   setup_photpin();
   servo_init();
 
+  #if defined(EXTRUDER_0_AUTO_FAN_PIN)
+  setPwmFrequency(EXTRUDER_0_AUTO_FAN_PIN, 0);
+  #endif
   #if defined(PWM_ENABLE_PIN) && PWM_ENABLE_PIN > -1
   SET_OUTPUT(PWM_ENABLE_PIN);
   WRITE(PWM_ENABLE_PIN,LOW); // Enable I2C PWM outputs
