@@ -535,6 +535,7 @@ int loop()
   manage_heater();
   manage_inactivity();
   checkHitEndstops();
+  usleep(100000);
   return 0;
 }
 
