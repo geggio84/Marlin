@@ -34,6 +34,7 @@
 #define OUTPUT 0x1
 #define INPUT_PULLUP 0x2
 
+#define constrain(amt,low,high) ((amt)<(low)?(low):((amt)>(high)?(high):(amt)))
 #define min(a,b) ((a)<(b)?(a):(b))
 #define max(a,b) ((a)>(b)?(a):(b))
 
