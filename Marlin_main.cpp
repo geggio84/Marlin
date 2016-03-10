@@ -730,37 +730,17 @@ bool code_seen(char code)
   return (strchr_pointer != NULL);  //Return True if a character was found
 }
 
-/* TODO: FIXME */
-#define pgm_read_float_near(address_short) 0
-//    __LPM_float((uint16_t)(address_short))
-#define pgm_read_byte_near(address_short) 0
-//    __LPM_float((uint16_t)(address_short))
-/* TODO: FIXME */
-
-#define DEFINE_PGM_READ_ANY(type, reader)       \
-    static inline type pgm_read_any(const type *p)  \
-    { return pgm_read_##reader##_near(p); }
-
-DEFINE_PGM_READ_ANY(float,       float);
-DEFINE_PGM_READ_ANY(signed char, byte);
-
-#define XYZ_CONSTS_FROM_CONFIG(type, array, CONFIG) \
-static const type array##_P[3] =        \
-    { X_##CONFIG, Y_##CONFIG, Z_##CONFIG };     \
-static inline type array(int axis)          \
-    { return pgm_read_any(&array##_P[axis]); }
-
-XYZ_CONSTS_FROM_CONFIG(float, base_min_pos,    MIN_POS);
-XYZ_CONSTS_FROM_CONFIG(float, base_max_pos,    MAX_POS);
-XYZ_CONSTS_FROM_CONFIG(float, base_home_pos,   HOME_POS);
-XYZ_CONSTS_FROM_CONFIG(float, max_length,      MAX_LENGTH);
-XYZ_CONSTS_FROM_CONFIG(float, home_retract_mm, HOME_RETRACT_MM);
-XYZ_CONSTS_FROM_CONFIG(signed char, home_dir,  HOME_DIR);
+static const float base_min_pos[3] = {X_MIN_POS, Y_MIN_POS, Z_MIN_POS};
+static const float base_max_pos[3] = {X_MAX_POS, Y_MAX_POS, Z_MAX_POS};
+static const float base_home_pos[3] = {X_HOME_POS, Y_HOME_POS, Z_HOME_POS};
+static const float max_length[3] = {X_MAX_LENGTH, Y_MAX_LENGTH, Z_MAX_LENGTH};
+static const float home_retract_mm[3] = {X_HOME_RETRACT_MM, Y_HOME_RETRACT_MM, Z_HOME_RETRACT_MM};
+static const float home_dir[3] = {X_HOME_DIR, Y_HOME_DIR, Z_HOME_DIR};
 
 static void axis_is_at_home(int axis) {
-  current_position[axis] = base_home_pos(axis) + add_homeing[axis];
-  min_pos[axis] =          base_min_pos(axis) + add_homeing[axis];
-  max_pos[axis] =          base_max_pos(axis) + add_homeing[axis];
+  current_position[axis] = base_home_pos[axis] + add_homeing[axis];
+  min_pos[axis] =          base_min_pos[axis] + add_homeing[axis];
+  max_pos[axis] =          base_max_pos[axis] + add_homeing[axis];
 }
 
 #ifdef ENABLE_AUTO_BED_LEVELING
@@ -833,13 +813,13 @@ static void run_z_probe() {
     plan_set_position(current_position[X_AXIS], current_position[Y_AXIS], zPosition, current_position[E_AXIS]);
 
     // move up the retract distance
-    zPosition += home_retract_mm(Z_AXIS);
+    zPosition += home_retract_mm[Z_AXIS];
     plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], zPosition, current_position[E_AXIS], feedrate/60);
     st_synchronize();
 
     // move back down slowly to find bed
     feedrate = homing_feedrate[Z_AXIS]/4;
-    zPosition -= home_retract_mm(Z_AXIS) * 2;
+    zPosition -= home_retract_mm[Z_AXIS] * 2;
     plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], zPosition, current_position[E_AXIS], feedrate/60);
     st_synchronize();
 
@@ -949,7 +929,7 @@ static void homeaxis(int axis) {
       axis==Y_AXIS ? HOMEAXIS_DO(Y) :
       axis==Z_AXIS ? HOMEAXIS_DO(Z) :
       0) {
-    int axis_home_dir = home_dir(axis);
+    int axis_home_dir = home_dir[axis];
 
     current_position[axis] = 0;
     plan_set_position(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS]);
@@ -968,18 +948,18 @@ static void homeaxis(int axis) {
       }
     #endif
 
-    destination[axis] = 1.5 * max_length(axis) * axis_home_dir;
+    destination[axis] = 1.5 * max_length[axis] * axis_home_dir;
     feedrate = homing_feedrate[axis];
     plan_buffer_line(destination[X_AXIS], destination[Y_AXIS], destination[Z_AXIS], destination[E_AXIS], feedrate/60);
     st_synchronize();
 
     current_position[axis] = 0;
     plan_set_position(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS]);
-    destination[axis] = -home_retract_mm(axis) * axis_home_dir;
+    destination[axis] = -home_retract_mm[axis] * axis_home_dir;
     plan_buffer_line(destination[X_AXIS], destination[Y_AXIS], destination[Z_AXIS], destination[E_AXIS], feedrate/60);
     st_synchronize();
 
-    destination[axis] = 2*home_retract_mm(axis) * axis_home_dir;
+    destination[axis] = 2*home_retract_mm[axis] * axis_home_dir;
     feedrate = homing_feedrate[axis]/2 ;
 
     plan_buffer_line(destination[X_AXIS], destination[Y_AXIS], destination[Z_AXIS], destination[E_AXIS], feedrate/60);
@@ -1152,17 +1132,17 @@ void process_commands()
       {
         current_position[X_AXIS] = 0;current_position[Y_AXIS] = 0;
 
-        int x_axis_home_dir = home_dir(X_AXIS);
+        int x_axis_home_dir = home_dir[X_AXIS];
 
         plan_set_position(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS]);
-        destination[X_AXIS] = 1.5 * max_length(X_AXIS) * x_axis_home_dir;destination[Y_AXIS] = 1.5 * max_length(Y_AXIS) * home_dir(Y_AXIS);
+        destination[X_AXIS] = 1.5 * max_length[X_AXIS] * x_axis_home_dir;destination[Y_AXIS] = 1.5 * max_length[Y_AXIS] * home_dir[Y_AXIS];
         feedrate = homing_feedrate[X_AXIS];
         if(homing_feedrate[Y_AXIS]<feedrate)
           feedrate = homing_feedrate[Y_AXIS];
-        if (max_length(X_AXIS) > max_length(Y_AXIS)) {
-          feedrate *= sqrt(pow(max_length(Y_AXIS) / max_length(X_AXIS), 2) + 1);
+        if (max_length[X_AXIS] > max_length[Y_AXIS]) {
+          feedrate *= sqrt(pow(max_length[Y_AXIS] / max_length[X_AXIS], 2) + 1);
         } else {
-          feedrate *= sqrt(pow(max_length(X_AXIS) / max_length(Y_AXIS), 2) + 1);
+          feedrate *= sqrt(pow(max_length[X_AXIS] / max_length[Y_AXIS], 2) + 1);
         }
         plan_buffer_line(destination[X_AXIS], destination[Y_AXIS], destination[Z_AXIS], destination[E_AXIS], feedrate/60);
         st_synchronize();
@@ -1209,7 +1189,7 @@ void process_commands()
         #ifndef Z_SAFE_HOMING
           if((home_all_axis) || (code_seen(axis_codes[Z_AXIS]))) {
             #if defined (Z_RAISE_BEFORE_HOMING) && (Z_RAISE_BEFORE_HOMING > 0)
-              destination[Z_AXIS] = Z_RAISE_BEFORE_HOMING * home_dir(Z_AXIS) * (-1);    // Set destination away from bed
+              destination[Z_AXIS] = Z_RAISE_BEFORE_HOMING * home_dir[Z_AXIS] * (-1);    // Set destination away from bed
               feedrate = max_feedrate[Z_AXIS];
               plan_buffer_line(destination[X_AXIS], destination[Y_AXIS], destination[Z_AXIS], destination[E_AXIS], feedrate);
               st_synchronize();
@@ -1220,7 +1200,7 @@ void process_commands()
           if(home_all_axis) {
             destination[X_AXIS] = round(Z_SAFE_HOMING_X_POINT - X_PROBE_OFFSET_FROM_EXTRUDER);
             destination[Y_AXIS] = round(Z_SAFE_HOMING_Y_POINT - Y_PROBE_OFFSET_FROM_EXTRUDER);
-            destination[Z_AXIS] = Z_RAISE_BEFORE_HOMING * home_dir(Z_AXIS) * (-1);    // Set destination away from bed
+            destination[Z_AXIS] = Z_RAISE_BEFORE_HOMING * home_dir[Z_AXIS] * (-1);    // Set destination away from bed
             feedrate = XY_TRAVEL_SPEED;
             current_position[Z_AXIS] = 0;
 
@@ -1242,7 +1222,7 @@ void process_commands()
 
               current_position[Z_AXIS] = 0;
               plan_set_position(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS]);
-              destination[Z_AXIS] = Z_RAISE_BEFORE_HOMING * home_dir(Z_AXIS) * (-1);    // Set destination away from bed
+              destination[Z_AXIS] = Z_RAISE_BEFORE_HOMING * home_dir[Z_AXIS] * (-1);    // Set destination away from bed
               feedrate = max_feedrate[Z_AXIS];
               plan_buffer_line(destination[X_AXIS], destination[Y_AXIS], destination[Z_AXIS], destination[E_AXIS], feedrate);
               st_synchronize();
