@@ -55,7 +55,6 @@ class MarlinSerial //: public Stream
   public:
     MarlinSerial();
     void begin(long,char*);
-    void end();
     int peek(void);
     int read_buf(void);
     void flush(void);
@@ -131,13 +130,6 @@ class MarlinSerial //: public Stream
         write_ser(*buffer++);
     }
 
-    /*FORCE_INLINE void print(const String &s)
-    {
-      for (int i = 0; i < (int)s.length(); i++) {
-        write(s[i]);
-      }
-    }*/
-    
     FORCE_INLINE void print(const char *str)
     {
       write_ser(str);

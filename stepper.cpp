@@ -273,7 +273,9 @@ void ISR(int sign)// ISR(TIMER1_COMPA_vect)
 //      #endif
     }
     else {
+/* TODO: FIXME */
         //OCR1A=2000; // 1kHz.
+/* TODO: FIXME */
     }
   }
 
@@ -480,7 +482,9 @@ void ISR(int sign)// ISR(TIMER1_COMPA_vect)
 
       // step_rate to timer interval
       timer = calc_timer(acc_step_rate);
+      /* TODO: FIXME */
       //OCR1A = timer;
+      /* TODO: FIXME */
       acceleration_time += timer;
       #ifdef ADVANCE
         for(int8_t i=0; i < step_loops; i++) {
@@ -509,7 +513,9 @@ void ISR(int sign)// ISR(TIMER1_COMPA_vect)
 
       // step_rate to timer interval
       timer = calc_timer(step_rate);
+      /* TODO: FIXME */
       //OCR1A = timer;
+      /* TODO: FIXME */
       deceleration_time += timer;
       #ifdef ADVANCE
         for(int8_t i=0; i < step_loops; i++) {
@@ -522,7 +528,9 @@ void ISR(int sign)// ISR(TIMER1_COMPA_vect)
       #endif //ADVANCE
     }
     else {
+      /* TODO: FIXME */
       //OCR1A = OCR1A_nominal;
+      /* TODO: FIXME */
       // ensure we're running at the correct step rate, even if we just came off an acceleration
       step_loops = step_loops_nominal;
     }
@@ -1016,7 +1024,9 @@ void digipot_current(uint8_t driver, int current)
 
 void microstep_init()
 {
+  #if defined(X_MS1_PIN) && X_MS1_PIN > -1
   const uint8_t microstep_modes[] = MICROSTEP_MODES;
+  #endif
 
   #if defined(E1_MS1_PIN) && E1_MS1_PIN > -1
   pinMode(E1_MS1_PIN,OUTPUT);

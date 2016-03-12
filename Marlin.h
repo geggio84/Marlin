@@ -38,21 +38,6 @@
 #define min(a,b) ((a)<(b)?(a):(b))
 #define max(a,b) ((a)>(b)?(a):(b))
 
-#ifndef AT90USB
-#define  HardwareSerial_h // trick to disable the standard HWserial
-#endif
-
-#if (ARDUINO >= 100)
-# include "Arduino.h"
-#else
-//# include "WProgram.h"
-  //Arduino < 1.0.0 does not define this, so we need to do it ourselves
-# define analogInputToDigitalPin(p) (p)//((p) + A0)
-#endif
-
-#ifdef AT90USB
-#include "HardwareSerial.h"
-#endif
 
 typedef struct {
     FILE *file_p;
@@ -61,13 +46,6 @@ typedef struct {
 } myFILE;
 
 #include "MarlinSerial.h"
-
-#ifndef cbi
-#define cbi(sfr, bit) (_SFR_BYTE(sfr) &= ~_BV(bit))
-#endif
-#ifndef sbi
-#define sbi(sfr, bit) (_SFR_BYTE(sfr) |= _BV(bit))
-#endif
 
 #define MYSERIAL MSerial
 
@@ -92,7 +70,6 @@ const char echomagic[] ="echo:";
 #define SERIAL_ECHOLN(x) SERIAL_PROTOCOLLN(x)
 #define SERIAL_ECHOLNPGM(x) SERIAL_PROTOCOLLNPGM(x)
 
-//#define SERIAL_ECHOPAIR(name,value) (serial_echopair_P(name,(value)))
 #define SERIAL_ECHOPAIR(name,value) (serial_echopair_P(((const char *)(name)),(value)))
 
 void serial_echopair_P(const char *s_P, float v);

@@ -773,7 +773,9 @@ void temp_ISR(void)
   //these variables are only accesible from the ISR, but static, so they don't lose their value
   static unsigned char temp_count = 0;
   static unsigned long raw_temp_0_value = 0;
+  #if defined(TEMP_1_PIN) && (TEMP_1_PIN > -1)
   static unsigned long raw_temp_1_value = 0;
+  #endif
   static unsigned long raw_temp_bed_value = 0;
   static unsigned char soft_pwm_0;
   #if defined(HEATER_BED_PIN)
@@ -839,7 +841,9 @@ void temp_ISR(void)
     temp_meas_ready = true;
     temp_count = 0;
     raw_temp_0_value = 0;
+	#if defined(TEMP_1_PIN) && (TEMP_1_PIN > -1)
     raw_temp_1_value = 0;
+	#endif
     raw_temp_bed_value = 0;
 
 #if HEATER_0_RAW_LO_TEMP > HEATER_0_RAW_HI_TEMP

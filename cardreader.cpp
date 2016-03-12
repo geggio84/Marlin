@@ -477,7 +477,7 @@ void CardReader::getStatus()
 }
 void CardReader::write_command(char *buf)
 {
-  char* begin = buf;
+  //char* begin = buf;
   char* npos = 0;
   char* end = buf + strlen(buf) - 1;
 
@@ -486,7 +486,7 @@ void CardReader::write_command(char *buf)
 /* TODO: FIXME */
   if((npos = strchr(buf, 'N')) != NULL)
   {
-    begin = strchr(npos, ' ') + 1;
+    //begin = strchr(npos, ' ') + 1;
     end = strchr(npos, '*') - 1;
   }
   end[1] = '\r';

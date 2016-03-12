@@ -41,11 +41,8 @@
 #include "temperature.h"
 #include "motion_control.h"
 #include "cardreader.h"
-//#include "watchdog.h"
 #include "ConfigurationStore.h"
 #include "language.h"
-//#include "pins_arduino.h"
-//#include "math.h"
 
 #ifdef BLINKM
 #include "BlinkM.h"
@@ -319,7 +316,6 @@ void enquecommand_P(const char *cmd)
   if(buflen < BUFSIZE)
   {
     //this is dangerous if a mixing of serial and this happens
-    //strcpy_P(&(cmdbuffer[bufindw][0]),cmd);
     strcpy(&(cmdbuffer[bufindw][0]),cmd);
     SERIAL_ECHO_START;
     SERIAL_ECHOPGM("enqueing \"");
@@ -2973,7 +2969,7 @@ void setPwmFrequency(const char *pin, int val)
 }
 
 bool setTargetedHotend(int code){
-  return false;
+  return true;
 }
 
 

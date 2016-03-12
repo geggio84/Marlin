@@ -447,13 +447,17 @@ void check_axes_activity()
   unsigned char y_active = 0;  
   unsigned char z_active = 0;
   unsigned char e_active = 0;
+  #if defined(FAN_PIN) && FAN_PIN > -1
   unsigned char tail_fan_speed = fanSpeed;
+  #endif
   block_t *block;
 
   if(block_buffer_tail != block_buffer_head)
   {
     uint8_t block_index = block_buffer_tail;
+	#if defined(FAN_PIN) && FAN_PIN > -1
     tail_fan_speed = block_buffer[block_index].fan_speed;
+	#endif
 
     while(block_index != block_buffer_head)
     {

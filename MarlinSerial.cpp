@@ -115,13 +115,6 @@ void MarlinSerial::begin(long baud, char* serial)
         }
 }
 
-void MarlinSerial::end()
-{
-/* TODO: FIX */
-}
-
-
-
 int MarlinSerial::peek(void)
 {
   if (rx_buffer.head == rx_buffer.tail) {
