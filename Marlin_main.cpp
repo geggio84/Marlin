@@ -2969,7 +2969,7 @@ void setPwmFrequency(const char *pin, int val)
 }
 
 bool setTargetedHotend(int code){
-  return true;
+  return false;
 }
 
 
