@@ -19,23 +19,23 @@
 * BeagleBone Printer v1.0
 *
 ****************************************************************************************/
-//#define X_STEP_PIN         GPIO(1,12)
-//#define X_DIR_PIN          GPIO(3,21)
+#define X_STEP_PIN         14 // pr1_pru0_pru_r30[14]
+#define X_DIR_PIN           7 // pr1_pru0_pru_r30[7]
 #define X_MIN_PIN          GPIO(2,2)
 #define X_MAX_PIN          GPIO(2,3)
 
-//#define Y_STEP_PIN         GPIO(1,13)
-//#define Y_DIR_PIN          GPIO(3,14)
+#define Y_STEP_PIN         15 // pr1_pru0_pru_r30[15]
+#define Y_DIR_PIN           0 // pr1_pru0_pru_r30[0]
 #define Y_MIN_PIN          GPIO(2,5)
 #define Y_MAX_PIN          GPIO(2,4)
 
-//#define Z_STEP_PIN         GPIO(3,17)
-//#define Z_DIR_PIN          GPIO(0,20)
+#define Z_STEP_PIN          3 // pr1_pru0_pru_r30[3]
+#define Z_DIR_PIN           6 // pr1_pru0_pru_r30[6]
 #define Z_MIN_PIN          GPIO(0,23)
 #define Z_MAX_PIN          GPIO(0,26)
 
-//#define E0_STEP_PIN         GPIO(3,16)
-//#define E0_DIR_PIN          GPIO(3,15)
+#define E0_STEP_PIN         2 // pr1_pru0_pru_r30[2]
+#define E0_DIR_PIN          1 // pr1_pru0_pru_r30[1]
 
 #define STEPPER_ENABLEn_PIN GPIO(1,15)
 #define STEPPER_FLAG_PIN    GPIO(1,14)
