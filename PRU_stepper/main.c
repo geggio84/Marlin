@@ -43,20 +43,20 @@
 
 volatile register uint32_t __R31;
 
-/* PRU1 is mailbox module user 2 */
-#define MB_USER						2
-/* Mbox0 - mail_u2_irq (mailbox interrupt for PRU1) is Int Number 59 */
-#define MB_INT_NUMBER				59
+/* PRU0 is mailbox module user 1 */
+#define MB_USER						1
+/* Mbox0 - mail_u1_irq (mailbox interrupt for PRU0) is Int Number 60 */
+#define MB_INT_NUMBER				60
 
-/* Host-1 Interrupt sets bit 31 in register R31 */
-#define HOST_INT					0x80000000
+/* Host-0 Interrupt sets bit 30 in register R31 */
+#define HOST_INT					0x40000000
 
 /* The mailboxes used for RPMsg are defined in the Linux device tree
  * PRU0 uses mailboxes 2 (From ARM) and 3 (To ARM)
  * PRU1 uses mailboxes 4 (From ARM) and 5 (To ARM)
  */
-#define MB_TO_ARM_HOST				5
-#define MB_FROM_ARM_HOST			4
+#define MB_TO_ARM_HOST				3
+#define MB_FROM_ARM_HOST			2
 
 /*
  * Using the name 'rpmsg-client-sample' will probe the RPMsg sample driver
@@ -65,11 +65,10 @@ volatile register uint32_t __R31;
  * Using the name 'rpmsg-pru' will probe the rpmsg_pru driver found
  * at linux-x.y.z/drivers/rpmsg/rpmsg_pru.c
  */
-//#define CHAN_NAME					"rpmsg-client-sample"
 #define CHAN_NAME					"rpmsg-pru"
 
-#define CHAN_DESC					"Channel 31"
-#define CHAN_PORT					31
+#define CHAN_DESC					"Channel 30"
+#define CHAN_PORT					30
 
 /* 
  * Used to make sure the Linux drivers are ready for RPMsg communication
