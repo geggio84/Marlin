@@ -36,6 +36,7 @@
 #include <SPI.h>
 #endif
 
+#define MAX_BUFFER_SIZE		512
 
 //===========================================================================
 //=============================public variables  ============================
@@ -244,9 +245,22 @@ FORCE_INLINE void trapezoid_generator_reset() {
 // It pops blocks from the block_buffer and executes them by pulsing the stepper pins appropriately.
 void ISR(int sign)// ISR(TIMER1_COMPA_vect)
 {
+	char readBuf[MAX_BUFFER_SIZE];
+	int result = 0;
+
   signal(SIGALRM, ISR); //Set alarm clock for 1 second
   alarm(1);
   printf("I'm Alive\n\r");
+	/* Send 'hello world!' to the PRU through the RPMsg channel */
+	result = write(pru_file, "hello world!", 13);
+	if(result > 0)
+		printf("Message: Sent to PRU\n");
+
+	/* Poll until we receive a message from the PRU and then print it */
+	result = read(pru_file, readBuf, MAX_BUFFER_SIZE);
+	if(result > 0)
+		printf("Message received from PRU:%s\n\n", readBuf);
+
   // If there is no current block, attempt to pop one from the buffer
   if (current_block == NULL) {
     // Anything in the buffer?

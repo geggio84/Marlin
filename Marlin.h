@@ -154,6 +154,7 @@ extern bool axis_known_position[3];
 extern float zprobe_zoffset;
 extern int fanSpeed;
 extern easySPIN_stepper steppers[4];
+extern int pru_file;
 
 #ifdef FAN_SOFT_PWM
 extern unsigned char fanSpeedSoftPwm;

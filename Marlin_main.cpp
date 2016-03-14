@@ -178,6 +178,7 @@ myFILE *gcode_file;
 myFILE *log_file;
 FILE *config_file;
 int serial_file;
+int pru_file;
 
 #ifdef SDSUPPORT
 CardReader card;
@@ -405,6 +406,9 @@ void setup()
   config_file = fopen(CONFIG_FILE , "a+b");
   if (config_file == NULL)
 		printf("Error opening %s file\n",CONFIG_FILE);
+	pru_file = open(PRU_DEVICE_NAME, O_RDWR);
+  if (pru_file == 0)
+		printf("Error opening %s file\n",PRU_DEVICE_NAME);
   setup_killpin();
   setup_powerhold();
   MYSERIAL.begin(BAUDRATE,(char*)SERIAL_PORT);
@@ -2919,6 +2923,12 @@ void kill()
 	    fclose(config_file);
 		printf("Now We Close Config Store File: %s\n\r",CONFIG_FILE);
   }
+  /* Close the rpmsg_pru character device file */
+  if (pru_file != 0) {
+	  close(pru_file);
+	  printf("Now We Close PRU Device File: %s\n\r",PRU_DEVICE_NAME);
+  }
+
   printf("Exit MARLIN Firmware\n\r");
   // Terminate program
   exit(0);

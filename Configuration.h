@@ -8,6 +8,8 @@
 
 #define CONFIG_FILE "./config"
 
+#define PRU_DEVICE_NAME		"/dev/rpmsg_pru31"
+
 // User-specified version info of this build to display in [Pronterface, etc] terminal window during
 // startup. Implementation of an idea by Prof Braino to inform user that any changes made to this
 // build by the user have been successfully uploaded into firmware.
