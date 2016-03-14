@@ -19,23 +19,23 @@
 * BeagleBone Printer v1.0
 *
 ****************************************************************************************/
-#define X_STEP_PIN         GPIO(1,12)
-#define X_DIR_PIN          GPIO(3,21)
+//#define X_STEP_PIN         GPIO(1,12)
+//#define X_DIR_PIN          GPIO(3,21)
 #define X_MIN_PIN          GPIO(2,2)
 #define X_MAX_PIN          GPIO(2,3)
 
-#define Y_STEP_PIN         GPIO(1,13)
-#define Y_DIR_PIN          GPIO(3,14)
+//#define Y_STEP_PIN         GPIO(1,13)
+//#define Y_DIR_PIN          GPIO(3,14)
 #define Y_MIN_PIN          GPIO(2,5)
 #define Y_MAX_PIN          GPIO(2,4)
 
-#define Z_STEP_PIN         GPIO(3,17)
-#define Z_DIR_PIN          GPIO(0,20)
+//#define Z_STEP_PIN         GPIO(3,17)
+//#define Z_DIR_PIN          GPIO(0,20)
 #define Z_MIN_PIN          GPIO(0,23)
 #define Z_MAX_PIN          GPIO(0,26)
 
-#define E0_STEP_PIN         GPIO(3,16)
-#define E0_DIR_PIN          GPIO(3,15)
+//#define E0_STEP_PIN         GPIO(3,16)
+//#define E0_DIR_PIN          GPIO(3,15)
 
 #define STEPPER_ENABLEn_PIN GPIO(1,15)
 #define STEPPER_FLAG_PIN    GPIO(1,14)
@@ -75,9 +75,6 @@
 #define SDPOWER            -1
 #define SDSS               -1//31
 
-//List of pins which to ignore when asked to change by gcode, 0 and 1 are RX and TX, do not mess with those!
-#define _E0_PINS E0_STEP_PIN, E0_DIR_PIN,
-
 #ifdef DISABLE_MAX_ENDSTOPS
 #define X_MAX_PIN          -1
 #define Y_MAX_PIN          -1
@@ -90,7 +87,7 @@
 #define Z_MIN_PIN          -1
 #endif
 
-#define SENSITIVE_PINS {0, 1, X_STEP_PIN, X_DIR_PIN, X_MIN_PIN, X_MAX_PIN, Y_STEP_PIN, Y_DIR_PIN, Y_MIN_PIN, Y_MAX_PIN, Z_STEP_PIN, Z_DIR_PIN, Z_MIN_PIN, Z_MAX_PIN, PS_ON_PIN, _E0_PINS }
+#define SENSITIVE_PINS {0, 1, X_MIN_PIN, X_MAX_PIN, Y_MIN_PIN, Y_MAX_PIN, Z_MIN_PIN, Z_MAX_PIN, PS_ON_PIN }
 
 #endif
 
