@@ -4,3 +4,9 @@ out/
 *.orig
 *.rej
 *.bak
+PRU_stepper/Debug
+PRU_stepper/Release
+*.cproject
+*.ccsproject
+*.project
+*.settings
