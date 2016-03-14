@@ -241,6 +241,52 @@ FORCE_INLINE void trapezoid_generator_reset() {
 
 }
 
+void debug_current_block(block_t* block)
+{
+	printf("*** CURRENT BLOCK ***\n");
+	// Step count along each axis
+	printf("- steps_x = %ld\n",block->steps_x);
+	printf("- steps_y = %ld\n",block->steps_y);
+	printf("- steps_z = %ld\n",block->steps_z);
+	printf("- steps_e = %ld\n",block->steps_e);
+	// The number of step events required to complete this block
+	printf("- step_event_count = %lu\n",block->step_event_count);
+	// The index of the step event on which to stop acceleration
+	printf("- accelerate_until = %ld\n",block->accelerate_until);
+	// The index of the step event on which to start decelerating
+	printf("- decelerate_after = %ld\n",block->decelerate_after);
+	// The acceleration rate used for acceleration calculation
+	printf("- acceleration_rate = %ld\n",block->acceleration_rate);
+	// The direction bit set for this block (refers to *_DIRECTION_BIT in config.h)
+	printf("- direction_bits = %d\n",block->direction_bits);
+	// The nominal speed for this block in mm/sec
+	printf("- nominal_speed = %f\n",block->nominal_speed);
+	// Entry speed at previous-current junction in mm/sec
+	printf("- entry_speed = %f\n",block->entry_speed);
+	// Maximum allowable junction entry speed in mm/sec
+	printf("- max_entry_speed = %f\n",block->max_entry_speed);
+	// The total travel of this block in mm
+	printf("- millimeters = %f\n",block->millimeters);
+	// acceleration mm/sec^2
+	printf("- acceleration = %f\n",block->acceleration);
+	// Planner flag to recalculate trapezoids on entry junction
+	printf("- recalculate_flag = %d\n",block->recalculate_flag);
+	// Planner flag for nominal speed always reached
+	printf("- nominal_length_flag = %d\n",block->nominal_length_flag);
+	// The nominal step rate for this block in step_events/sec
+	printf("- nominal_rate = %lu\n",block->nominal_rate);
+	// The jerk-adjusted step rate at start of block
+	printf("- initial_rate = %lu\n",block->initial_rate);
+	// The minimal rate at exit
+	printf("- final_rate = %lu\n",block->final_rate);
+	// acceleration steps/sec^2
+	printf("- acceleration_st = %lu\n",block->acceleration_st);
+	printf("- fan_speed = %lu\n",block->fan_speed);
+	printf("- busy = %d\n",block->busy);
+
+	printf("*************************************************\n\n");
+}
+
 // "The Stepper Driver Interrupt" - This timer interrupt is the workhorse.
 // It pops blocks from the block_buffer and executes them by pulsing the stepper pins appropriately.
 void ISR(int sign)// ISR(TIMER1_COMPA_vect)
@@ -294,6 +340,7 @@ void ISR(int sign)// ISR(TIMER1_COMPA_vect)
   }
 
   if (current_block != NULL) {
+	debug_current_block(current_block);
     // Set directions TO DO This should be done once during init of trapezoid. Endstops -> interrupt
     out_bits = current_block->direction_bits;
 
