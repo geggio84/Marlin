@@ -298,12 +298,12 @@ const bool Z_MAX_ENDSTOP_INVERTING = true; // set to true to invert the logic of
 #define Z_MAX_LENGTH (Z_MAX_POS - Z_MIN_POS)
 
 /* Stepper driver configuration */
-#define X_TVAL			0x00
+#define X_TVAL			(( 1000 / 31.25 ) - 1)
 #define X_T_FAST		easySPIN_TOFF_FAST_8_0_us | easySPIN_FAST_STEP_8_0_us
 #define X_TON_MIN		0x00
 #define X_TOFF_MIN		0x01
 #define X_OCD_TH		easySPIN_OCD_TH_2625mA
-#define X_STEP_MODE		easySPIN_STEP_SEL_1 | easySPIN_SYNC_SEL_1_2
+#define X_STEP_MODE		easySPIN_STEP_SEL_1_16 | easySPIN_SYNC_SEL_1_2
 #define X_ALARM_EN		  easySPIN_ALARM_EN_OVERCURRENT \
 						| easySPIN_ALARM_EN_THERMAL_SHUTDOWN \
 						| easySPIN_ALARM_EN_THERMAL_WARNING \
@@ -314,12 +314,12 @@ const bool Z_MAX_ENDSTOP_INVERTING = true; // set to true to invert the logic of
 						| easySPIN_CONFIG_EN_TQREG_INT_REG | easySPIN_CONFIG_OC_SD_ENABLE \
 						| easySPIN_CONFIG_SR_180V_us | easySPIN_CONFIG_TSW_8_us
 
-#define Y_TVAL			0x00
+#define Y_TVAL			(( 1000 / 31.25 ) - 1)
 #define Y_T_FAST		easySPIN_TOFF_FAST_8_0_us | easySPIN_FAST_STEP_8_0_us
 #define Y_TON_MIN		0x00
 #define Y_TOFF_MIN		0x01
 #define Y_OCD_TH		easySPIN_OCD_TH_2625mA
-#define Y_STEP_MODE		easySPIN_STEP_SEL_1 | easySPIN_SYNC_SEL_1_2
+#define Y_STEP_MODE		easySPIN_STEP_SEL_1_16 | easySPIN_SYNC_SEL_1_2
 #define Y_ALARM_EN		  easySPIN_ALARM_EN_OVERCURRENT \
 						| easySPIN_ALARM_EN_THERMAL_SHUTDOWN \
 						| easySPIN_ALARM_EN_THERMAL_WARNING \
@@ -330,12 +330,12 @@ const bool Z_MAX_ENDSTOP_INVERTING = true; // set to true to invert the logic of
 						| easySPIN_CONFIG_EN_TQREG_INT_REG | easySPIN_CONFIG_OC_SD_ENABLE \
 						| easySPIN_CONFIG_SR_180V_us | easySPIN_CONFIG_TSW_8_us
 
-#define Z_TVAL			0x00
+#define Z_TVAL			(( 1000 / 31.25 ) - 1)
 #define Z_T_FAST		easySPIN_TOFF_FAST_8_0_us | easySPIN_FAST_STEP_8_0_us
 #define Z_TON_MIN		0x00
 #define Z_TOFF_MIN		0x01
 #define Z_OCD_TH		easySPIN_OCD_TH_2625mA
-#define Z_STEP_MODE		easySPIN_STEP_SEL_1 | easySPIN_SYNC_SEL_1_2
+#define Z_STEP_MODE		easySPIN_STEP_SEL_1_16 | easySPIN_SYNC_SEL_1_2
 #define Z_ALARM_EN		  easySPIN_ALARM_EN_OVERCURRENT \
 						| easySPIN_ALARM_EN_THERMAL_SHUTDOWN \
 						| easySPIN_ALARM_EN_THERMAL_WARNING \
@@ -346,12 +346,12 @@ const bool Z_MAX_ENDSTOP_INVERTING = true; // set to true to invert the logic of
 						| easySPIN_CONFIG_EN_TQREG_INT_REG | easySPIN_CONFIG_OC_SD_ENABLE \
 						| easySPIN_CONFIG_SR_180V_us | easySPIN_CONFIG_TSW_8_us
 
-#define E_TVAL			0x00
+#define E_TVAL			(( 1000 / 31.25 ) - 1)
 #define E_T_FAST		easySPIN_TOFF_FAST_8_0_us | easySPIN_FAST_STEP_8_0_us
 #define E_TON_MIN		0x00
 #define E_TOFF_MIN		0x01
 #define E_OCD_TH		easySPIN_OCD_TH_2625mA
-#define E_STEP_MODE		easySPIN_STEP_SEL_1 | easySPIN_SYNC_SEL_1_2
+#define E_STEP_MODE		easySPIN_STEP_SEL_1_16 | easySPIN_SYNC_SEL_1_2
 #define E_ALARM_EN		  easySPIN_ALARM_EN_OVERCURRENT \
 						| easySPIN_ALARM_EN_THERMAL_SHUTDOWN \
 						| easySPIN_ALARM_EN_THERMAL_WARNING \
