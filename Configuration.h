@@ -469,8 +469,43 @@ const bool Z_MAX_ENDSTOP_INVERTING = true; // set to true to invert the logic of
 #define HOMING_FEEDRATE {50*60, 50*60, 4*60, 0}  // set the homing speeds (mm/min)
 
 // default settings
+#define X_STEPS_PER_REV		400
+#define Y_STEPS_PER_REV		400
+#define Z_STEPS_PER_REV		200
+#define E_STEPS_PER_REV		200
 
-#define DEFAULT_AXIS_STEPS_PER_UNIT   {78.7402,78.7402,200.0*8/3,760*1.1}  // default steps per unit for Ultimaker
+/*********************************************
+ * X and Y axis configuration
+ * Stepper Gear 16 Teeth
+ * External rod Gear 36 teeth
+ * Internal rod Gear 20 teeth
+ * 2mm belt pitch
+ *********************************************/
+#define X_RATIO ( (16.0 * 20.0 / 36.0) * 2 )
+#define Y_RATIO ( (16.0 * 20.0 / 36.0) * 2 )
+/*********************************************
+ * Z axis configuration
+ * 6mm lead screw 1mm per rev
+ *********************************************/
+#define Z_RATIO ( 1 )
+/*********************************************
+ * E axis configuration
+ * Stepper Gear 9 Teeth
+ * Screw Gear 25 Teeth
+ *********************************************/
+#define E_RATIO ( (9.0 / 25.0) * 2 )
+
+#define DEFAULT_X_MICROSTEPS	16
+#define DEFAULT_Y_MICROSTEPS	16
+#define DEFAULT_Z_MICROSTEPS	16
+#define DEFAULT_E_MICROSTEPS	16
+
+#define X_STEPS_PER_UNIT ( ( X_STEPS_PER_REV * DEFAULT_X_MICROSTEPS ) / X_RATIO )
+#define Y_STEPS_PER_UNIT ( ( Y_STEPS_PER_REV * DEFAULT_Y_MICROSTEPS ) / Y_RATIO )
+#define Z_STEPS_PER_UNIT ( ( Z_STEPS_PER_REV * DEFAULT_Z_MICROSTEPS ) / Z_RATIO )
+#define E_STEPS_PER_UNIT ( ( E_STEPS_PER_REV * DEFAULT_E_MICROSTEPS ) / E_RATIO )
+
+#define DEFAULT_AXIS_STEPS_PER_UNIT   { X_STEPS_PER_UNIT , Y_STEPS_PER_UNIT , Z_STEPS_PER_UNIT , E_STEPS_PER_UNIT }  // default steps per unit for Ultimaker
 #define DEFAULT_MAX_FEEDRATE          {500, 500, 5, 25}    // (mm/sec)
 #define DEFAULT_MAX_ACCELERATION      {9000,9000,100,10000}    // X, Y, Z, E maximum start speed for accelerated moves. E default values are good for Skeinforge 40+, for older versions raise them a lot.
 
