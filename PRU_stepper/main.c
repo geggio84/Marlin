@@ -33,13 +33,16 @@
 
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <pru_cfg.h>
 #include <pru_intc.h>
 #include <rsc_types.h>
 #include <pru_virtqueue.h>
 #include <pru_rpmsg.h>
 #include <sys_mailbox.h>
-#include "resource_table_1.h"
+#include "resource_table.h"
+#include "stepper_pru.h"
+#include "../pins.h"
 
 volatile register uint32_t __R31;
 
@@ -84,7 +87,10 @@ uint8_t payload[RPMSG_BUF_SIZE];
 void main() {
 	struct pru_rpmsg_transport transport;
 	uint16_t src, dst, len;
+	//char lenght[20];
 	volatile uint8_t *status;
+	unsigned char endstop_status;
+	pru_stepper_block block;
 
 	/* allow OCP master port access by the PRU so the PRU can read external memories */
 	CT_CFG.SYSCFG_bit.STANDBY_INIT = 0;
@@ -117,9 +123,13 @@ void main() {
 				/* Check to see if the message corresponds to a receive event for the PRU */
 				if(CT_MBX.MESSAGE[MB_FROM_ARM_HOST] == 1){
 					/* Receive the message */
-					if(pru_rpmsg_receive(&transport, &src, &dst, payload, &len) == PRU_RPMSG_SUCCESS){
+					if(pru_rpmsg_receive(&transport, &src, &dst, &block, &len) == PRU_RPMSG_SUCCESS){
 						/* Echo the message back to the same address from which we just received */
-						pru_rpmsg_send(&transport, dst, src, payload, len);
+						//ltoa(len, lenght);
+						//pru_rpmsg_send(&transport, dst, src, lenght, sizeof(lenght));
+						//block.steps_x++;
+						endstop_status = do_block(&block, &transport, dst, src);
+						pru_rpmsg_send(&transport, dst, src, &endstop_status, sizeof(endstop_status));
 					}
 				}
 			}
