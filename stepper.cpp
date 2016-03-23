@@ -287,31 +287,73 @@ void debug_current_block(block_t* block)
 	printf("*************************************************\n\n");
 }
 
+typedef struct {
+	unsigned long nominal_rate;		// The nominal step rate for this block in step_events/sec 
+	unsigned long initial_rate;		// The jerk-adjusted step rate at start of block  
+	unsigned long final_rate;		// The minimal rate at exit
+	long steps_x;
+	long steps_y;
+	long steps_z;
+	long steps_e;					// Step count along each axis
+	unsigned long step_event_count;	// The number of step events required to complete this block
+	unsigned char direction_bits;	// The direction bit set for this block
+	long accelerate_until;			// The index of the step event on which to stop acceleration
+	long decelerate_after;			// The index of the step event on which to start decelerating
+	long acceleration_rate;			// The acceleration rate used for acceleration calculation
+} pru_stepper_block;
+
 // "The Stepper Driver Interrupt" - This timer interrupt is the workhorse.
 // It pops blocks from the block_buffer and executes them by pulsing the stepper pins appropriately.
 void ISR(int sign)// ISR(TIMER1_COMPA_vect)
 {
 	char readBuf[MAX_BUFFER_SIZE];
 	int result = 0;
+	unsigned long tmp;
+	pru_stepper_block pru_block;
 
-  signal(SIGALRM, ISR); //Set alarm clock for 1 second
-  alarm(1);
+  printf("########################################\n");
   printf("I'm Alive\n\r");
-	/* Send 'hello world!' to the PRU through the RPMsg channel */
-	result = write(pru_file, "hello world!", 13);
-	if(result > 0)
-		printf("Message: Sent to PRU\n");
-
-	/* Poll until we receive a message from the PRU and then print it */
-	result = read(pru_file, readBuf, MAX_BUFFER_SIZE);
-	if(result > 0)
-		printf("Message received from PRU:%s\n\n", readBuf);
 
   // If there is no current block, attempt to pop one from the buffer
   if (current_block == NULL) {
     // Anything in the buffer?
     current_block = plan_get_current_block();
     if (current_block != NULL) {
+		pru_block.nominal_rate = current_block->nominal_rate;
+		pru_block.initial_rate = current_block->initial_rate;
+		pru_block.final_rate = current_block->final_rate;
+		pru_block.steps_x = current_block->steps_x;
+		pru_block.steps_y = current_block->steps_y;
+		pru_block.steps_z = current_block->steps_z;
+		pru_block.steps_e = current_block->steps_e;
+		pru_block.step_event_count = current_block->step_event_count;
+		pru_block.direction_bits = current_block->direction_bits;
+		pru_block.accelerate_until = current_block->accelerate_until;
+		pru_block.decelerate_after = current_block->decelerate_after;
+		pru_block.acceleration_rate = current_block->acceleration_rate;
+		printf("SIZEOF pru_block = %d\n",sizeof(pru_block));
+		/* Send 'pru_stepper_block' to the PRU through the RPMsg channel */
+		result = write(pru_file, &pru_block, sizeof(pru_block));
+		if(result > 0)
+			printf("Message: Sent to PRU\n");
+
+		while(1) {
+			usleep(1000);
+			/* Poll until we receive a message from the PRU and then print it */
+			tmp = 0;
+			result = read(pru_file, &tmp, sizeof(unsigned long));
+			if(result > 0) {
+				//printf("Message received from PRU:%s\n\n", readBuf);
+				printf("**** read %d bytes = %lu\n",result,tmp);
+				if(result == sizeof(unsigned char)) {
+					break;
+				}
+			} else {
+				printf("read EOF\n");
+				break;
+			}
+		}
+
       current_block->busy = true;
       trapezoid_generator_reset();
       counter_x = -(current_block->step_event_count >> 1);
@@ -602,6 +644,9 @@ void ISR(int sign)// ISR(TIMER1_COMPA_vect)
       plan_discard_current_block();
     }
   }
+  
+  signal(SIGALRM, ISR); //Set alarm clock for 1 second
+  alarm(1);
 }
 
 #ifdef ADVANCE
