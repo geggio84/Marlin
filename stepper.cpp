@@ -216,13 +216,16 @@ FORCE_INLINE void trapezoid_generator_reset() {
     e_steps += ((advance >>8) - old_advance);
     old_advance = advance >>8;
   #endif
+  printf("trapezoid_generator_reset \n");
   deceleration_time = 0;
   // step_rate to timer interval
   OCR1A_nominal = calc_timer(current_block->nominal_rate);
+  printf("OCR1A_nominal = calc_timer(current_block->nominal_rate) = %d (current_block->nominal_rate = %lu)\n",OCR1A_nominal,current_block->nominal_rate);
   // make a note of the number of step loops required at nominal speed
   step_loops_nominal = step_loops;
   acc_step_rate = current_block->initial_rate;
   acceleration_time = calc_timer(acc_step_rate);
+  printf("acceleration_time = calc_timer(acc_step_rate) = %ld (acc_step_rate = %d)\n",acceleration_time,acc_step_rate);
 /* TODO: FIXME */
   //OCR1A = acceleration_time;
 /* TODO: FIXME */
@@ -241,46 +244,46 @@ FORCE_INLINE void trapezoid_generator_reset() {
 
 void debug_current_block(block_t* block)
 {
-	printf("*** CURRENT BLOCK ***\n");
+	printf("*** CURRENT BLOCK (%d bytes) ***\n",sizeof(block_buffer[0]));
 	// Step count along each axis
-	printf("- steps_x = %ld\n",block->steps_x);
-	printf("- steps_y = %ld\n",block->steps_y);
-	printf("- steps_z = %ld\n",block->steps_z);
-	printf("- steps_e = %ld\n",block->steps_e);
+	printf("- steps_x = %ld (%d bytes)\n",block->steps_x, sizeof(block->steps_x));
+	printf("- steps_y = %ld (%d bytes)\n",block->steps_y, sizeof(block->steps_y));
+	printf("- steps_z = %ld (%d bytes)\n",block->steps_z, sizeof(block->steps_z));
+	printf("- steps_e = %ld (%d bytes)\n",block->steps_e, sizeof(block->steps_e));
 	// The number of step events required to complete this block
-	printf("- step_event_count = %lu\n",block->step_event_count);
+	printf("- step_event_count = %lu (%d bytes)\n",block->step_event_count, sizeof(block->step_event_count));
 	// The index of the step event on which to stop acceleration
-	printf("- accelerate_until = %ld\n",block->accelerate_until);
+	printf("- accelerate_until = %ld (%d bytes)\n",block->accelerate_until, sizeof(block->accelerate_until));
 	// The index of the step event on which to start decelerating
-	printf("- decelerate_after = %ld\n",block->decelerate_after);
+	printf("- decelerate_after = %ld (%d bytes)\n",block->decelerate_after, sizeof(block->decelerate_after));
 	// The acceleration rate used for acceleration calculation
-	printf("- acceleration_rate = %ld\n",block->acceleration_rate);
+	printf("- acceleration_rate = %ld (%d bytes)\n",block->acceleration_rate, sizeof(block->acceleration_rate));
 	// The direction bit set for this block (refers to *_DIRECTION_BIT in config.h)
-	printf("- direction_bits = %d\n",block->direction_bits);
+	printf("- direction_bits = %d (%d bytes)\n",block->direction_bits, sizeof(block->direction_bits));
 	// The nominal speed for this block in mm/sec
-	printf("- nominal_speed = %f\n",block->nominal_speed);
+	printf("- nominal_speed = %f mm/sec (%d bytes)\n",block->nominal_speed, sizeof(block->nominal_speed));
 	// Entry speed at previous-current junction in mm/sec
-	printf("- entry_speed = %f\n",block->entry_speed);
+	printf("- entry_speed = %f mm/sec (%d bytes)\n",block->entry_speed, sizeof(block->entry_speed));
 	// Maximum allowable junction entry speed in mm/sec
-	printf("- max_entry_speed = %f\n",block->max_entry_speed);
+	printf("- max_entry_speed = %f mm/sec (%d bytes)\n",block->max_entry_speed, sizeof(block->max_entry_speed));
 	// The total travel of this block in mm
-	printf("- millimeters = %f\n",block->millimeters);
+	printf("- millimeters = %f mm (%d bytes)\n",block->millimeters, sizeof(block->millimeters));
 	// acceleration mm/sec^2
-	printf("- acceleration = %f\n",block->acceleration);
+	printf("- acceleration = %f mm/sec^2 (%d bytes)\n",block->acceleration, sizeof(block->acceleration));
 	// Planner flag to recalculate trapezoids on entry junction
-	printf("- recalculate_flag = %d\n",block->recalculate_flag);
+	printf("- recalculate_flag = %d (%d bytes)\n",block->recalculate_flag, sizeof(block->recalculate_flag));
 	// Planner flag for nominal speed always reached
-	printf("- nominal_length_flag = %d\n",block->nominal_length_flag);
+	printf("- nominal_length_flag = %d (%d bytes)\n",block->nominal_length_flag, sizeof(block->nominal_length_flag));
 	// The nominal step rate for this block in step_events/sec
-	printf("- nominal_rate = %lu\n",block->nominal_rate);
+	printf("- nominal_rate = %lu step_events/sec (%d bytes)\n",block->nominal_rate, sizeof(block->nominal_rate));
 	// The jerk-adjusted step rate at start of block
-	printf("- initial_rate = %lu\n",block->initial_rate);
+	printf("- initial_rate = %lu (%d bytes)\n",block->initial_rate, sizeof(block->initial_rate));
 	// The minimal rate at exit
-	printf("- final_rate = %lu\n",block->final_rate);
+	printf("- final_rate = %lu (%d bytes)\n",block->final_rate, sizeof(block->final_rate));
 	// acceleration steps/sec^2
-	printf("- acceleration_st = %lu\n",block->acceleration_st);
-	printf("- fan_speed = %lu\n",block->fan_speed);
-	printf("- busy = %d\n",block->busy);
+	printf("- acceleration_st = %lu steps/sec^2 (%d bytes)\n",block->acceleration_st, sizeof(block->acceleration_st));
+	printf("- fan_speed = %lu (%d bytes)\n",block->fan_speed, sizeof(block->fan_speed));
+	printf("- busy = %d (%d bytes)\n",block->busy, sizeof(block->busy));
 
 	printf("*************************************************\n\n");
 }
@@ -316,6 +319,8 @@ void ISR(int sign)// ISR(TIMER1_COMPA_vect)
     // Anything in the buffer?
     current_block = plan_get_current_block();
     if (current_block != NULL) {
+		debug_current_block(current_block);
+
 		pru_block.nominal_rate = current_block->nominal_rate;
 		pru_block.initial_rate = current_block->initial_rate;
 		pru_block.final_rate = current_block->final_rate;
@@ -373,13 +378,13 @@ void ISR(int sign)// ISR(TIMER1_COMPA_vect)
     }
     else {
 /* TODO: FIXME */
+		printf("OCR1A = 2000\n");
         //OCR1A=2000; // 1kHz.
 /* TODO: FIXME */
     }
   }
 
   if (current_block != NULL) {
-	debug_current_block(current_block);
     // Set directions TO DO This should be done once during init of trapezoid. Endstops -> interrupt
     out_bits = current_block->direction_bits;
 
@@ -568,6 +573,11 @@ void ISR(int sign)// ISR(TIMER1_COMPA_vect)
       step_events_completed += 1;
       if(step_events_completed >= current_block->step_event_count) break;
     }
+
+	printf("counter_x = %ld\n",counter_x);
+	printf("step_events_completed = %ld\n",step_events_completed);
+	printf("out_bits = %d\n",out_bits);
+
     // Calculare new timer value
     unsigned short timer;
     unsigned short step_rate;
@@ -583,6 +593,7 @@ void ISR(int sign)// ISR(TIMER1_COMPA_vect)
       // step_rate to timer interval
       timer = calc_timer(acc_step_rate);
       /* TODO: FIXME */
+	  printf("OCR1A = timer = calc_timer(acc_step_rate) = %d (acc_step_rate = %d)\n",timer,acc_step_rate);
       //OCR1A = timer;
       /* TODO: FIXME */
       acceleration_time += timer;
@@ -614,6 +625,7 @@ void ISR(int sign)// ISR(TIMER1_COMPA_vect)
       // step_rate to timer interval
       timer = calc_timer(step_rate);
       /* TODO: FIXME */
+	  printf("OCR1A = timer = calc_timer(step_rate) = %d (step_rate = %d)\n",timer,step_rate);
       //OCR1A = timer;
       /* TODO: FIXME */
       deceleration_time += timer;
@@ -629,6 +641,7 @@ void ISR(int sign)// ISR(TIMER1_COMPA_vect)
     }
     else {
       /* TODO: FIXME */
+	  printf("OCR1A = OCR1A_nominal = %d\n",OCR1A_nominal);
       //OCR1A = OCR1A_nominal;
       /* TODO: FIXME */
       // ensure we're running at the correct step rate, even if we just came off an acceleration
