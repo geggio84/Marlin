@@ -36,8 +36,6 @@
 #include <SPI.h>
 #endif
 
-#define MAX_BUFFER_SIZE		512
-
 //===========================================================================
 //=============================public variables  ============================
 //===========================================================================
@@ -306,7 +304,6 @@ typedef struct {
 // It pops blocks from the block_buffer and executes them by pulsing the stepper pins appropriately.
 void ISR(int sign)// ISR(TIMER1_COMPA_vect)
 {
-	char readBuf[MAX_BUFFER_SIZE];
 	int result = 0;
 	unsigned long tmp;
 	pru_stepper_block pru_block;
