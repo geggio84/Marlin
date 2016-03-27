@@ -583,7 +583,7 @@ void ISR(int sign)// ISR(TIMER1_COMPA_vect)
     unsigned short step_rate;
     if (step_events_completed <= (unsigned long int)current_block->accelerate_until) {
 
-      acc_step_rate = acceleration_time * current_block->acceleration_rate >> 24;
+      acc_step_rate = (((unsigned long long int)((unsigned long long int)acceleration_time * (unsigned long long int)current_block->acceleration_rate) & 0xFFFF000000) >> 24);
       acc_step_rate += current_block->initial_rate;
 
       // upper limit
@@ -609,7 +609,7 @@ void ISR(int sign)// ISR(TIMER1_COMPA_vect)
       #endif
     }
     else if (step_events_completed > (unsigned long int)current_block->decelerate_after) {
-      step_rate = deceleration_time * current_block->acceleration_rate >> 24;
+      step_rate = (((unsigned long long int)((unsigned long long int)deceleration_time * (unsigned long long int)current_block->acceleration_rate) & 0xFFFF000000) >> 24);
 
       if(step_rate > acc_step_rate) { // Check step_rate stays positive
         step_rate = current_block->final_rate;
