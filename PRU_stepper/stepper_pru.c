@@ -60,7 +60,7 @@ unsigned short calc_timer(unsigned short step_rate) {
 	if(step_rate >= (8*256)){ // higher step rate
 		unsigned char tmp_step_rate = (step_rate & 0x00ff);
 		unsigned short gain = speed_lookuptable_fast[(unsigned char)(step_rate>>8)][1];
-		timer = tmp_step_rate * gain >> 16;
+		timer = (unsigned short)((((unsigned int)tmp_step_rate * (unsigned int)gain) & 0xFFFF0000) >> 16);
 		timer = (speed_lookuptable_fast[(unsigned char)(step_rate>>8)][0]) - timer;
 	}
 	else { // lower step rates
@@ -253,7 +253,7 @@ unsigned char do_block(pru_stepper_block *current_block, struct pru_rpmsg_transp
 		unsigned short step_rate;
 		if (step_events_completed <= (unsigned long int)current_block->accelerate_until) {
 
-			acc_step_rate = acceleration_time * current_block->acceleration_rate >> 16;
+			acc_step_rate = (((unsigned long long int)((unsigned long long int)acceleration_time * (unsigned long long int)current_block->acceleration_rate) & 0xFFFF000000) >> 24);
 			acc_step_rate += current_block->initial_rate;
 
 			// upper limit
@@ -267,7 +267,7 @@ unsigned char do_block(pru_stepper_block *current_block, struct pru_rpmsg_transp
 			/* TODO: FIXME */
 			acceleration_time += timer;
 		} else if (step_events_completed > (unsigned long int)current_block->decelerate_after) {
-			step_rate = deceleration_time * current_block->acceleration_rate >> 16;
+			step_rate = (((unsigned long long int)((unsigned long long int)deceleration_time * (unsigned long long int)current_block->acceleration_rate) & 0xFFFF000000) >> 24);
 
 			if(step_rate > acc_step_rate) { // Check step_rate stays positive
 				step_rate = current_block->final_rate;
