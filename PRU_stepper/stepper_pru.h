@@ -40,11 +40,11 @@ typedef struct {
 	long steps_z;
 	long steps_e;  					// Step count along each axis
 	unsigned long step_event_count;	// The number of step events required to complete this block
-	unsigned char direction_bits;	// The direction bit set for this block
+	unsigned long direction_bits;	// The direction bit set for this block
 	long accelerate_until;			// The index of the step event on which to stop acceleration
 	long decelerate_after;			// The index of the step event on which to start decelerating
 	long acceleration_rate;			// The acceleration rate used for acceleration calculation
-	unsigned char enable_endstops;
+	unsigned long enable_endstops;
 } pru_stepper_block;
 
 enum AxisEnum {X_AXIS=0, Y_AXIS=1, Z_AXIS=2, E_AXIS=3};

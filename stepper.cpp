@@ -297,10 +297,11 @@ typedef struct {
 	long steps_z;
 	long steps_e;					// Step count along each axis
 	unsigned long step_event_count;	// The number of step events required to complete this block
-	unsigned char direction_bits;	// The direction bit set for this block
+	unsigned long direction_bits;	// The direction bit set for this block
 	long accelerate_until;			// The index of the step event on which to stop acceleration
 	long decelerate_after;			// The index of the step event on which to start decelerating
 	long acceleration_rate;			// The acceleration rate used for acceleration calculation
+	unsigned long enable_endstops;
 } pru_stepper_block;
 
 // "The Stepper Driver Interrupt" - This timer interrupt is the workhorse.
@@ -333,6 +334,7 @@ void ISR(int sign)// ISR(TIMER1_COMPA_vect)
 		pru_block.accelerate_until = current_block->accelerate_until;
 		pru_block.decelerate_after = current_block->decelerate_after;
 		pru_block.acceleration_rate = current_block->acceleration_rate;
+		pru_block.enable_endstops = (unsigned long)check_endstops;
 		printf("SIZEOF pru_block = %d\n",sizeof(pru_block));
 		/* Send 'pru_stepper_block' to the PRU through the RPMsg channel */
 		result = write(pru_file, &pru_block, sizeof(pru_block));
