@@ -12,6 +12,7 @@
 
 #define MAX_STEP_FREQUENCY 40000 // Max step frequency for Ultimaker (5000 pps / half step)
 #define F_CPU 16000000
+#define STEP_RATE_MIN (F_CPU / 500000)
 
 #define FALSE 0
 #define TRUE 1
