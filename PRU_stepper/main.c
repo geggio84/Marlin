@@ -87,7 +87,7 @@ uint8_t payload[RPMSG_BUF_SIZE];
 void main() {
 	struct pru_rpmsg_transport transport;
 	uint16_t src, dst, len;
-	//char lenght[20];
+	char lenght[20] = "The END!";
 	volatile uint8_t *status;
 	unsigned char endstop_status;
 	pru_stepper_block block;
@@ -130,6 +130,7 @@ void main() {
 						//block.steps_x++;
 						endstop_status = do_block(&block, &transport, dst, src);
 						pru_rpmsg_send(&transport, dst, src, &endstop_status, sizeof(endstop_status));
+						pru_rpmsg_send(&transport, dst, src, &lenght, 8);
 					}
 				}
 			}

@@ -347,7 +347,7 @@ void ISR(int sign)// ISR(TIMER1_COMPA_vect)
 			if(result > 0) {
 				//printf("Message received from PRU:%s\n\n", readBuf);
 				printf("**** read %d bytes = %lu\n",result,tmp);
-				if(result == sizeof(unsigned char)) {
+				if(result == 8) {
 					break;
 				}
 			} else {
