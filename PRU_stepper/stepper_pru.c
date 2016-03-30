@@ -123,7 +123,7 @@ unsigned char do_block(pru_stepper_block *current_block, struct pru_rpmsg_transp
 		if ((out_bits & (1<<X_AXIS)) != 0) {   // stepping along -X axis
 			if(current_block->enable_endstops) {
 				#if defined(X_MIN_PIN) && X_MIN_PIN > -1
-				unsigned char x_min_endstop=(READ(X_MIN_PIN_READ) != X_MIN_ENDSTOP_INVERTING);
+				unsigned char x_min_endstop=(unsigned char)(READ(X_MIN_PIN_READ) != X_MIN_ENDSTOP_INVERTING);
 				if(x_min_endstop && old_x_min_endstop && (current_block->steps_x > 0)) {
 					endstops_trigsteps[X_AXIS] = count_position[X_AXIS];
 					endstop_x_hit=TRUE;
@@ -135,7 +135,7 @@ unsigned char do_block(pru_stepper_block *current_block, struct pru_rpmsg_transp
 		} else { // +direction
 			if(current_block->enable_endstops) {
 				#if defined(X_MAX_PIN) && X_MAX_PIN > -1
-				unsigned char x_max_endstop=(READ(X_MAX_PIN_READ) != X_MAX_ENDSTOP_INVERTING);
+				unsigned char x_max_endstop=(unsigned char)(READ(X_MAX_PIN_READ) != X_MAX_ENDSTOP_INVERTING);
 				if(x_max_endstop && old_x_max_endstop && (current_block->steps_x > 0)) {
 					endstops_trigsteps[X_AXIS] = count_position[X_AXIS];
 					endstop_x_hit=TRUE;
@@ -149,7 +149,7 @@ unsigned char do_block(pru_stepper_block *current_block, struct pru_rpmsg_transp
 		if ((out_bits & (1<<Y_AXIS)) != 0) {   // -direction
 			if(current_block->enable_endstops) {
 				#if defined(Y_MIN_PIN) && Y_MIN_PIN > -1
-				unsigned char y_min_endstop=(READ(Y_MIN_PIN_READ) != Y_MIN_ENDSTOP_INVERTING);
+				unsigned char y_min_endstop=(unsigned char)(READ(Y_MIN_PIN_READ) != Y_MIN_ENDSTOP_INVERTING);
 				if(y_min_endstop && old_y_min_endstop && (current_block->steps_y > 0)) {
 					endstops_trigsteps[Y_AXIS] = count_position[Y_AXIS];
 					endstop_y_hit=TRUE;
@@ -161,7 +161,7 @@ unsigned char do_block(pru_stepper_block *current_block, struct pru_rpmsg_transp
 		} else { // +direction
 			if(current_block->enable_endstops) {
 				#if defined(Y_MAX_PIN) && Y_MAX_PIN > -1
-				unsigned char y_max_endstop=(READ(Y_MAX_PIN_READ) != Y_MAX_ENDSTOP_INVERTING);
+				unsigned char y_max_endstop=(unsigned char)(READ(Y_MAX_PIN_READ) != Y_MAX_ENDSTOP_INVERTING);
 				if(y_max_endstop && old_y_max_endstop && (current_block->steps_y > 0)) {
 					endstops_trigsteps[Y_AXIS] = count_position[Y_AXIS];
 					endstop_y_hit=TRUE;
@@ -177,7 +177,7 @@ unsigned char do_block(pru_stepper_block *current_block, struct pru_rpmsg_transp
 			count_direction[Z_AXIS]=-1;
 			if(current_block->enable_endstops) {
 				#if defined(Z_MIN_PIN) && Z_MIN_PIN > -1
-				unsigned char z_min_endstop=(READ(Z_MIN_PIN_READ) != Z_MIN_ENDSTOP_INVERTING);
+				unsigned char z_min_endstop=(unsigned char)(READ(Z_MIN_PIN_READ) != Z_MIN_ENDSTOP_INVERTING);
 				if(z_min_endstop && old_z_min_endstop && (current_block->steps_z > 0)) {
 					endstops_trigsteps[Z_AXIS] = count_position[Z_AXIS];
 					endstop_z_hit=TRUE;
@@ -191,7 +191,7 @@ unsigned char do_block(pru_stepper_block *current_block, struct pru_rpmsg_transp
 			count_direction[Z_AXIS]=1;
 			if(current_block->enable_endstops) {
 				#if defined(Z_MAX_PIN) && Z_MAX_PIN > -1
-				unsigned char z_max_endstop=(READ(Z_MAX_PIN_READ) != Z_MAX_ENDSTOP_INVERTING);
+				unsigned char z_max_endstop=(unsigned char)(READ(Z_MAX_PIN_READ) != Z_MAX_ENDSTOP_INVERTING);
 				if(z_max_endstop && old_z_max_endstop && (current_block->steps_z > 0)) {
 					endstops_trigsteps[Z_AXIS] = count_position[Z_AXIS];
 					endstop_z_hit=TRUE;

@@ -23,12 +23,12 @@
 #define GPIO2                           0x481AC000                              // The adress of the GPIO2 bank
 #define GPIO3                           0x481AE000                              // The adress of the GPIO3 bank
 
-#define X_MIN_PIN_READ		((*(volatile uint32_t *)(GPIO2 + GPIO_DATAIN)) && 0x4)		// GPIO(2,2)
-#define X_MAX_PIN_READ		((*(volatile uint32_t *)(GPIO2 + GPIO_DATAIN)) && 0x8)		// GPIO(2,3)
-#define Y_MIN_PIN_READ		((*(volatile uint32_t *)(GPIO2 + GPIO_DATAIN)) && 0x20)	// GPIO(2,5)
-#define Y_MAX_PIN_READ		((*(volatile uint32_t *)(GPIO2 + GPIO_DATAIN)) && 0x10)	// GPIO(2,4)
-#define Z_MIN_PIN_READ		((*(volatile uint32_t *)(GPIO0 + GPIO_DATAIN)) && 0x800000)	// GPIO(0,23)
-#define Z_MAX_PIN_READ		((*(volatile uint32_t *)(GPIO0 + GPIO_DATAIN)) && 0x4000000)	// GPIO(0,26)
+#define X_MIN_PIN_READ		(((*(volatile uint32_t *)(GPIO2 + GPIO_DATAIN)) & 0x4) >> 2)		// GPIO(2,2)
+#define X_MAX_PIN_READ		(((*(volatile uint32_t *)(GPIO2 + GPIO_DATAIN)) & 0x8) >> 3)		// GPIO(2,3)
+#define Y_MIN_PIN_READ		(((*(volatile uint32_t *)(GPIO2 + GPIO_DATAIN)) & 0x20) >> 5)	// GPIO(2,5)
+#define Y_MAX_PIN_READ		(((*(volatile uint32_t *)(GPIO2 + GPIO_DATAIN)) & 0x10) >> 4)	// GPIO(2,4)
+#define Z_MIN_PIN_READ		(((*(volatile uint32_t *)(GPIO0 + GPIO_DATAIN)) & 0x800000) >> 23)	// GPIO(0,23)
+#define Z_MAX_PIN_READ		(((*(volatile uint32_t *)(GPIO0 + GPIO_DATAIN)) & 0x4000000) >> 26)	// GPIO(0,26)
 
 #define READ(PIN) ( PIN )
 
