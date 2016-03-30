@@ -9,6 +9,10 @@
 #define STEPPER_PRU_H_
 
 #include <stdint.h>
+#include "../pins.h"
+
+volatile register uint32_t __R30;
+volatile register uint32_t __R31;
 
 #define MAX_STEP_FREQUENCY 40000 // Max step frequency for Ultimaker (5000 pps / half step)
 #define F_CPU 16000000
@@ -41,6 +45,12 @@
 #define Z_MAX_PIN_READ		(((*(volatile uint32_t *)(GPIO0 + GPIO_DATAIN)) & 0x4000000) >> 26)	// GPIO(0,26)
 
 #define READ(PIN) ( PIN )
+
+#define WRITE(PIN,VALUE) (__R30 ^= ((int)-VALUE ^ (int)__R30) & (1 << PIN))
+
+#define WRITE_E_STEP(v) WRITE(E0_STEP_PIN, v)
+#define NORM_E_DIR() WRITE(E0_DIR_PIN, !INVERT_E0_DIR)
+#define REV_E_DIR() WRITE(E0_DIR_PIN, INVERT_E0_DIR)
 
 typedef struct {
 	unsigned long nominal_rate;		// The nominal step rate for this block in step_events/sec

@@ -44,8 +44,6 @@
 #include "stepper_pru.h"
 #include "../pins.h"
 
-volatile register uint32_t __R31;
-
 /* PRU0 is mailbox module user 1 */
 #define MB_USER						1
 /* Mbox0 - mail_u1_irq (mailbox interrupt for PRU0) is Int Number 60 */

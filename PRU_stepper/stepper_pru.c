@@ -105,17 +105,17 @@ unsigned char do_block(pru_stepper_block *current_block, struct pru_rpmsg_transp
 
 		// Set the direction bits
 		if((out_bits & (1<<X_AXIS))!=0){
-			//WRITE(X_DIR_PIN, INVERT_X_DIR);
+			WRITE(X_DIR_PIN, INVERT_X_DIR);
 			count_direction[X_AXIS]=-1;
 		} else {
-			//WRITE(X_DIR_PIN, !INVERT_X_DIR);
+			WRITE(X_DIR_PIN, !INVERT_X_DIR);
 			count_direction[X_AXIS]=1;
 		}
 		if((out_bits & (1<<Y_AXIS))!=0){
-			//WRITE(Y_DIR_PIN, INVERT_Y_DIR);
+			WRITE(Y_DIR_PIN, INVERT_Y_DIR);
 			count_direction[Y_AXIS]=-1;
 		} else {
-			//WRITE(Y_DIR_PIN, !INVERT_Y_DIR);
+			WRITE(Y_DIR_PIN, !INVERT_Y_DIR);
 			count_direction[Y_AXIS]=1;
 		}
 
@@ -173,7 +173,7 @@ unsigned char do_block(pru_stepper_block *current_block, struct pru_rpmsg_transp
 		}
 
 		if ((out_bits & (1<<Z_AXIS)) != 0) {   // -direction
-			//WRITE(Z_DIR_PIN,INVERT_Z_DIR);
+			WRITE(Z_DIR_PIN,INVERT_Z_DIR);
 			count_direction[Z_AXIS]=-1;
 			if(current_block->enable_endstops) {
 				#if defined(Z_MIN_PIN) && Z_MIN_PIN > -1
@@ -187,7 +187,7 @@ unsigned char do_block(pru_stepper_block *current_block, struct pru_rpmsg_transp
 				#endif
 			}
 		} else { // +direction
-			//WRITE(Z_DIR_PIN,!INVERT_Z_DIR);
+			WRITE(Z_DIR_PIN,!INVERT_Z_DIR);
 			count_direction[Z_AXIS]=1;
 			if(current_block->enable_endstops) {
 				#if defined(Z_MAX_PIN) && Z_MAX_PIN > -1
@@ -203,10 +203,10 @@ unsigned char do_block(pru_stepper_block *current_block, struct pru_rpmsg_transp
 		}
 
 		if ((out_bits & (1<<E_AXIS)) != 0) {  // -direction
-			//REV_E_DIR();
+			REV_E_DIR();
 			count_direction[E_AXIS]=-1;
 		} else { // +direction
-			//NORM_E_DIR();
+			NORM_E_DIR();
 			count_direction[E_AXIS]=1;
 		}
 
@@ -214,34 +214,34 @@ unsigned char do_block(pru_stepper_block *current_block, struct pru_rpmsg_transp
 
 			counter_x += current_block->steps_x;
 			if (counter_x > 0) {
-				//WRITE(X_STEP_PIN, !INVERT_X_STEP_PIN);
+				WRITE(X_STEP_PIN, !INVERT_X_STEP_PIN);
 				counter_x -= current_block->step_event_count;
 				count_position[X_AXIS]+=count_direction[X_AXIS];
-				//WRITE(X_STEP_PIN, INVERT_X_STEP_PIN);
+				WRITE(X_STEP_PIN, INVERT_X_STEP_PIN);
 			}
 
 			counter_y += current_block->steps_y;
 			if (counter_y > 0) {
-				//WRITE(Y_STEP_PIN, !INVERT_Y_STEP_PIN);
+				WRITE(Y_STEP_PIN, !INVERT_Y_STEP_PIN);
 				counter_y -= current_block->step_event_count;
 				count_position[Y_AXIS]+=count_direction[Y_AXIS];
-				//WRITE(Y_STEP_PIN, INVERT_Y_STEP_PIN);
+				WRITE(Y_STEP_PIN, INVERT_Y_STEP_PIN);
 			}
 
 			counter_z += current_block->steps_z;
 			if (counter_z > 0) {
-				//WRITE(Z_STEP_PIN, !INVERT_Z_STEP_PIN);
+				WRITE(Z_STEP_PIN, !INVERT_Z_STEP_PIN);
 				counter_z -= current_block->step_event_count;
 				count_position[Z_AXIS]+=count_direction[Z_AXIS];
-				//WRITE(Z_STEP_PIN, INVERT_Z_STEP_PIN);
+				WRITE(Z_STEP_PIN, INVERT_Z_STEP_PIN);
 			}
 
 			counter_e += current_block->steps_e;
 			if (counter_e > 0) {
-				//WRITE_E_STEP(!INVERT_E_STEP_PIN);
+				WRITE_E_STEP(!INVERT_E_STEP_PIN);
 				counter_e -= current_block->step_event_count;
 				count_position[E_AXIS]+=count_direction[E_AXIS];
-				//WRITE_E_STEP(INVERT_E_STEP_PIN);
+				WRITE_E_STEP(INVERT_E_STEP_PIN);
 			}
 
 			step_events_completed += 1;
