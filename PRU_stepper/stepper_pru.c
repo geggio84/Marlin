@@ -14,6 +14,7 @@ static long acceleration_time, deceleration_time;
 static unsigned short acc_step_rate; // needed for deccelaration start point
 static char step_loops;
 static unsigned short OCR1A_nominal;
+static unsigned short OCR1A;
 static unsigned short step_loops_nominal;
 volatile long count_position[4] = { 0, 0, 0, 0};
 volatile signed char count_direction[4] = { 1, 1, 1, 1};
@@ -82,16 +83,14 @@ void trapezoid_generator_reset(pru_stepper_block *current_block) {
 	step_loops_nominal = step_loops;
 	acc_step_rate = current_block->initial_rate;
 	acceleration_time = calc_timer(acc_step_rate);
-/* TODO: FIXME */
-	//OCR1A = acceleration_time;
-/* TODO: FIXME */
+	OCR1A = acceleration_time;
 }
 
 // "The Stepper Driver Interrupt" - This timer interrupt is the workhorse.
 // It pops blocks from the block_buffer and executes them by pulsing the stepper pins appropriately.
 unsigned char do_block(pru_stepper_block *current_block, struct pru_rpmsg_transport *transport, uint32_t src, uint32_t dst)
 {
-	unsigned char i;
+	unsigned short i;
 	trapezoid_generator_reset(current_block);
 	counter_x = -(current_block->step_event_count >> 1);
 	counter_y = counter_x;
@@ -262,9 +261,7 @@ unsigned char do_block(pru_stepper_block *current_block, struct pru_rpmsg_transp
 
 			// step_rate to timer interval
 			timer = calc_timer(acc_step_rate);
-			/* TODO: FIXME */
-			//OCR1A = timer;
-			/* TODO: FIXME */
+			OCR1A = timer;
 			acceleration_time += timer;
 		} else if (step_events_completed > (unsigned long int)current_block->decelerate_after) {
 			step_rate = (((unsigned long long int)((unsigned long long int)deceleration_time * (unsigned long long int)current_block->acceleration_rate) & 0xFFFF000000) >> 24);
@@ -281,19 +278,16 @@ unsigned char do_block(pru_stepper_block *current_block, struct pru_rpmsg_transp
 
 			// step_rate to timer interval
 			timer = calc_timer(step_rate);
-			/* TODO: FIXME */
-			//OCR1A = timer;
-			/* TODO: FIXME */
+			OCR1A = timer;
 			deceleration_time += timer;
 		} else {
-			/* TODO: FIXME */
-			//OCR1A = OCR1A_nominal;
-			/* TODO: FIXME */
+			OCR1A = OCR1A_nominal;
 			// ensure we're running at the correct step rate, even if we just came off an acceleration
 			step_loops = step_loops_nominal;
 		}
 
-		__delay_cycles(20000000);
+		for(i=0; i < OCR1A; i++)
+			__delay_cycles(TIMER_SCALE);
 
 		// If current block is finished, reset pointer
 	} while(step_events_completed < current_block->step_event_count);

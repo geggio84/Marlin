@@ -16,6 +16,10 @@ volatile register uint32_t __R31;
 
 #define MAX_STEP_FREQUENCY 40000 // Max step frequency for Ultimaker (5000 pps / half step)
 #define F_CPU 16000000
+// For now timer has a frequency of 2MHz as in Marlin original code for Arduino
+// 1 / 200 MHz = 5 nsec
+// 1 / 2   MHz = 500 nsec
+#define TIMER_SCALE (100)
 #define STEP_RATE_MIN (F_CPU / 500000)
 
 #define FALSE 0
