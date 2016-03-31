@@ -266,6 +266,9 @@ void ISR(int sign)// ISR(TIMER1_COMPA_vect)
 
       current_block->busy = true;
 
+	  current_block = NULL;
+      plan_discard_current_block();
+
       #ifdef Z_LATE_ENABLE
         if(current_block->steps_z > 0) {
           enable_z();
