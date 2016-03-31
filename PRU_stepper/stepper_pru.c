@@ -295,9 +295,6 @@ unsigned char do_block(pru_stepper_block *current_block, struct pru_rpmsg_transp
 
 		__delay_cycles(20000000);
 
-		while (pru_rpmsg_send(transport, src, dst, &timer, sizeof(timer)) != PRU_RPMSG_SUCCESS);
-		while (pru_rpmsg_send(transport, src, dst, &acc_step_rate, sizeof(acc_step_rate)) != PRU_RPMSG_SUCCESS);
-		while (pru_rpmsg_send(transport, src, dst, &step_rate, sizeof(step_rate)) != PRU_RPMSG_SUCCESS);
 		// If current block is finished, reset pointer
 	} while(step_events_completed < current_block->step_event_count);
 
