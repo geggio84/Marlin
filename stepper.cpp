@@ -480,20 +480,6 @@ void st_init()
 	easyspin_setup(&steppers[Z_AXIS]);
 	easyspin_setup(&steppers[E_AXIS]);
 
-  //Initialize Dir Pins
-  //#if defined(X_DIR_PIN) && X_DIR_PIN > -1
-  //  SET_OUTPUT(X_DIR_PIN);
-  //#endif
-  //#if defined(Y_DIR_PIN) && Y_DIR_PIN > -1
-  //  SET_OUTPUT(Y_DIR_PIN);
-  //#endif
-  //#if defined(Z_DIR_PIN) && Z_DIR_PIN > -1
-  //  SET_OUTPUT(Z_DIR_PIN);
-  //#endif
-  //#if defined(E0_DIR_PIN) && E0_DIR_PIN > -1
-  //  SET_OUTPUT(E0_DIR_PIN);
-  //#endif
-
   //endstops and pullups
 
   #if defined(X_MIN_PIN) && X_MIN_PIN > -1
@@ -538,28 +524,10 @@ void st_init()
     #endif
   #endif
 
-
-  //Initialize Step Pins
-  //#if defined(X_STEP_PIN) && (X_STEP_PIN > -1)
-  //  SET_OUTPUT(X_STEP_PIN);
-  //  WRITE(X_STEP_PIN,INVERT_X_STEP_PIN);
     disable_x();
-  //#endif
-  //#if defined(Y_STEP_PIN) && (Y_STEP_PIN > -1)
-  //  SET_OUTPUT(Y_STEP_PIN);
-  //  WRITE(Y_STEP_PIN,INVERT_Y_STEP_PIN);
     disable_y();
-  //#endif
-  //#if defined(Z_STEP_PIN) && (Z_STEP_PIN > -1)
-  //  SET_OUTPUT(Z_STEP_PIN);
-  //  WRITE(Z_STEP_PIN,INVERT_Z_STEP_PIN);
     disable_z();
-  //#endif
-  //#if defined(E0_STEP_PIN) && (E0_STEP_PIN > -1)
-  //  SET_OUTPUT(E0_STEP_PIN);
-  //  WRITE(E0_STEP_PIN,INVERT_E_STEP_PIN);
     disable_e0();
-  //#endif
 
   ENABLE_STEPPER_DRIVER_INTERRUPT();
 
