@@ -62,11 +62,7 @@ float current_temperature_bed = 0.0;
 #endif
 
 unsigned char soft_pwm_bed;
-  
-#ifdef BABYSTEPPING
-  volatile int babystepsTodo[3]={0,0,0};
-#endif
-  
+
 //===========================================================================
 //=============================private variables============================
 //===========================================================================

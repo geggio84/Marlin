@@ -236,9 +236,6 @@
 	#define MSG_ENDSTOPS_HIT "endstops hit: "
 	#define MSG_ERR_COLD_EXTRUDE_STOP " cold extrusion prevented"
 	#define MSG_ERR_LONG_EXTRUDE_STOP " too long extrusion prevented"
-	#define MSG_BABYSTEPPING_X "Babystepping X"
-	#define MSG_BABYSTEPPING_Y "Babystepping Y"
-	#define MSG_BABYSTEPPING_Z "Babystepping Z"
 	#define MSG_SERIAL_ERROR_MENU_STRUCTURE "Error in menu structure"
 
 #endif
@@ -435,9 +432,6 @@
 	#define MSG_ENDSTOPS_HIT "Wylacznik krancowy zostal wyzwolony na pozycji: "
 	#define MSG_ERR_COLD_EXTRUDE_STOP " uniemozliwiono zimna ekstruzje"
 	#define MSG_ERR_LONG_EXTRUDE_STOP " uniemozliwiono zbyt dluga ekstruzje"
-	#define MSG_BABYSTEPPING_X "Babystepping w osi X"
-	#define MSG_BABYSTEPPING_Y "Babystepping w osi Y"
-	#define MSG_BABYSTEPPING_Z "Babystepping w osi Z"
 	#define MSG_SERIAL_ERROR_MENU_STRUCTURE "Error in menu structure"
 
 #endif
@@ -634,9 +628,6 @@
 	#define MSG_ENDSTOPS_HIT "Fin de course atteint: "
 	#define MSG_ERR_COLD_EXTRUDE_STOP " Extrusion a froid evitee"
 	#define MSG_ERR_LONG_EXTRUDE_STOP " Extrusion longue evitee"
-	#define MSG_BABYSTEPPING_X "Babystepping X"
-	#define MSG_BABYSTEPPING_Y "Babystepping Y"
-	#define MSG_BABYSTEPPING_Z "Babystepping Z"
 	#define MSG_SERIAL_ERROR_MENU_STRUCTURE "Error in menu structure"
 
 #endif
@@ -834,9 +825,6 @@
 	#define MSG_ENDSTOPS_HIT "endstops hit: "
 	#define MSG_ERR_COLD_EXTRUDE_STOP " cold extrusion prevented"
 	#define MSG_ERR_LONG_EXTRUDE_STOP " too long extrusion prevented"
-	#define MSG_BABYSTEPPING_X "Babystepping X"
-	#define MSG_BABYSTEPPING_Y "Babystepping Y"
-	#define MSG_BABYSTEPPING_Z "Babystepping Z"
 	#define MSG_SERIAL_ERROR_MENU_STRUCTURE "Error in menu structure"
 
 #endif
@@ -1038,9 +1026,6 @@
 	#define MSG_ENDSTOPS_HIT "Se ha tocado el fin de carril: "
 	#define MSG_ERR_COLD_EXTRUDE_STOP " extrusion fria evitada"
 	#define MSG_ERR_LONG_EXTRUDE_STOP " extrusion demasiado larga evitada"
-	#define MSG_BABYSTEPPING_X "Babystepping X"
-	#define MSG_BABYSTEPPING_Y "Babystepping Y"
-	#define MSG_BABYSTEPPING_Z "Babystepping Z"
 	#define MSG_SERIAL_ERROR_MENU_STRUCTURE "Error in menu structure"
 
 #endif
@@ -1233,9 +1218,6 @@
 	#define MSG_ENDSTOPS_HIT					"концевик сработал: "
 	#define MSG_ERR_COLD_EXTRUDE_STOP			" защита холодной экструзии"
 	#define MSG_ERR_LONG_EXTRUDE_STOP			" защита превышения длинны экструзии"
-	#define MSG_BABYSTEPPING_X "Babystepping X"
-	#define MSG_BABYSTEPPING_Y "Babystepping Y"
-	#define MSG_BABYSTEPPING_Z "Babystepping Z"
 	#define MSG_SERIAL_ERROR_MENU_STRUCTURE "Error in menu structure"
 
 #endif
@@ -1430,9 +1412,6 @@
 	#define MSG_ENDSTOPS_HIT         "Raggiunto il fondo carrello: "
 	#define MSG_ERR_COLD_EXTRUDE_STOP " prevenuta estrusione fredda"
 	#define MSG_ERR_LONG_EXTRUDE_STOP " prevenuta estrusione troppo lunga"
-	#define MSG_BABYSTEPPING_X "Babystepping X"
-	#define MSG_BABYSTEPPING_Y "Babystepping Y"
-	#define MSG_BABYSTEPPING_Z "Babystepping Z"
 	#define MSG_SERIAL_ERROR_MENU_STRUCTURE "Qualcosa non va in MenuStructure."
 
 #endif
@@ -1633,9 +1612,6 @@
 	#define MSG_ENDSTOPS_HIT "O ponto final foi tocado: "
 	#define MSG_ERR_COLD_EXTRUDE_STOP " Extrusao a frio evitada"
 	#define MSG_ERR_LONG_EXTRUDE_STOP " Extrusao muito larga evitada"
-	#define MSG_BABYSTEPPING_X "Babystepping X"
-	#define MSG_BABYSTEPPING_Y "Babystepping Y"
-	#define MSG_BABYSTEPPING_Z "Babystepping Z"
 	#define MSG_SERIAL_ERROR_MENU_STRUCTURE "Algo esta errado na estrutura do Menu."
 
 #endif
@@ -1830,9 +1806,6 @@
 	#define MSG_ENDSTOPS_HIT "paatyrajat aktivoitu: "
 	#define MSG_ERR_COLD_EXTRUDE_STOP " kylmana pursotus estetty"
 	#define MSG_ERR_LONG_EXTRUDE_STOP " liian pitka pursotus estetty"
-	#define MSG_BABYSTEPPING_X "Babystepping X"
-	#define MSG_BABYSTEPPING_Y "Babystepping Y"
-	#define MSG_BABYSTEPPING_Z "Babystepping Z"
 	#define MSG_ENDSTOP_ABORT "Endstop abort"
 	#define MSG_CONTRAST "Kontrasti"
 	#define MSG_SERIAL_ERROR_MENU_STRUCTURE "Virhe valikon rakenteessa"
@@ -2035,9 +2008,6 @@
 	#define MSG_ENDSTOPS_HIT "S'ha tocau a fin de carril: "
 	#define MSG_ERR_COLD_EXTRUDE_STOP " extrusion fria privada"
 	#define MSG_ERR_LONG_EXTRUDE_STOP " extrusion masiau larga privada"
-	#define MSG_BABYSTEPPING_X "Babystepping X"
-	#define MSG_BABYSTEPPING_Y "Babystepping Y"
-	#define MSG_BABYSTEPPING_Z "Babystepping Z"
 	#define MSG_SERIAL_ERROR_MENU_STRUCTURE "Error in menu structure"
 
 #endif
@@ -2230,9 +2200,6 @@
 	#define MSG_ENDSTOPS_HIT "endstops geraakt: "
 	#define MSG_ERR_COLD_EXTRUDE_STOP " Koude extrusie voorkomen"
 	#define MSG_ERR_LONG_EXTRUDE_STOP " te lange extrusie voorkomen"
-	#define MSG_BABYSTEPPING_X "Babystepping X"
-	#define MSG_BABYSTEPPING_Y "Babystepping Y"
-	#define MSG_BABYSTEPPING_Z "Babystepping Z"
 	#define MSG_SERIAL_ERROR_MENU_STRUCTURE "Fout in menustructuur"
 
 #endif
@@ -2427,9 +2394,6 @@
 	#define MSG_ENDSTOPS_HIT "S'ha tocat el final de carrera: "
 	#define MSG_ERR_COLD_EXTRUDE_STOP " extrusio freda evitada"
 	#define MSG_ERR_LONG_EXTRUDE_STOP " extrusio massa llarga evitada"
-	#define MSG_BABYSTEPPING_X "Babystepping X"
-	#define MSG_BABYSTEPPING_Y "Babystepping Y"
-	#define MSG_BABYSTEPPING_Z "Babystepping Z"
 	#define MSG_SERIAL_ERROR_MENU_STRUCTURE "Error a l'estructura dels menus"
 
 #endif
@@ -2623,9 +2587,6 @@
 	#define MSG_ENDSTOPS_HIT "Bide amaiera ukitu da: "
 	#define MSG_ERR_COLD_EXTRUDE_STOP " estrusio hotza saihestua"
 	#define MSG_ERR_LONG_EXTRUDE_STOP " estrusio oso luzea saihestua"
-	#define MSG_BABYSTEPPING_X "Babystepping X"
-	#define MSG_BABYSTEPPING_Y "Babystepping Y"
-	#define MSG_BABYSTEPPING_Z "Babystepping Z"
 	#define MSG_SERIAL_ERROR_MENU_STRUCTURE "Akatsak menu-an"
 	
 #endif
