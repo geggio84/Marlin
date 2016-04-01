@@ -128,9 +128,6 @@
 #endif //End auto min/max positions
 //END AUTOSET LOCATIONS OF LIMIT SWITCHES -ZP
 
-
-//#define Z_LATE_ENABLE // Enable Z the last moment. Needed if your Z driver overheats.
-
 //homing hits the endstop, then retracts by this distance, before it tries to slowly bump again:
 #define X_HOME_RETRACT_MM 5
 #define Y_HOME_RETRACT_MM 5

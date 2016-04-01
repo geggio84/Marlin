@@ -607,9 +607,7 @@ block->steps_y = labs(target[Y_AXIS]-position[Y_AXIS]);
   //enable active axes
   if(block->steps_x != 0) enable_x();
   if(block->steps_y != 0) enable_y();
-#ifndef Z_LATE_ENABLE
   if(block->steps_z != 0) enable_z();
-#endif
 
   // Enable extruder(s)
   if((block->steps_e == 0) && (DISABLE_INACTIVE_EXTRUDER)) {

@@ -269,14 +269,6 @@ void ISR(int sign)// ISR(TIMER1_COMPA_vect)
 	  current_block = NULL;
       plan_discard_current_block();
 
-      #ifdef Z_LATE_ENABLE
-        if(current_block->steps_z > 0) {
-          enable_z();
-          OCR1A = 2000; //1ms wait
-          return;
-        }
-      #endif
-
 //      #ifdef ADVANCE
 //      e_steps = 0;
 //      #endif
