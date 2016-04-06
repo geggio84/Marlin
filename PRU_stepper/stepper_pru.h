@@ -32,7 +32,7 @@ volatile register uint32_t __R31;
 
 #define INVERT_X_DIR FALSE    // for Mendel set to false, for Orca set to true
 #define INVERT_Y_DIR FALSE    // for Mendel set to true, for Orca set to false
-#define INVERT_Z_DIR TRUE     // for Mendel set to false, for Orca set to true
+#define INVERT_Z_DIR FALSE     // for Mendel set to false, for Orca set to true
 #define INVERT_E0_DIR FALSE   // for direct drive extruder v9 set to true, for geared extruder set to false
 
 #define GPIO_DATAIN                     0x138                                   // This is the register for reading data
