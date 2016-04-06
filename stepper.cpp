@@ -268,16 +268,6 @@ void ISR(int sign)// ISR(TIMER1_COMPA_vect)
 
 	  current_block = NULL;
       plan_discard_current_block();
-
-//      #ifdef ADVANCE
-//      e_steps = 0;
-//      #endif
-    }
-    else {
-/* TODO: FIXME */
-		printf("OCR1A = 2000\n");
-        //OCR1A=2000; // 1kHz.
-/* TODO: FIXME */
     }
   }
 
@@ -436,11 +426,11 @@ void easyspin_setup(easySPIN_stepper *stepper) {
 	if (ret == -1)
 		perror("can't get max speed hz");
 
-	printf("spi mode: 0x%x\n", stepper->spi_device.mode);
-	printf("bits per word: %d\n", stepper->spi_device.bits);
-	printf("max speed: %d Hz (%d KHz)\n", stepper->spi_device.speed, stepper->spi_device.speed/1000);
+	//printf("spi mode: 0x%x\n", stepper->spi_device.mode);
+	//printf("bits per word: %d\n", stepper->spi_device.bits);
+	//printf("max speed: %d Hz (%d KHz)\n", stepper->spi_device.speed, stepper->spi_device.speed/1000);
 
-	printf("##### eMotionControl_Init BEGIN #####\n");
+	//printf("##### eMotionControl_Init BEGIN #####\n");
 	/* easySPIN system init */
 	easySPIN_Disable(&stepper->spi_device);
 

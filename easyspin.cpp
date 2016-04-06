@@ -126,7 +126,7 @@ void easySPIN_Nop(spidev *spi_dev) {
  */
 void easySPIN_SetParam(spidev *spi_dev, easySPIN_Registers_TypeDef param, uint32_t value) {
 
-	printf("####### easySPIN_SetParam nr. 0x%X with value 0x%X #######\n",param,value);
+	//printf("####### easySPIN_SetParam nr. 0x%X with value 0x%X #######\n",param,value);
 	/* Send SetParam operation code to easySPIN */
 	easySPIN_Write_Byte(spi_dev, easySPIN_SET_PARAM | param);
 	switch (param) {
@@ -222,7 +222,7 @@ uint16_t easySPIN_Get_Status(spidev *spi_dev) {
 	/* Send zero byte / receive LSByte from easySPIN */
 	temp = easySPIN_Write_Byte(spi_dev, (uint8_t) (0x00));
 	rx |= temp;
-	printf("easySPIN_Get_Status = 0x%X\n",rx);
+	//printf("easySPIN_Get_Status = 0x%X\n",rx);
 	return rx;
 }
 
