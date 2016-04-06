@@ -58,16 +58,16 @@ void MarlinSerial::begin(long baud, char* serial)
         serial_file = open(serial, O_RDWR | O_NOCTTY | O_NONBLOCK);
         if (serial_file == 0) {
                 printf("Failed to open file %s\n\r",serial);
-                kill();
+                marlin_kill();
         }
         if(!isatty(serial_file)) {
                 printf("Serial file %s is NOT a TTY\n\r",serial);
-                kill();
+                marlin_kill();
         }
         // Set serial port baudrate
         if(tcgetattr(serial_file, &serial_config) < 0){
                 printf("Failed to get serial attribute\n\r");
-                kill();
+                marlin_kill();
         }
         switch (baud)
         {
@@ -106,12 +106,12 @@ void MarlinSerial::begin(long baud, char* serial)
         serial_config.c_cc[VTIME]=5;
         if(cfsetispeed(&serial_config, serial_baud) < 0 || cfsetospeed(&serial_config, serial_baud) < 0) {
                 printf("Failed to set serial baudrate\n\r");
-                kill();
+                marlin_kill();
         }
 
         if(tcsetattr(serial_file, TCSANOW, &serial_config) < 0){
                 printf("Failed to set serial attribute\n\r");
-                kill();
+                marlin_kill();
         }
 }
 

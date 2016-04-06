@@ -121,7 +121,7 @@ void ClearToSend();
 
 void get_coordinates();
 void prepare_move();
-void kill();
+void marlin_kill();
 void Stop();
 
 bool IsStopped();

@@ -45,7 +45,7 @@ ISR(WDT_vect)
     //TODO: This message gets overwritten by the kill() call
     SERIAL_ERROR_START;
     SERIAL_ERRORLNPGM("Something is wrong, please turn off the printer.");
-    kill(); //kill blocks
+    marlin_kill(); //kill blocks
     while(1); //wait for user or serial reset
 }
 #endif//RESET_MANUAL

@@ -636,7 +636,7 @@ int get_command()
 
         //If command was e-stop process now
         if(strcmp(cmdbuffer[bufindw], "M112") == 0)
-          kill();
+          marlin_kill();
         
         bufindw = (bufindw + 1)%BUFSIZE;
         buflen += 1;
@@ -1651,7 +1651,7 @@ void process_commands()
       setWatch();
       break;
     case 112: //  M112 -Emergency Stop
-      kill();
+      marlin_kill();
       break;
     case 140: // M140 set bed temp
       if (code_seen('S')) setTargetBed(code_value());
@@ -2838,7 +2838,7 @@ void manage_inactivity()
 
   if( (millis() - previous_millis_cmd) >  max_inactive_time )
     if(max_inactive_time)
-      kill();
+      marlin_kill();
   if(stepper_inactive_time)  {
     if( (millis() - previous_millis_cmd) >  stepper_inactive_time )
     {
@@ -2862,7 +2862,7 @@ void manage_inactivity()
   
   #if defined(KILL_PIN) && KILL_PIN > -1
     if( 0 == READ(KILL_PIN) )
-      kill();
+      marlin_kill();
   #endif
   #if defined(CONTROLLERFAN_PIN)
     controllerFan(); //Check if fan should be turned on to cool stepper drivers down
@@ -2892,7 +2892,7 @@ void manage_inactivity()
   check_axes_activity();
 }
 
-void kill()
+void marlin_kill()
 {
   disable_heater();
 
@@ -2939,7 +2939,7 @@ void signal_callback_handler(int signum)
   switch (signum) {
         case SIGINT:
                 printf("\nPressed CTR-C\n");
-                kill();
+                marlin_kill();
                 break;
                 // Cleanup and close up stuff here
                 // Terminate program
