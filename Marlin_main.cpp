@@ -2934,7 +2934,7 @@ void marlin_kill()
   exit(0);
 }
 
-void signal_callback_handler(int signum)
+void marlin_main_kill(int signum)
 {
   switch (signum) {
         case SIGINT:

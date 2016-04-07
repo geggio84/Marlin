@@ -81,7 +81,7 @@ void digitalWrite(uint8_t, uint8_t);
 int digitalRead(uint8_t);
 int analogRead(uint8_t);
 void analogWrite(uint8_t, int);
-void signal_callback_handler(int signum);
+void marlin_main_kill(int);
 //Things to write to serial from Program memory. Saves 400 to 2k of RAM.
 FORCE_INLINE void serialprintPGM(const char *str)
 {
