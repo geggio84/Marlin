@@ -762,9 +762,7 @@ void bed_max_temp_error(void) {
   #endif
 }
 
-// Timer 0 is shared with millies
-/* TODO: FIXME */
-void temp_ISR(void)
+void temp_ISR(int sign)
 {
   //these variables are only accesible from the ISR, but static, so they don't lose their value
   static unsigned char temp_count = 0;

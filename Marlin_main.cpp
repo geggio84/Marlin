@@ -515,6 +515,7 @@ int main(int argc, char *argv[])
         printf("PARENT: My PID is %d\n", getpid());
         printf("PARENT: My child's PID is %d\n", pid_val);
 		signal(SIGUSR1, stepper_handler);
+		signal(SIGUSR2, temp_ISR);
 		break;
     }
 	
@@ -554,7 +555,6 @@ int loop()
     bufindr = (bufindr + 1)%BUFSIZE;
   }
   //check heater every n milliseconds
-  temp_ISR();
   manage_heater();
   manage_inactivity();
   checkHitEndstops();
