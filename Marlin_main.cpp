@@ -2925,6 +2925,8 @@ void marlin_kill()
   disable_y();
   disable_z();
   disable_e0();
+  
+  setPwmFrequency(CONTROLLERFAN_PIN, 0);
 
   #if defined(STEPPER_ENABLEn_PIN) && STEPPER_ENABLEn_PIN > -1
   WRITE(STEPPER_ENABLEn_PIN, HIGH);
