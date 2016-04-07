@@ -213,7 +213,7 @@ typedef struct {
 void stepper_wait_loop()
 {
 	while(1) {
-		usleep(100000);
+		usleep(10000);
 		kill(getppid(), SIGUSR1);
 	}
 }
