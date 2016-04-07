@@ -261,14 +261,10 @@ void stepper_handler(int sign)
 		tmp = 0;
 		result = read(pru_file, &tmp, sizeof(unsigned long));
 		if(result > 0) {
-			//printf("Message received from PRU:%s\n\n", readBuf);
-			printf("**** read %d bytes = %lu\n",result,tmp);
 			if(result == 8) {
 				current_block = NULL;
 				plan_discard_current_block();
 			}
-		} else {
-			printf("read EOF\n");
 		}
 	}
 
