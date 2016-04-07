@@ -31,7 +31,8 @@
 extern bool abort_on_endstop_hit;
 #endif
 
-void ISR(int sign);
+void stepper_wait_loop();
+void stepper_handler(int sign);
 
 // Initialize and start the stepper motor subsystem
 void st_init();

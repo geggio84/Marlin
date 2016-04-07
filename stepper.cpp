@@ -210,16 +210,21 @@ typedef struct {
 	unsigned long enable_endstops;
 } pru_stepper_block;
 
+void stepper_wait_loop()
+{
+	while(1) {
+		usleep(100000);
+		kill(getppid(), SIGUSR1);
+	}
+}
+
 // "The Stepper Driver Interrupt" - This timer interrupt is the workhorse.
 // It pops blocks from the block_buffer and executes them by pulsing the stepper pins appropriately.
-void ISR(int sign)// ISR(TIMER1_COMPA_vect)
+void stepper_handler(int sign)
 {
 	int result = 0;
 	unsigned long tmp;
 	pru_stepper_block pru_block;
-
-  printf("########################################\n");
-  printf("I'm Alive\n\r");
 
   // If there is no current block, attempt to pop one from the buffer
   if (current_block == NULL) {
@@ -247,32 +252,26 @@ void ISR(int sign)// ISR(TIMER1_COMPA_vect)
 		if(result > 0)
 			printf("Message: Sent to PRU\n");
 
-		while(1) {
-			usleep(1000);
-			/* Poll until we receive a message from the PRU and then print it */
-			tmp = 0;
-			result = read(pru_file, &tmp, sizeof(unsigned long));
-			if(result > 0) {
-				//printf("Message received from PRU:%s\n\n", readBuf);
-				printf("**** read %d bytes = %lu\n",result,tmp);
-				if(result == 8) {
-					break;
-				}
-			} else {
-				printf("read EOF\n");
-				break;
-			}
-		}
-
-      current_block->busy = true;
-
-	  current_block = NULL;
-      plan_discard_current_block();
+		current_block->busy = true;
     }
   }
 
-  signal(SIGALRM, ISR); //Set alarm clock for 1 second
-  alarm(1);
+	if (current_block != NULL) {
+		/* Poll until we receive a message from the PRU and then print it */
+		tmp = 0;
+		result = read(pru_file, &tmp, sizeof(unsigned long));
+		if(result > 0) {
+			//printf("Message received from PRU:%s\n\n", readBuf);
+			printf("**** read %d bytes = %lu\n",result,tmp);
+			if(result == 8) {
+				current_block = NULL;
+				plan_discard_current_block();
+			}
+		} else {
+			printf("read EOF\n");
+		}
+	}
+
 }
 
 #ifdef ADVANCE
@@ -455,7 +454,7 @@ void st_init()
 
 	/* Standby-reset deactivation */
 	easySPIN_Reset(easySPIN_STBY_RESET_GPIO);
-	sleep(1);
+	usleep(100000);
 	/* Standby-reset deactivation */
 	easySPIN_ReleaseReset(easySPIN_STBY_RESET_GPIO);
 

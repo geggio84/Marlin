@@ -179,6 +179,7 @@ myFILE *log_file;
 FILE *config_file;
 int serial_file;
 int pru_file;
+pid_t pid_val;
 
 #ifdef SDSUPPORT
 CardReader card;
@@ -491,17 +492,38 @@ int main(int argc, char *argv[])
 {   
     struct timeval tv;
     
+	// Fork new child process
+	switch(pid_val = fork()) {
+    case -1:
+        perror("fork\n");  /* something went wrong */
+        exit(1);         /* parent exits */
+		break;
+
+    case 0:
+        printf(" CHILD: This is the child process!\n");
+        printf(" CHILD: My PID is %d\n", getpid());
+        printf(" CHILD: My parent's PID is %d\n", getppid());
+		signal(SIGINT, stepper_wait_kill);
+		sleep(1);
+		stepper_wait_loop();
+		break;
+
+    default:
+        printf("PARENT: This is the parent process!\n");
+        printf("PARENT: My PID is %d\n", getpid());
+        printf("PARENT: My child's PID is %d\n", pid_val);
+		signal(SIGUSR1, stepper_handler);
+		break;
+    }
+	
     // Register signal and signal handler
-    signal(SIGALRM, ISR);
-    signal(SIGINT, signal_callback_handler);
+    signal(SIGINT, marlin_main_kill);
     gettimeofday(&tv,NULL);
     time_zero = tv.tv_sec * 1000 + tv.tv_usec / 1000L;
     header();
 
     // Setup
     setup();
-
-	alarm(3);
 
     while(1)
     {
@@ -534,6 +556,7 @@ int loop()
   manage_heater();
   manage_inactivity();
   checkHitEndstops();
+  // delay 100ms
   usleep(100000);
   return 0;
 }
@@ -2939,12 +2962,20 @@ void marlin_main_kill(int signum)
   switch (signum) {
         case SIGINT:
                 printf("\nPressed CTR-C\n");
+				kill(pid_val,SIGINT);
+				usleep(10000);
                 marlin_kill();
                 break;
                 // Cleanup and close up stuff here
                 // Terminate program
       default : break;
   }
+}
+
+void stepper_wait_kill(int signum)
+{
+	printf("CHILD: Exit");
+	exit(0);
 }
 
 void Stop()
