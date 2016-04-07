@@ -233,7 +233,7 @@ void stepper_handler(int sign)
     // Anything in the buffer?
     current_block = plan_get_current_block();
     if (current_block != NULL) {
-		debug_current_block(current_block);
+		//debug_current_block(current_block);
 
 		pru_block.nominal_rate = current_block->nominal_rate;
 		pru_block.initial_rate = current_block->initial_rate;
@@ -248,7 +248,7 @@ void stepper_handler(int sign)
 		pru_block.decelerate_after = current_block->decelerate_after;
 		pru_block.acceleration_rate = current_block->acceleration_rate;
 		pru_block.enable_endstops = (unsigned long)check_endstops;
-		printf("SIZEOF pru_block = %d\n",sizeof(pru_block));
+		//printf("SIZEOF pru_block = %d\n",sizeof(pru_block));
 		/* Send 'pru_stepper_block' to the PRU through the RPMsg channel */
 		result = write(pru_file, &pru_block, sizeof(pru_block));
 		if(result > 0)
