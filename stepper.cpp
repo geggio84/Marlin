@@ -213,9 +213,9 @@ typedef struct {
 void stepper_wait_loop()
 {
 	while(1) {
-		usleep(10000);
+		usleep(5000);
 		kill(getppid(), SIGUSR1);
-		usleep(10000);
+		usleep(5000);
 		kill(getppid(), SIGUSR2);
 	}
 }
