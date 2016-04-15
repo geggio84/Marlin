@@ -488,7 +488,7 @@ const bool Z_MAX_ENDSTOP_INVERTING = true; // set to true to invert the logic of
  * Stepper Gear 9 Teeth
  * Screw Gear 25 Teeth
  *********************************************/
-#define E_RATIO ( (9.0 / 25.0) * 2 )
+#define E_RATIO ( (9.0 / 25.0) * 24.5 )
 
 #define DEFAULT_X_MICROSTEPS	4
 #define DEFAULT_Y_MICROSTEPS	4
