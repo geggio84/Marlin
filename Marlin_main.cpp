@@ -179,7 +179,7 @@ myFILE *log_file;
 FILE *config_file;
 int serial_file;
 int pru_file;
-pid_t pid_val;
+pid_t pid_val[2] = { 0 , 0 };
 
 #ifdef SDSUPPORT
 CardReader card;
@@ -493,32 +493,42 @@ void usage()
 int main(int argc, char *argv[])
 {   
     struct timeval tv;
+	int i;
     
 	// Fork new child process
-	switch(pid_val = fork()) {
-    case -1:
-        perror("fork\n");  /* something went wrong */
-        exit(1);         /* parent exits */
-		break;
+	for (i=0; i<2; i++)
+    {
+		switch(pid_val[i] = fork()) {
+		case -1:
+			perror("fork\n");  /* something went wrong */
+			exit(1);         /* parent exits */
+			break;
 
-    case 0:
-        printf(" CHILD: This is the child process!\n");
-        printf(" CHILD: My PID is %d\n", getpid());
-        printf(" CHILD: My parent's PID is %d\n", getppid());
-		signal(SIGINT, stepper_wait_kill);
-		sleep(1);
-		stepper_wait_loop();
-		break;
+		case 0:
+			printf(" CHILD: This is the child process!\n");
+			printf(" CHILD: My PID is %d\n", getpid());
+			printf(" CHILD: My parent's PID is %d\n", getppid());
+			if(pid_val[0] == 0) {
+				signal(SIGINT, stepper_wait_kill);
+				sleep(1);
+				stepper_wait_loop();
+			} else {
+				signal(SIGINT, temp_read_kill);
+				sleep(1);
+				temp_read_loop();
+			}
+			break;
 
-    default:
-        printf("PARENT: This is the parent process!\n");
-        printf("PARENT: My PID is %d\n", getpid());
-        printf("PARENT: My child's PID is %d\n", pid_val);
-		signal(SIGUSR1, stepper_handler);
-		signal(SIGUSR2, temp_ISR);
-		break;
-    }
-	
+		default:
+			printf("PARENT: This is the parent process!\n");
+			printf("PARENT: My PID is %d\n", getpid());
+			printf("PARENT: My child's PID are %d and %d\n", pid_val[0], pid_val[1]);
+			signal(SIGUSR1, stepper_handler);
+			signal(SIGUSR2, temp_ISR);
+			break;
+		}
+	}
+
     // Register signal and signal handler
     signal(SIGINT, marlin_main_kill);
     gettimeofday(&tv,NULL);
@@ -2966,8 +2976,9 @@ void marlin_main_kill(int signum)
   switch (signum) {
         case SIGINT:
                 printf("\nPressed CTR-C\n");
-				kill(pid_val,SIGINT);
-				usleep(10000);
+				kill(pid_val[0],SIGINT);
+				kill(pid_val[1],SIGINT);
+				wait(NULL);
                 marlin_kill();
                 break;
                 // Cleanup and close up stuff here
@@ -2978,7 +2989,13 @@ void marlin_main_kill(int signum)
 
 void stepper_wait_kill(int signum)
 {
-	printf("CHILD: Exit");
+	printf("CHILD Stepper: Exit\n");
+	exit(0);
+}
+
+void temp_read_kill(int signum)
+{
+	printf("CHILD Temperature: Exit\n");
 	exit(0);
 }
 

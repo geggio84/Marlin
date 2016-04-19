@@ -61,6 +61,7 @@ extern float current_temperature_bed;
 //high level conversion routines, for use outside of temperature.cpp
 //inline so that there is no performance decrease.
 //deg=degreeCelsius
+void temp_read_loop(void);
 void temp_ISR(int sign);
 
 FORCE_INLINE float degHotend() {

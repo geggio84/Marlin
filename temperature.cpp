@@ -133,6 +133,14 @@ unsigned long watchmillis = 0;
 //=============================   functions      ============================
 //===========================================================================
 
+void temp_read_loop()
+{
+	while(1) {
+		usleep(50000);
+		kill(getppid(), SIGUSR2);
+	}
+}
+
 void PID_autotune(float temp, int extruder, int ncycles)
 {
   float input = 0.0;
