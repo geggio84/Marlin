@@ -210,9 +210,10 @@ typedef struct {
 	unsigned long enable_endstops;
 } pru_stepper_block;
 
-void stepper_wait_loop()
+void stepper_wait_loop(unsigned int *count)
 {
 	while(1) {
+		*count = *count + 1;
 		usleep(5000);
 		kill(getppid(), SIGUSR1);
 	}

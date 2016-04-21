@@ -181,6 +181,8 @@ int serial_file;
 int pru_file;
 pid_t pid_val[2] = { 0 , 0 };
 
+unsigned int *result;
+
 #ifdef SDSUPPORT
 CardReader card;
 #endif
@@ -494,7 +496,20 @@ int main(int argc, char *argv[])
 {   
     struct timeval tv;
 	int i;
+	int shm_descr = -1;
+	int integerSize = sizeof(unsigned int);
     
+	// Open the shared memory.
+	shm_descr = shm_open(SHM_FILE, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
+	
+	// Size up the shared memory.
+	ftruncate(shm_descr, integerSize);
+	
+	result = mmap(NULL, integerSize, PROT_WRITE | PROT_READ, MAP_SHARED, shm_descr, 0 );
+
+	perror("mmap");
+	printf("%X\n", result);
+
 	// Fork new child process
 	for (i=0; i<2; i++)
     {
@@ -511,7 +526,7 @@ int main(int argc, char *argv[])
 			if(pid_val[0] == 0) {
 				signal(SIGINT, stepper_wait_kill);
 				sleep(1);
-				stepper_wait_loop();
+				stepper_wait_loop(result);
 			} else {
 				signal(SIGINT, temp_read_kill);
 				sleep(1);
@@ -2979,6 +2994,7 @@ void marlin_main_kill(int signum)
 				kill(pid_val[0],SIGINT);
 				kill(pid_val[1],SIGINT);
 				wait(NULL);
+				printf ("Parent reads <%u>\n",*result);
                 marlin_kill();
                 break;
                 // Cleanup and close up stuff here

@@ -14,6 +14,10 @@
 #include <inttypes.h>
 #include <sys/time.h>
 #include <sys/wait.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
+#include <unistd.h>
+#include <sys/mman.h>
 #include <time.h>
 #include <unistd.h>
 #include <termios.h>
@@ -157,6 +161,8 @@ extern float zprobe_zoffset;
 extern int fanSpeed;
 extern easySPIN_stepper steppers[4];
 extern int pru_file;
+
+#define SHM_FILE "/shared_mem"
 
 #ifdef FAN_SOFT_PWM
 extern unsigned char fanSpeedSoftPwm;
