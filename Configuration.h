@@ -298,7 +298,7 @@ const bool Z_MAX_ENDSTOP_INVERTING = true; // set to true to invert the logic of
 #define X_TON_MIN		0x00
 #define X_TOFF_MIN		0x01
 #define X_OCD_TH		easySPIN_OCD_TH_2625mA
-#define X_STEP_MODE		easySPIN_STEP_SEL_1_4 | easySPIN_SYNC_SEL_1_2
+#define X_STEP_MODE		easySPIN_STEP_SEL_1_16 | easySPIN_SYNC_SEL_1_2
 #define X_ALARM_EN		  easySPIN_ALARM_EN_OVERCURRENT \
 						| easySPIN_ALARM_EN_THERMAL_SHUTDOWN \
 						| easySPIN_ALARM_EN_THERMAL_WARNING \
@@ -314,7 +314,7 @@ const bool Z_MAX_ENDSTOP_INVERTING = true; // set to true to invert the logic of
 #define Y_TON_MIN		0x00
 #define Y_TOFF_MIN		0x01
 #define Y_OCD_TH		easySPIN_OCD_TH_2625mA
-#define Y_STEP_MODE		easySPIN_STEP_SEL_1_4 | easySPIN_SYNC_SEL_1_2
+#define Y_STEP_MODE		easySPIN_STEP_SEL_1_16 | easySPIN_SYNC_SEL_1_2
 #define Y_ALARM_EN		  easySPIN_ALARM_EN_OVERCURRENT \
 						| easySPIN_ALARM_EN_THERMAL_SHUTDOWN \
 						| easySPIN_ALARM_EN_THERMAL_WARNING \
@@ -330,7 +330,7 @@ const bool Z_MAX_ENDSTOP_INVERTING = true; // set to true to invert the logic of
 #define Z_TON_MIN		0x00
 #define Z_TOFF_MIN		0x01
 #define Z_OCD_TH		easySPIN_OCD_TH_2625mA
-#define Z_STEP_MODE		easySPIN_STEP_SEL_1_4 | easySPIN_SYNC_SEL_1_2
+#define Z_STEP_MODE		easySPIN_STEP_SEL_1_16 | easySPIN_SYNC_SEL_1_2
 #define Z_ALARM_EN		  easySPIN_ALARM_EN_OVERCURRENT \
 						| easySPIN_ALARM_EN_THERMAL_SHUTDOWN \
 						| easySPIN_ALARM_EN_THERMAL_WARNING \
@@ -346,7 +346,7 @@ const bool Z_MAX_ENDSTOP_INVERTING = true; // set to true to invert the logic of
 #define E_TON_MIN		0x00
 #define E_TOFF_MIN		0x01
 #define E_OCD_TH		easySPIN_OCD_TH_2625mA
-#define E_STEP_MODE		easySPIN_STEP_SEL_1_4 | easySPIN_SYNC_SEL_1_2
+#define E_STEP_MODE		easySPIN_STEP_SEL_1_16 | easySPIN_SYNC_SEL_1_2
 #define E_ALARM_EN		  easySPIN_ALARM_EN_OVERCURRENT \
 						| easySPIN_ALARM_EN_THERMAL_SHUTDOWN \
 						| easySPIN_ALARM_EN_THERMAL_WARNING \
@@ -490,10 +490,10 @@ const bool Z_MAX_ENDSTOP_INVERTING = true; // set to true to invert the logic of
  *********************************************/
 #define E_RATIO ( (9.0 / 25.0) * 24.5 )
 
-#define DEFAULT_X_MICROSTEPS	4
-#define DEFAULT_Y_MICROSTEPS	4
-#define DEFAULT_Z_MICROSTEPS	4
-#define DEFAULT_E_MICROSTEPS	4
+#define DEFAULT_X_MICROSTEPS	16
+#define DEFAULT_Y_MICROSTEPS	16
+#define DEFAULT_Z_MICROSTEPS	16
+#define DEFAULT_E_MICROSTEPS	16
 
 #define X_STEPS_PER_UNIT ( ( X_STEPS_PER_REV * DEFAULT_X_MICROSTEPS ) / X_RATIO )
 #define Y_STEPS_PER_UNIT ( ( Y_STEPS_PER_REV * DEFAULT_Y_MICROSTEPS ) / Y_RATIO )
