@@ -39,7 +39,7 @@ typedef struct {
   long accelerate_until;                    // The index of the step event on which to stop acceleration
   long decelerate_after;                    // The index of the step event on which to start decelerating
   long acceleration_rate;                   // The acceleration rate used for acceleration calculation
-  unsigned char direction_bits;             // The direction bit set for this block (refers to *_DIRECTION_BIT in config.h)
+  unsigned int direction_bits;             // The direction bit set for this block (refers to *_DIRECTION_BIT in config.h)
   #ifdef ADVANCE
     long advance_rate;
     volatile long initial_advance;
@@ -54,8 +54,8 @@ typedef struct {
   float max_entry_speed;                             // Maximum allowable junction entry speed in mm/sec
   float millimeters;                                 // The total travel of this block in mm
   float acceleration;                                // acceleration mm/sec^2
-  unsigned char recalculate_flag;                    // Planner flag to recalculate trapezoids on entry junction
-  unsigned char nominal_length_flag;                 // Planner flag for nominal speed always reached
+  unsigned int recalculate_flag;                    // Planner flag to recalculate trapezoids on entry junction
+  unsigned int nominal_length_flag;                 // Planner flag for nominal speed always reached
 
   // Settings for the trapezoid generator
   unsigned long nominal_rate;                        // The nominal step rate for this block in step_events/sec 
@@ -63,8 +63,15 @@ typedef struct {
   unsigned long final_rate;                          // The minimal rate at exit
   unsigned long acceleration_st;                     // acceleration steps/sec^2
   unsigned long fan_speed;
-  volatile char busy;
+  volatile int busy;
 } block_t;
+
+typedef struct {
+	block_t block_buffer[BLOCK_BUFFER_SIZE];            // A ring buffer for motion instfructions
+	unsigned int block_buffer_head;           // Index of the next block to be pushed
+	unsigned int block_buffer_tail;           // Index of the block to process now
+	unsigned int check_endstops;
+} stepper_block_t;
 
 #ifdef ENABLE_AUTO_BED_LEVELING
 // this holds the required transform to compensate for bed level
@@ -123,25 +130,27 @@ extern unsigned long axis_steps_per_sqr_second[NUM_AXIS];
     
 
 
-extern block_t block_buffer[BLOCK_BUFFER_SIZE];            // A ring buffer for motion instfructions
-extern volatile unsigned char block_buffer_head;           // Index of the next block to be pushed
-extern volatile unsigned char block_buffer_tail; 
+extern block_t *block_buffer[BLOCK_BUFFER_SIZE];            // A ring buffer for motion instfructions
+extern unsigned int *block_buffer_head;           // Index of the next block to be pushed
+extern unsigned int *block_buffer_tail; 
+extern stepper_block_t stepper_block_buffer;
 // Called when the current block is no longer needed. Discards the block and makes the memory
 // availible for new blocks.    
 FORCE_INLINE void plan_discard_current_block()  
 {
-  if (block_buffer_head != block_buffer_tail) {
-    block_buffer_tail = (block_buffer_tail + 1) & (BLOCK_BUFFER_SIZE - 1);  
+  if (*block_buffer_head != *block_buffer_tail) {
+    *block_buffer_tail = (*block_buffer_tail + 1) & (BLOCK_BUFFER_SIZE - 1);  
   }
 }
 
 // Gets the current block. Returns NULL if buffer empty
 FORCE_INLINE block_t *plan_get_current_block() 
 {
-  if (block_buffer_head == block_buffer_tail) { 
+	//printf("*block_buffer_head = %d ---- *block_buffer_tail = %d\n",*block_buffer_head,*block_buffer_tail);
+  if (*block_buffer_head == *block_buffer_tail) { 
     return(NULL); 
   }
-  block_t *block = &block_buffer[block_buffer_tail];
+  block_t *block = block_buffer[*block_buffer_tail];
   block->busy = true;
   return(block);
 }
@@ -149,7 +158,7 @@ FORCE_INLINE block_t *plan_get_current_block()
 // Returns true if the buffer has a queued block, false otherwise
 FORCE_INLINE bool blocks_queued() 
 {
-  if (block_buffer_head == block_buffer_tail) { 
+  if (*block_buffer_head == *block_buffer_tail) { 
     return false; 
   }
   else

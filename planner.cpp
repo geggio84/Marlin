@@ -98,9 +98,11 @@ bool autotemp_enabled=false;
 //===========================================================================
 //=================semi-private variables, used in inline  functions    =====
 //===========================================================================
-block_t block_buffer[BLOCK_BUFFER_SIZE];            // A ring buffer for motion instfructions
-volatile unsigned char block_buffer_head;           // Index of the next block to be pushed
-volatile unsigned char block_buffer_tail;           // Index of the block to process now
+block_t *block_buffer[BLOCK_BUFFER_SIZE];            // A ring buffer for motion instfructions
+unsigned int *block_buffer_head;           // Index of the next block to be pushed
+unsigned int *block_buffer_tail;           // Index of the block to process now
+
+stepper_block_t stepper_block_buffer;            // A ring buffer for motion instfructions
 
 //===========================================================================
 //=============================private variables ============================
@@ -269,22 +271,22 @@ void planner_reverse_pass_kernel(block_t *previous, block_t *current, block_t *n
 // planner_recalculate() needs to go over the current plan twice. Once in reverse and once forward. This 
 // implements the reverse pass.
 void planner_reverse_pass() {
-  uint8_t block_index = block_buffer_head;
+  uint8_t block_index = *block_buffer_head;
   
   //Make a local copy of block_buffer_tail, because the interrupt can alter it
   CRITICAL_SECTION_START;
-  unsigned char tail = block_buffer_tail;
+  unsigned char tail = *block_buffer_tail;
   CRITICAL_SECTION_END
   
-  if(((block_buffer_head-tail + BLOCK_BUFFER_SIZE) & (BLOCK_BUFFER_SIZE - 1)) > 3) {
-    block_index = (block_buffer_head - 3) & (BLOCK_BUFFER_SIZE - 1);
+  if(((*block_buffer_head-tail + BLOCK_BUFFER_SIZE) & (BLOCK_BUFFER_SIZE - 1)) > 3) {
+    block_index = (*block_buffer_head - 3) & (BLOCK_BUFFER_SIZE - 1);
     block_t *block[3] = { 
       NULL, NULL, NULL         };
     while(block_index != tail) { 
       block_index = prev_block_index(block_index); 
       block[2]= block[1];
       block[1]= block[0];
-      block[0] = &block_buffer[block_index];
+      block[0] = block_buffer[block_index];
       planner_reverse_pass_kernel(block[0], block[1], block[2]);
     }
   }
@@ -317,14 +319,14 @@ void planner_forward_pass_kernel(block_t *previous, block_t *current, block_t *n
 // planner_recalculate() needs to go over the current plan twice. Once in reverse and once forward. This 
 // implements the forward pass.
 void planner_forward_pass() {
-  uint8_t block_index = block_buffer_tail;
+  uint8_t block_index = *block_buffer_tail;
   block_t *block[3] = { 
     NULL, NULL, NULL   };
 
-  while(block_index != block_buffer_head) {
+  while(block_index != *block_buffer_head) {
     block[0] = block[1];
     block[1] = block[2];
-    block[2] = &block_buffer[block_index];
+    block[2] = block_buffer[block_index];
     planner_forward_pass_kernel(block[0],block[1],block[2]);
     block_index = next_block_index(block_index);
   }
@@ -335,13 +337,13 @@ void planner_forward_pass() {
 // entry_factor for each junction. Must be called by planner_recalculate() after 
 // updating the blocks.
 void planner_recalculate_trapezoids() {
-  int8_t block_index = block_buffer_tail;
+  uint8_t block_index = *block_buffer_tail;
   block_t *current;
   block_t *next = NULL;
 
-  while(block_index != block_buffer_head) {
+  while(block_index != *block_buffer_head) {
     current = next;
-    next = &block_buffer[block_index];
+    next = block_buffer[block_index];
     if (current) {
       // Recalculate if current block entry or exit junction speed has changed.
       if (current->recalculate_flag || next->recalculate_flag) {
@@ -385,8 +387,8 @@ void planner_recalculate() {
 }
 
 void plan_init() {
-  block_buffer_head = 0;
-  block_buffer_tail = 0;
+  *block_buffer_head = 0;
+  *block_buffer_tail = 0;
   memset(position, 0, sizeof(position)); // clear position
   previous_speed[0] = 0.0;
   previous_speed[1] = 0.0;
@@ -410,13 +412,13 @@ void getHighESpeed()
   }
 
   float high=0.0;
-  uint8_t block_index = block_buffer_tail;
+  uint8_t block_index = *block_buffer_tail;
 
-  while(block_index != block_buffer_head) {
-    if((block_buffer[block_index].steps_x != 0) ||
-      (block_buffer[block_index].steps_y != 0) ||
-      (block_buffer[block_index].steps_z != 0)) {
-      float se=(float(block_buffer[block_index].steps_e)/float(block_buffer[block_index].step_event_count))*block_buffer[block_index].nominal_speed;
+  while(block_index != *block_buffer_head) {
+    if((block_buffer[block_index]->steps_x != 0) ||
+      (block_buffer[block_index]->steps_y != 0) ||
+      (block_buffer[block_index]->steps_z != 0)) {
+      float se=(float(block_buffer[block_index]->steps_e)/float(block_buffer[block_index]->step_event_count))*block_buffer[block_index]->nominal_speed;
       //se; mm/sec;
       if(se>high)
       {
@@ -452,16 +454,16 @@ void check_axes_activity()
   #endif
   block_t *block;
 
-  if(block_buffer_tail != block_buffer_head)
+  if(*block_buffer_tail != *block_buffer_head)
   {
-    uint8_t block_index = block_buffer_tail;
+    uint8_t block_index = *block_buffer_tail;
 	#if defined(FAN_PIN) && FAN_PIN > -1
-    tail_fan_speed = block_buffer[block_index].fan_speed;
+    tail_fan_speed = block_buffer[block_index]->fan_speed;
 	#endif
 
-    while(block_index != block_buffer_head)
+    while(block_index != *block_buffer_head)
     {
-      block = &block_buffer[block_index];
+      block = block_buffer[block_index];
       if(block->steps_x != 0) x_active++;
       if(block->steps_y != 0) y_active++;
       if(block->steps_z != 0) z_active++;
@@ -514,11 +516,11 @@ void plan_buffer_line(const float &x, const float &y, const float &z, const floa
 #endif  //ENABLE_AUTO_BED_LEVELING
 {
   // Calculate the buffer head after we push this byte
-  int next_buffer_head = next_block_index(block_buffer_head);
+  uint8_t next_buffer_head = next_block_index(*block_buffer_head);
 
   // If the buffer is full: good! That means we are well ahead of the robot. 
   // Rest here until there is room in the buffer.
-  while(block_buffer_tail == next_buffer_head)
+  while(*block_buffer_tail == next_buffer_head)
   {
     manage_heater(); 
     manage_inactivity(); 
@@ -559,7 +561,7 @@ void plan_buffer_line(const float &x, const float &y, const float &z, const floa
   #endif
 
   // Prepare to set up new block
-  block_t *block = &block_buffer[block_buffer_head];
+  block_t *block = block_buffer[*block_buffer_head];
 
   // Mark block as not busy (Not executed by the stepper interrupt)
   block->busy = false;
@@ -643,7 +645,7 @@ block->steps_y = labs(target[Y_AXIS]-position[Y_AXIS]);
     // Calculate speed in mm/second for each axis. No divide by zero due to previous checks.
   float inverse_second = feed_rate * inverse_millimeters;
 
-  int moves_queued=(block_buffer_head-block_buffer_tail + BLOCK_BUFFER_SIZE) & (BLOCK_BUFFER_SIZE - 1);
+  int moves_queued=(*block_buffer_head-*block_buffer_tail + BLOCK_BUFFER_SIZE) & (BLOCK_BUFFER_SIZE - 1);
 
   // slow down when de buffer starts to empty, rather than wait at the corner for a buffer refill
 #ifdef OLD_SLOWDOWN
@@ -769,7 +771,7 @@ block->steps_y = labs(target[Y_AXIS]-position[Y_AXIS]);
   double vmax_junction = MINIMUM_PLANNER_SPEED; // Set default max junction speed
 
   // Skip first block or when previous_nominal_speed is used as a flag for homing and offset cycles.
-  if ((block_buffer_head != block_buffer_tail) && (previous_nominal_speed > 0.0)) {
+  if ((*block_buffer_head != *block_buffer_tail) && (previous_nominal_speed > 0.0)) {
     // Compute cosine of angle between previous and current path. (prev_unit_vec is negative)
     // NOTE: Max junction velocity is computed without sin() or acos() by trig half angle identity.
     double cos_theta = - previous_unit_vec[X_AXIS] * unit_vec[X_AXIS]
@@ -873,7 +875,7 @@ block->steps_y = labs(target[Y_AXIS]-position[Y_AXIS]);
   safe_speed/block->nominal_speed);
 
   // Move buffer head
-  block_buffer_head = next_buffer_head;
+  *block_buffer_head = next_buffer_head;
 
   // Update position
   memcpy(position, target, sizeof(target)); // position[] = target[]
@@ -927,7 +929,7 @@ void plan_set_e_position(const float &e)
 
 uint8_t movesplanned()
 {
-  return (block_buffer_head-block_buffer_tail + BLOCK_BUFFER_SIZE) & (BLOCK_BUFFER_SIZE - 1);
+  return (*block_buffer_head-*block_buffer_tail + BLOCK_BUFFER_SIZE) & (BLOCK_BUFFER_SIZE - 1);
 }
 
 #ifdef PREVENT_DANGEROUS_EXTRUDE

@@ -79,16 +79,22 @@
 
 uint8_t payload[RPMSG_BUF_SIZE];
 
+block_t *current_block;  // A pointer to the block currently being traced
+
+far PRU_SRAM unsigned int counter;
+
 /*
  * main.c
  */
 void main() {
 	struct pru_rpmsg_transport transport;
 	uint16_t src, dst, len;
-	char lenght[20] = "The END!";
+	char lenght[20];
 	volatile uint8_t *status;
 	unsigned char endstop_status;
-	pru_stepper_block block;
+	int i;
+	//unsigned int *counter;
+	//pru_stepper_block block;
 
 	/* allow OCP master port access by the PRU so the PRU can read external memories */
 	CT_CFG.SYSCFG_bit.STANDBY_INIT = 0;
@@ -107,6 +113,7 @@ void main() {
 	/* Initialize pru_virtqueue corresponding to vring1 (ARM Host to PRU direction) */
 	pru_virtqueue_init(&transport.virtqueue1, &resourceTable.rpmsg_vring1, &CT_MBX.MESSAGE[MB_TO_ARM_HOST], &CT_MBX.MESSAGE[MB_FROM_ARM_HOST]);
 
+	counter = 10;
 	/* Create the RPMsg channel between the PRU and ARM user space using the transport structure. */
 	while(pru_rpmsg_channel(RPMSG_NS_CREATE, &transport, CHAN_NAME, CHAN_DESC, CHAN_PORT) != PRU_RPMSG_SUCCESS);
 	while(1){
@@ -121,14 +128,37 @@ void main() {
 				/* Check to see if the message corresponds to a receive event for the PRU */
 				if(CT_MBX.MESSAGE[MB_FROM_ARM_HOST] == 1){
 					/* Receive the message */
-					if(pru_rpmsg_receive(&transport, &src, &dst, &block, &len) == PRU_RPMSG_SUCCESS){
+					if(pru_rpmsg_receive(&transport, &src, &dst, &lenght, &len) == PRU_RPMSG_SUCCESS){
 						/* Echo the message back to the same address from which we just received */
 						//ltoa(len, lenght);
 						//pru_rpmsg_send(&transport, dst, src, lenght, sizeof(lenght));
 						//block.steps_x++;
-						endstop_status = do_block(&block, &transport, dst, src);
-						pru_rpmsg_send(&transport, dst, src, &endstop_status, sizeof(endstop_status));
-						pru_rpmsg_send(&transport, dst, src, &lenght, 8);
+
+						/* C28 defaults to 0x00000000, we need to set bits 23:8 to 0x0100 in order to have it point to 0x00010000	 */
+						PRU0_CTRL.CTPPR0_bit.C28_BLK_POINTER = 0x0100;
+
+						/*for(i=0; i<BLOCK_BUFFER_SIZE; i++)
+							block_buffer[i] = (block_t *)(SHM_ADDR + (i * sizeof(block_t)));
+						block_buffer_head = (unsigned int *)(SHM_ADDR + (BLOCK_BUFFER_SIZE * sizeof(block_t)));
+						block_buffer_tail = (unsigned int *)(block_buffer_head + sizeof(block_buffer_head));
+						check_endstops = block_buffer_tail + sizeof(block_buffer_tail);
+						counter = check_endstops + sizeof(check_endstops);*/
+
+						while(1) {
+							counter += 1;
+							if (current_block == 0) {
+								// Anything in the buffer?
+								current_block = plan_get_current_block();
+								if (current_block != 0) {
+									current_block->busy = TRUE;
+									endstop_status = do_block();
+									current_block = 0;
+									plan_discard_current_block();
+								}
+							}
+						}
+						//pru_rpmsg_send(&transport, dst, src, &endstop_status, sizeof(endstop_status));
+						//pru_rpmsg_send(&transport, dst, src, &lenght, 8);
 					}
 				}
 			}

@@ -65,7 +65,7 @@ bool abort_on_endstop_hit = false;
   int motor_current_setting[3] = DEFAULT_PWM_MOTOR_CURRENT;
 #endif
 
-static bool check_endstops = true;
+unsigned int *check_endstops;
 
 volatile long count_position[NUM_AXIS] = { 0, 0, 0, 0};
 volatile signed char count_direction[NUM_AXIS] = { 1, 1, 1, 1};
@@ -77,7 +77,7 @@ uint32_t easySPIN_rx_data = 0;
 //=============================functions         ============================
 //===========================================================================
 
-#define CHECK_ENDSTOPS  if(check_endstops)
+#define CHECK_ENDSTOPS  if(*check_endstops)
 
 // Some useful constants
 
@@ -124,7 +124,7 @@ void endstops_hit_on_purpose()
 
 void enable_endstops(bool check)
 {
-  check_endstops = check;
+  *check_endstops = check;
 }
 
 //         __________________________
@@ -210,10 +210,16 @@ typedef struct {
 	unsigned long enable_endstops;
 } pru_stepper_block;
 
-void stepper_wait_loop(unsigned int *count)
+void stepper_wait_loop(stepper_block_t *block)
 {
 	while(1) {
-		*count = *count + 1;
+		//*((unsigned long *) count) = *((unsigned long *) count) + 1;
+		//printf("stepper_wait_loop count = %d\n",*((unsigned long *) count));
+		//block->block_buffer[0].steps_x = 100;
+		//block->block_buffer[1].steps_x = 101;
+		//block->block_buffer[1].steps_y = 102;
+		//block->block_buffer_head ++;
+		//block->block_buffer_tail += 2;
 		usleep(5000);
 		kill(getppid(), SIGUSR1);
 	}

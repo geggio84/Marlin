@@ -40,6 +40,18 @@ const unsigned char X_MAX_ENDSTOP_INVERTING = TRUE; // set to true to invert the
 const unsigned char Y_MAX_ENDSTOP_INVERTING = TRUE; // set to true to invert the logic of the endstop.
 const unsigned char Z_MAX_ENDSTOP_INVERTING = TRUE; // set to true to invert the logic of the endstop.
 
+/* NOTE:  Allocating shared_freq_x to PRU Shared Memory means that other PRU cores on
+ *        the same subsystem must take care not to allocate data to that memory.
+ *	 	  Users also cannot rely on where in shared memory these variables are placed
+ *        so accessing them from another PRU core or from the ARM is an undefined behavior.
+ */
+//PRU_SRAM volatile uint32_t shared_freq_1;
+
+far PRU_SRAM block_t block_buffer[BLOCK_BUFFER_SIZE];  // A ring buffer for motion instfructions
+far PRU_SRAM unsigned int block_buffer_head;           // Index of the next block to be pushed
+far PRU_SRAM unsigned int block_buffer_tail;           // Index of the block to process now
+far PRU_SRAM unsigned int check_endstops;
+
 unsigned short calc_timer(unsigned short step_rate) {
 	unsigned short timer;
 	if(step_rate > MAX_STEP_FREQUENCY) step_rate = MAX_STEP_FREQUENCY;
@@ -75,7 +87,7 @@ unsigned short calc_timer(unsigned short step_rate) {
 // Initializes the trapezoid generator from the current block. Called whenever a new
 // block begins.
 //FORCE_INLINE void trapezoid_generator_reset() {
-void trapezoid_generator_reset(pru_stepper_block *current_block) {
+void trapezoid_generator_reset() {
 	deceleration_time = 0;
 	// step_rate to timer interval
 	OCR1A_nominal = calc_timer(current_block->nominal_rate);
@@ -88,10 +100,10 @@ void trapezoid_generator_reset(pru_stepper_block *current_block) {
 
 // "The Stepper Driver Interrupt" - This timer interrupt is the workhorse.
 // It pops blocks from the block_buffer and executes them by pulsing the stepper pins appropriately.
-unsigned char do_block(pru_stepper_block *current_block, struct pru_rpmsg_transport *transport, uint32_t src, uint32_t dst)
+unsigned char do_block()
 {
 	unsigned short i;
-	trapezoid_generator_reset(current_block);
+	trapezoid_generator_reset();
 	counter_x = -(current_block->step_event_count >> 1);
 	counter_y = counter_x;
 	counter_z = counter_x;
@@ -120,7 +132,7 @@ unsigned char do_block(pru_stepper_block *current_block, struct pru_rpmsg_transp
 
 		// Set direction en check limit switches
 		if ((out_bits & (1<<X_AXIS)) != 0) {   // stepping along -X axis
-			if(current_block->enable_endstops) {
+			if(check_endstops) {
 				#if defined(X_MIN_PIN) && X_MIN_PIN > -1
 				unsigned char x_min_endstop=(unsigned char)(READ(X_MIN_PIN_READ) != X_MIN_ENDSTOP_INVERTING);
 				if(x_min_endstop && old_x_min_endstop && (current_block->steps_x > 0)) {
@@ -132,7 +144,7 @@ unsigned char do_block(pru_stepper_block *current_block, struct pru_rpmsg_transp
 				#endif
 			}
 		} else { // +direction
-			if(current_block->enable_endstops) {
+			if(check_endstops) {
 				#if defined(X_MAX_PIN) && X_MAX_PIN > -1
 				unsigned char x_max_endstop=(unsigned char)(READ(X_MAX_PIN_READ) != X_MAX_ENDSTOP_INVERTING);
 				if(x_max_endstop && old_x_max_endstop && (current_block->steps_x > 0)) {
@@ -146,7 +158,7 @@ unsigned char do_block(pru_stepper_block *current_block, struct pru_rpmsg_transp
 		}
 
 		if ((out_bits & (1<<Y_AXIS)) != 0) {   // -direction
-			if(current_block->enable_endstops) {
+			if(check_endstops) {
 				#if defined(Y_MIN_PIN) && Y_MIN_PIN > -1
 				unsigned char y_min_endstop=(unsigned char)(READ(Y_MIN_PIN_READ) != Y_MIN_ENDSTOP_INVERTING);
 				if(y_min_endstop && old_y_min_endstop && (current_block->steps_y > 0)) {
@@ -158,7 +170,7 @@ unsigned char do_block(pru_stepper_block *current_block, struct pru_rpmsg_transp
 				#endif
 			}
 		} else { // +direction
-			if(current_block->enable_endstops) {
+			if(check_endstops) {
 				#if defined(Y_MAX_PIN) && Y_MAX_PIN > -1
 				unsigned char y_max_endstop=(unsigned char)(READ(Y_MAX_PIN_READ) != Y_MAX_ENDSTOP_INVERTING);
 				if(y_max_endstop && old_y_max_endstop && (current_block->steps_y > 0)) {
@@ -174,7 +186,7 @@ unsigned char do_block(pru_stepper_block *current_block, struct pru_rpmsg_transp
 		if ((out_bits & (1<<Z_AXIS)) != 0) {   // -direction
 			WRITE(Z_DIR_PIN,INVERT_Z_DIR);
 			count_direction[Z_AXIS]=-1;
-			if(current_block->enable_endstops) {
+			if(check_endstops) {
 				#if defined(Z_MIN_PIN) && Z_MIN_PIN > -1
 				unsigned char z_min_endstop=(unsigned char)(READ(Z_MIN_PIN_READ) != Z_MIN_ENDSTOP_INVERTING);
 				if(z_min_endstop && old_z_min_endstop && (current_block->steps_z > 0)) {
@@ -188,7 +200,7 @@ unsigned char do_block(pru_stepper_block *current_block, struct pru_rpmsg_transp
 		} else { // +direction
 			WRITE(Z_DIR_PIN,!INVERT_Z_DIR);
 			count_direction[Z_AXIS]=1;
-			if(current_block->enable_endstops) {
+			if(check_endstops) {
 				#if defined(Z_MAX_PIN) && Z_MAX_PIN > -1
 				unsigned char z_max_endstop=(unsigned char)(READ(Z_MAX_PIN_READ) != Z_MAX_ENDSTOP_INVERTING);
 				if(z_max_endstop && old_z_max_endstop && (current_block->steps_z > 0)) {
@@ -293,4 +305,23 @@ unsigned char do_block(pru_stepper_block *current_block, struct pru_rpmsg_transp
 	} while(step_events_completed < current_block->step_event_count);
 
 	return (unsigned char)((endstop_x_hit) || (endstop_y_hit << 1) || (endstop_z_hit << 1));
+}
+
+void plan_discard_current_block()
+{
+  if (block_buffer_head != block_buffer_tail) {
+    block_buffer_tail = (block_buffer_tail + 1) & (BLOCK_BUFFER_SIZE - 1);
+  }
+}
+
+// Gets the current block. Returns NULL if buffer empty
+block_t *plan_get_current_block()
+{
+	//printf("*block_buffer_head = %d ---- *block_buffer_tail = %d\n",*block_buffer_head,*block_buffer_tail);
+  if (block_buffer_head == block_buffer_tail) {
+    return(0);
+  }
+  block_t *block = &block_buffer[block_buffer_tail];
+  block->busy = TRUE;
+  return(block);
 }

@@ -161,7 +161,11 @@ extern float zprobe_zoffset;
 extern int fanSpeed;
 extern easySPIN_stepper steppers[4];
 extern int pru_file;
+extern int shm_descr;
+extern int shm_size;
+extern unsigned int *check_endstops;
 
+#define PRUSS_RAM2_OFFSET 0x4A310000
 #define SHM_FILE "/shared_mem"
 
 #ifdef FAN_SOFT_PWM

@@ -179,9 +179,12 @@ myFILE *log_file;
 FILE *config_file;
 int serial_file;
 int pru_file;
-pid_t pid_val[2] = { 0 , 0 };
+#define NR_CHILDS 1
+pid_t pid_val[NR_CHILDS];
+int shm_descr = -1;
+int shm_size;
 
-unsigned int *result;
+stepper_block_t *shm_addr;
 
 #ifdef SDSUPPORT
 CardReader card;
@@ -463,6 +466,9 @@ void setup()
   #ifdef DIGIPOT_I2C
     digipot_i2c_init();
   #endif
+
+	if(write(pru_file, "PRU START", 9) > 0)
+		printf("Message: Sent to PRU\n");
 }
 
 unsigned long millis(void)
@@ -496,22 +502,35 @@ int main(int argc, char *argv[])
 {   
     struct timeval tv;
 	int i;
-	int shm_descr = -1;
-	int integerSize = sizeof(unsigned int);
+	shm_size = sizeof(stepper_block_buffer);
+	void *virt_addr;
     
 	// Open the shared memory.
-	shm_descr = shm_open(SHM_FILE, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
+	//shm_descr = shm_open(SHM_FILE, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
+	shm_descr = open("/dev/mem", O_RDWR | O_SYNC);
+	printf("/dev/mem opened.\n");
 	
 	// Size up the shared memory.
-	ftruncate(shm_descr, integerSize);
+	//ftruncate(shm_descr, integerSize);
 	
-	result = mmap(NULL, integerSize, PROT_WRITE | PROT_READ, MAP_SHARED, shm_descr, 0 );
+	shm_addr = (stepper_block_t *)mmap(NULL, shm_size, PROT_WRITE | PROT_READ, MAP_SHARED, shm_descr, PRUSS_RAM2_OFFSET );
 
 	perror("mmap");
-	printf("%X\n", result);
+	printf("%X\n", (unsigned int)shm_addr);
+
+	virt_addr = shm_addr;
+	for (i=0; i<BLOCK_BUFFER_SIZE; i++)
+		block_buffer[i] = &shm_addr->block_buffer[i];
+	block_buffer_head = &shm_addr->block_buffer_head;
+	block_buffer_tail = &shm_addr->block_buffer_tail;
+	check_endstops = &shm_addr->check_endstops;
+	*check_endstops = true;
+
+	for (i=0; i<(shm_size/4); i++)
+		*((unsigned long *)((uint8_t*)virt_addr + 4*i)) = 0;
 
 	// Fork new child process
-	for (i=0; i<2; i++)
+	for (i=0; i<NR_CHILDS; i++)
     {
 		switch(pid_val[i] = fork()) {
 		case -1:
@@ -523,22 +542,25 @@ int main(int argc, char *argv[])
 			printf(" CHILD: This is the child process!\n");
 			printf(" CHILD: My PID is %d\n", getpid());
 			printf(" CHILD: My parent's PID is %d\n", getppid());
-			if(pid_val[0] == 0) {
-				signal(SIGINT, stepper_wait_kill);
-				sleep(1);
-				stepper_wait_loop(result);
-			} else {
+			//if(pid_val[0] == 0) {
+			//	signal(SIGINT, stepper_wait_kill);
+			//	sleep(1);
+			//	printf("sizeof stepper_block_buffer = %d Bytes\n",sizeof(stepper_block_buffer));
+			//	printf("sizeof stepper_block_buffer.block_buffer[] = %d Bytes\n",sizeof(stepper_block_buffer.block_buffer));
+			//	printf("sizeof stepper_block_buffer.block_buffer[0] = %d Bytes\n",sizeof(stepper_block_buffer.block_buffer[0]));
+			//	stepper_wait_loop(shm_addr);
+			//} else {
 				signal(SIGINT, temp_read_kill);
 				sleep(1);
 				temp_read_loop();
-			}
+			//}
 			break;
 
 		default:
 			printf("PARENT: This is the parent process!\n");
 			printf("PARENT: My PID is %d\n", getpid());
 			printf("PARENT: My child's PID are %d and %d\n", pid_val[0], pid_val[1]);
-			signal(SIGUSR1, stepper_handler);
+			//signal(SIGUSR1, stepper_handler);
 			signal(SIGUSR2, temp_ISR);
 			break;
 		}
@@ -2981,6 +3003,9 @@ void marlin_kill()
 	  printf("Now We Close PRU Device File: %s\n\r",PRU_DEVICE_NAME);
   }
 
+  	munmap(shm_addr, shm_size);
+    close(shm_descr);
+	
   printf("Exit MARLIN Firmware\n\r");
   // Terminate program
   exit(0);
@@ -2994,7 +3019,7 @@ void marlin_main_kill(int signum)
 				kill(pid_val[0],SIGINT);
 				kill(pid_val[1],SIGINT);
 				wait(NULL);
-				printf ("Parent reads <%u>\n",*result);
+				printf ("Parent reads <%u   %u>\n",shm_addr->block_buffer_head,shm_addr->block_buffer_tail);
                 marlin_kill();
                 break;
                 // Cleanup and close up stuff here
@@ -3005,12 +3030,16 @@ void marlin_main_kill(int signum)
 
 void stepper_wait_kill(int signum)
 {
+	munmap(shm_addr, shm_size);
+    close(shm_descr);
 	printf("CHILD Stepper: Exit\n");
 	exit(0);
 }
 
 void temp_read_kill(int signum)
 {
+	munmap(shm_addr, shm_size);
+    close(shm_descr);
 	printf("CHILD Temperature: Exit\n");
 	exit(0);
 }
