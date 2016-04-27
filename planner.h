@@ -71,6 +71,7 @@ typedef struct {
 	unsigned int block_buffer_head;           // Index of the next block to be pushed
 	unsigned int block_buffer_tail;           // Index of the block to process now
 	unsigned int check_endstops;
+	long count_position[NUM_AXIS];
 } stepper_block_t;
 
 #ifdef ENABLE_AUTO_BED_LEVELING

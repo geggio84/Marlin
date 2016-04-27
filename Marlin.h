@@ -164,6 +164,7 @@ extern int pru_file;
 extern int shm_descr;
 extern int shm_size;
 extern unsigned int *check_endstops;
+extern long *count_position[NUM_AXIS];
 
 #define PRUSS_RAM2_OFFSET 0x4A310000
 #define SHM_FILE "/shared_mem"

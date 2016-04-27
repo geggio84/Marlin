@@ -16,7 +16,7 @@ static char step_loops;
 static unsigned short OCR1A_nominal;
 static unsigned short OCR1A;
 static unsigned short step_loops_nominal;
-volatile long count_position[4] = { 0, 0, 0, 0};
+//volatile long count_position[4] = { 0, 0, 0, 0};
 volatile signed char count_direction[4] = { 1, 1, 1, 1};
 
 static unsigned char old_x_min_endstop=FALSE;
@@ -51,6 +51,7 @@ far PRU_SRAM block_t block_buffer[BLOCK_BUFFER_SIZE];  // A ring buffer for moti
 far PRU_SRAM unsigned int block_buffer_head;           // Index of the next block to be pushed
 far PRU_SRAM unsigned int block_buffer_tail;           // Index of the block to process now
 far PRU_SRAM unsigned int check_endstops;
+far PRU_SRAM long count_position[4];
 
 unsigned short calc_timer(unsigned short step_rate) {
 	unsigned short timer;

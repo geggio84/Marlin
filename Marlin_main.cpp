@@ -524,6 +524,10 @@ int main(int argc, char *argv[])
 	block_buffer_head = &shm_addr->block_buffer_head;
 	block_buffer_tail = &shm_addr->block_buffer_tail;
 	check_endstops = &shm_addr->check_endstops;
+	for (i=0; i<4; i++) {
+		count_position[i] = &shm_addr->count_position[i];
+		*count_position[i] = 0;
+	}
 	*check_endstops = true;
 
 	for (i=0; i<(shm_size/4); i++)
