@@ -716,7 +716,7 @@ const bool Z_MAX_ENDSTOP_INVERTING = true; // set to true to invert the logic of
 //#define SF_ARC_FIX
 
 //define BlinkM/CyzRgb Support
-//#define BLINKM
+#define BLINKM
 
 /*********************************************************************\
 * R/C SERVO support

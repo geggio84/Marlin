@@ -25,7 +25,7 @@ VPATH += $(BUILD_DIR)
 CXXSRC = Marlin_main.cpp MarlinSerial.cpp cardreader.cpp \
 	planner.cpp stepper.cpp temperature.cpp motion_control.cpp \
 	ConfigurationStore.cpp gpio_lib.cpp easyspin.cpp \
-	vector_3.cpp qr_solve.cpp
+	vector_3.cpp qr_solve.cpp BlinkM.cpp
 #CXXSRC = WMath.cpp WString.cpp Print.cpp \
 #	Sd2Card.cpp SdBaseFile.cpp SdFatUtil.cpp \
 #	SdFile.cpp SdVolume.cpp \

@@ -46,7 +46,6 @@
 
 #ifdef BLINKM
 #include "BlinkM.h"
-#include "Wire.h"
 #endif
 
 #if NUM_SERVOS > 0
@@ -2073,15 +2072,15 @@ void process_commands()
     #ifdef BLINKM
     case 150: // M150
       {
-        byte red;
-        byte grn;
-        byte blu;
+        unsigned char red;
+        unsigned char grn;
+        unsigned char blu;
 
         if(code_seen('R')) red = code_value();
         if(code_seen('U')) grn = code_value();
         if(code_seen('B')) blu = code_value();
 
-        SendColors(red,grn,blu);
+        SendColors(red,grn,blu,2);
       }
       break;
     #endif //BLINKM
