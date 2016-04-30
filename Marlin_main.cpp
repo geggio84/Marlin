@@ -2080,7 +2080,7 @@ void process_commands()
         if(code_seen('U')) grn = code_value();
         if(code_seen('B')) blu = code_value();
 
-        SendColors(red,grn,blu,2);
+        SendColors(red,grn,blu,EXTR_LED_PIN);
       }
       break;
     #endif //BLINKM
