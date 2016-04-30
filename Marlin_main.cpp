@@ -609,7 +609,7 @@ int loop()
   manage_inactivity();
   checkHitEndstops();
   // delay 100ms
-  usleep(100000);
+  usleep(30000);
   return 0;
 }
 
