@@ -14,7 +14,7 @@ void SendColors(unsigned char red, unsigned char grn, unsigned char blu, int led
 
 	snprintf(nr, sizeof(nr), "%d", led);
 
-	printf("Set LED nr.%s to R%d G%d B%d\n\r",nr,red,grn,blu);
+	//printf("Set LED nr.%s to R%d G%d B%d\n\r",nr,red,grn,blu);
 
 	sprintf(buf, "red_%s", nr);
 	setPwmFrequency(buf, red);
