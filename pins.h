@@ -42,7 +42,8 @@
 
 #define PWM_ENABLE_PIN		GPIO(0,27)
 
-#define LED_PIN            -1
+#define EXTR_LED_PIN            0
+#define BED_LED_PIN            2
 
 #define FAN_PIN            -1
 
