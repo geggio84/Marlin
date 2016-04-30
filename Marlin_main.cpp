@@ -2876,32 +2876,83 @@ void controllerFan()
 #endif
 
 #ifdef TEMP_STAT_LEDS
-static bool blue_led = false;
-static bool red_led = false;
+static bool init_LEDS = true;
 static uint32_t stat_update = 0;
+
+/*
+   Return a RGB colour value given a scalar v in the range [vmin,vmax]
+   In this case each colour component ranges from 0 (no contribution) to
+   1 (fully saturated), modifications for other ranges is trivial.
+   The colour is clipped at the end of the scales if v is outside
+   the range [vmin,vmax]
+*/
+
+typedef struct {
+	double r,g,b;
+} COLOUR;
+
+COLOUR GetColour(double v,double vmin,double vmax)
+{
+   COLOUR c = {1.0,1.0,1.0}; // white
+   double dv;
+
+   if (v < vmin)
+      v = vmin;
+   if (v > vmax)
+      v = vmax;
+   dv = vmax - vmin;
+
+   if (v < (vmin + 0.25 * dv)) {
+      c.r = 0;
+      c.g = 4 * (v - vmin) / dv;
+   } else if (v < (vmin + 0.5 * dv)) {
+      c.r = 0;
+      c.b = 1 + 4 * (vmin + 0.25 * dv - v) / dv;
+   } else if (v < (vmin + 0.75 * dv)) {
+      c.r = 4 * (v - vmin - 0.5 * dv) / dv;
+      c.b = 0;
+   } else {
+      c.g = 1 + 4 * (vmin + 0.75 * dv - v) / dv;
+      c.b = 0;
+   }
+
+   return(c);
+}
 
 void handle_status_leds(void) {
   float max_temp = 0.0;
+  int i;
+  COLOUR extr_rgb, bed_rgb;
+
+  if(init_LEDS){
+		for(i=0; i< 256; i++) {
+			SendColors(i, 0, 0, EXTR_LED_PIN);
+			SendColors(i, 0, 0, BED_LED_PIN);
+			usleep(500);
+	  }
+	  for(i=0; i< 256; i++) {
+			SendColors((255-i), i, 0, EXTR_LED_PIN);
+			SendColors((255-i), i, 0, BED_LED_PIN);
+			usleep(500);
+	  }
+	  for(i=0; i< 256; i++) {
+			SendColors(0, (255-i), i, EXTR_LED_PIN);
+			SendColors(0, (255-i), i, BED_LED_PIN);
+			usleep(500);
+	  }
+	  for(i=0; i< 256; i++) {
+			SendColors(i, 0, (255-i), EXTR_LED_PIN);
+			SendColors(i, 0, (255-i), BED_LED_PIN);
+			usleep(500);
+	  }
+	  init_LEDS = false;
+  }
   if(millis() > stat_update) {
-    stat_update += 500; // Update every 0.5s
-       max_temp = max(max_temp, degHotend());
-       max_temp = max(max_temp, degTargetHotend());
-    #if defined(TEMP_BED_PIN) && TEMP_BED_PIN > -1
-      max_temp = max(max_temp, degTargetBed());
-      max_temp = max(max_temp, degBed());
-    #endif
-    if((max_temp > 55.0) && (red_led == false)) {
-      digitalWrite(STAT_LED_RED, 1);
-      digitalWrite(STAT_LED_BLUE, 0);
-      red_led = true;
-      blue_led = false;
-    }
-    if((max_temp < 54.0) && (blue_led == false)) {
-      digitalWrite(STAT_LED_RED, 0);
-      digitalWrite(STAT_LED_BLUE, 1);
-      red_led = false;
-      blue_led = true;
-    }
+		stat_update += 1000;
+		extr_rgb = GetColour((current_temperature/120), 0, 1);
+		bed_rgb = GetColour((current_temperature_bed/50), 0, 1);
+		SendColors(extr_rgb.r * 255, extr_rgb.g * 255, extr_rgb.b * 255, EXTR_LED_PIN);
+		SendColors(bed_rgb.r * 255, bed_rgb.g * 255, bed_rgb.b * 255, BED_LED_PIN);
   }
 }
 #endif
@@ -2975,6 +3026,8 @@ void marlin_kill()
   disable_y();
   disable_z();
   disable_e0();
+  SendColors(0, 0, 0, EXTR_LED_PIN);
+  SendColors(0, 0, 0, BED_LED_PIN);
   
   setPwmFrequency(CONTROLLERFAN_PIN, 0);
 
