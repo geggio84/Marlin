@@ -2947,7 +2947,7 @@ void handle_status_leds(void) {
 	  init_LEDS = false;
   }
   if(millis() > stat_update) {
-		stat_update += 1000;
+		stat_update += 500;
 		extr_rgb = GetColour((current_temperature/120), 0, 1);
 		bed_rgb = GetColour((current_temperature_bed/50), 0, 1);
 		SendColors(extr_rgb.r * 255, extr_rgb.g * 255, extr_rgb.b * 255, EXTR_LED_PIN);
