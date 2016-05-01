@@ -2920,7 +2920,6 @@ COLOUR GetColour(double v,double vmin,double vmax)
 }
 
 void handle_status_leds(void) {
-  float max_temp = 0.0;
   int i;
   COLOUR extr_rgb, bed_rgb;
 

@@ -607,7 +607,6 @@ double dnrm2 ( int n, double x[], int incx )
   double norm;
   double scale;
   double ssq;
-  double value;
 
   if ( n < 1 || incx < 1 )
   {
@@ -1235,7 +1234,6 @@ void dqrlss ( double a[], int lda, int m, int n, int kr, double b[], double x[],
 */
 {
   int i;
-  int info;
   int j;
   int job;
   int k;
@@ -1244,7 +1242,7 @@ void dqrlss ( double a[], int lda, int m, int n, int kr, double b[], double x[],
   if ( kr != 0 )
   {
     job = 110;
-    info = dqrsl ( a, lda, m, kr, qraux, b, rsd, rsd, x, rsd, rsd, job );
+    dqrsl ( a, lda, m, kr, qraux, b, rsd, rsd, x, rsd, rsd, job );
   }
 
   for ( i = 0; i < n; i++ )
@@ -1897,7 +1895,6 @@ double *qr_solve ( int m, int n, double a[], double b[] )
 */
 {
   double *a_qr;
-  int ind;
   int itask;
   int *jpvt;
   int kr;
@@ -1916,7 +1913,7 @@ double *qr_solve ( int m, int n, double a[], double b[] )
   r = ( double * ) malloc ( m * sizeof ( double ) );
   itask = 1;
 
-  ind = dqrls ( a_qr, lda, m, n, tol, &kr, b, x, r, jpvt, qraux, itask );
+  dqrls ( a_qr, lda, m, n, tol, &kr, b, x, r, jpvt, qraux, itask );
 
   free ( a_qr );
   free ( jpvt );
