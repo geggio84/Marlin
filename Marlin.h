@@ -142,8 +142,8 @@ void refresh_cmd_timeout(void);
 void setPwmFrequency(const char *pin, int val);
 
 #ifndef CRITICAL_SECTION_START
-  #define CRITICAL_SECTION_START  unsigned char _sreg = SREG; cli();
-  #define CRITICAL_SECTION_END    SREG = _sreg;
+  #define CRITICAL_SECTION_START
+  #define CRITICAL_SECTION_END
 #endif //CRITICAL_SECTION_START
 
 extern float homing_feedrate[];
