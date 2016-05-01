@@ -3119,7 +3119,7 @@ void setPwmFrequency(const char *pin, int val)
 	char num[3];
 
 	printf("Set %s to pwm %d\n\r",pin,val);
-	sprintf(buf, "/sys/class/leds/%s/brightness", pin);
+	//sprintf(buf, "/sys/class/leds/%s/brightness", pin);
 	fd = open(buf, O_WRONLY);
 
 	if(val >= 255) val = 255;
