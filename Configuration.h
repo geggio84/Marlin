@@ -293,7 +293,7 @@ const bool Z_MAX_ENDSTOP_INVERTING = true; // set to true to invert the logic of
 #define Z_MAX_LENGTH (Z_MAX_POS - Z_MIN_POS)
 
 /* Stepper driver configuration */
-#define X_TVAL			(( 1000 / 31.25 ) - 1)
+#define X_TVAL			(( 1500 / 31.25 ) - 1)
 #define X_T_FAST		easySPIN_TOFF_FAST_8_0_us | easySPIN_FAST_STEP_8_0_us
 #define X_TON_MIN		0x00
 #define X_TOFF_MIN		0x01
@@ -309,7 +309,7 @@ const bool Z_MAX_ENDSTOP_INVERTING = true; // set to true to invert the logic of
 						| easySPIN_CONFIG_EN_TQREG_INT_REG | easySPIN_CONFIG_OC_SD_ENABLE \
 						| easySPIN_CONFIG_SR_180V_us | easySPIN_CONFIG_TSW_8_us
 
-#define Y_TVAL			(( 1000 / 31.25 ) - 1)
+#define Y_TVAL			(( 1500 / 31.25 ) - 1)
 #define Y_T_FAST		easySPIN_TOFF_FAST_8_0_us | easySPIN_FAST_STEP_8_0_us
 #define Y_TON_MIN		0x00
 #define Y_TOFF_MIN		0x01
@@ -341,7 +341,7 @@ const bool Z_MAX_ENDSTOP_INVERTING = true; // set to true to invert the logic of
 						| easySPIN_CONFIG_EN_TQREG_INT_REG | easySPIN_CONFIG_OC_SD_ENABLE \
 						| easySPIN_CONFIG_SR_180V_us | easySPIN_CONFIG_TSW_8_us
 
-#define E_TVAL			(( 1000 / 31.25 ) - 1)
+#define E_TVAL			(( 1187.5 / 31.25 ) - 1)
 #define E_T_FAST		easySPIN_TOFF_FAST_8_0_us | easySPIN_FAST_STEP_8_0_us
 #define E_TON_MIN		0x00
 #define E_TOFF_MIN		0x01
