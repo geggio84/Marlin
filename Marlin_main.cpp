@@ -180,10 +180,10 @@ int serial_file;
 int pru_file;
 #define NR_CHILDS 1
 pid_t pid_val[NR_CHILDS];
-int shm_descr = -1;
-int shm_size;
+int PRU_shm_descr = -1;
+int PRU_shm_size;
 
-stepper_block_t *shm_addr;
+stepper_block_t *PRU_shm_addr;
 
 #ifdef SDSUPPORT
 CardReader card;
@@ -501,8 +501,8 @@ int main(int argc, char *argv[])
 {   
     struct timeval tv;
 	int i;
-	shm_size = sizeof(stepper_block_buffer);
-	void *virt_addr;
+	PRU_shm_size = sizeof(stepper_block_buffer);
+	void *PRU_virt_addr;
 
 	// Fork new child process
 	for (i=0; i<NR_CHILDS; i++)
@@ -543,31 +543,31 @@ int main(int argc, char *argv[])
 
 	// Open the shared memory.
 	//shm_descr = shm_open(SHM_FILE, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
-	shm_descr = open("/dev/mem", O_RDWR | O_SYNC);
+	PRU_shm_descr = open("/dev/mem", O_RDWR | O_SYNC);
 	printf("/dev/mem opened.\n");
 	
 	// Size up the shared memory.
 	//ftruncate(shm_descr, integerSize);
 	
-	shm_addr = (stepper_block_t *)mmap(NULL, shm_size, PROT_WRITE | PROT_READ, MAP_SHARED, shm_descr, PRUSS_RAM2_OFFSET );
+	PRU_shm_addr = (stepper_block_t *)mmap(NULL, PRU_shm_size, PROT_WRITE | PROT_READ, MAP_SHARED, PRU_shm_descr, PRUSS_RAM2_OFFSET );
 
 	perror("mmap");
-	printf("%X\n", (unsigned int)shm_addr);
+	printf("%X\n", (unsigned int)PRU_shm_addr);
 
-	virt_addr = shm_addr;
+	PRU_virt_addr = PRU_shm_addr;
 	for (i=0; i<BLOCK_BUFFER_SIZE; i++)
-		block_buffer[i] = &shm_addr->block_buffer[i];
-	block_buffer_head = &shm_addr->block_buffer_head;
-	block_buffer_tail = &shm_addr->block_buffer_tail;
-	check_endstops = &shm_addr->check_endstops;
+		block_buffer[i] = &PRU_shm_addr->block_buffer[i];
+	block_buffer_head = &PRU_shm_addr->block_buffer_head;
+	block_buffer_tail = &PRU_shm_addr->block_buffer_tail;
+	check_endstops = &PRU_shm_addr->check_endstops;
 	for (i=0; i<4; i++) {
-		count_position[i] = &shm_addr->count_position[i];
+		count_position[i] = &PRU_shm_addr->count_position[i];
 		*count_position[i] = 0;
 	}
 	*check_endstops = true;
 
-	for (i=0; i<(shm_size/4); i++)
-		*((unsigned long *)((uint8_t*)virt_addr + 4*i)) = 0;
+	for (i=0; i<(PRU_shm_size/4); i++)
+		*((unsigned long *)((uint8_t*)PRU_virt_addr + 4*i)) = 0;
 	
     // Register signal and signal handler
     signal(SIGINT, marlin_main_kill);
@@ -3058,8 +3058,8 @@ void marlin_kill()
 	  printf("Now We Close PRU Device File: %s\n\r",PRU_DEVICE_NAME);
   }
 
-  	munmap(shm_addr, shm_size);
-    close(shm_descr);
+  	munmap(PRU_shm_addr, PRU_shm_size);
+    close(PRU_shm_descr);
 	
   printf("Exit MARLIN Firmware\n\r");
   // Terminate program
@@ -3074,7 +3074,7 @@ void marlin_main_kill(int signum)
 				kill(pid_val[0],SIGINT);
 				kill(pid_val[1],SIGINT);
 				wait(NULL);
-				printf ("Parent reads <%u   %u>\n",shm_addr->block_buffer_head,shm_addr->block_buffer_tail);
+				printf ("Parent reads <%u   %u>\n",PRU_shm_addr->block_buffer_head,PRU_shm_addr->block_buffer_tail);
                 marlin_kill();
                 break;
                 // Cleanup and close up stuff here
@@ -3085,16 +3085,16 @@ void marlin_main_kill(int signum)
 
 void stepper_wait_kill(int signum)
 {
-	munmap(shm_addr, shm_size);
-    close(shm_descr);
+	//munmap(shm_addr, shm_size);
+    //close(shm_descr);
 	printf("CHILD Stepper: Exit\n");
 	exit(0);
 }
 
 void temp_read_kill(int signum)
 {
-	munmap(shm_addr, shm_size);
-    close(shm_descr);
+	//munmap(shm_addr, shm_size);
+    //close(shm_descr);
 	printf("CHILD Temperature: Exit\n");
 	exit(0);
 }
