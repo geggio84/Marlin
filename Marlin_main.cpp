@@ -503,34 +503,6 @@ int main(int argc, char *argv[])
 	int i;
 	shm_size = sizeof(stepper_block_buffer);
 	void *virt_addr;
-    
-	// Open the shared memory.
-	//shm_descr = shm_open(SHM_FILE, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
-	shm_descr = open("/dev/mem", O_RDWR | O_SYNC);
-	printf("/dev/mem opened.\n");
-	
-	// Size up the shared memory.
-	//ftruncate(shm_descr, integerSize);
-	
-	shm_addr = (stepper_block_t *)mmap(NULL, shm_size, PROT_WRITE | PROT_READ, MAP_SHARED, shm_descr, PRUSS_RAM2_OFFSET );
-
-	perror("mmap");
-	printf("%X\n", (unsigned int)shm_addr);
-
-	virt_addr = shm_addr;
-	for (i=0; i<BLOCK_BUFFER_SIZE; i++)
-		block_buffer[i] = &shm_addr->block_buffer[i];
-	block_buffer_head = &shm_addr->block_buffer_head;
-	block_buffer_tail = &shm_addr->block_buffer_tail;
-	check_endstops = &shm_addr->check_endstops;
-	for (i=0; i<4; i++) {
-		count_position[i] = &shm_addr->count_position[i];
-		*count_position[i] = 0;
-	}
-	*check_endstops = true;
-
-	for (i=0; i<(shm_size/4); i++)
-		*((unsigned long *)((uint8_t*)virt_addr + 4*i)) = 0;
 
 	// Fork new child process
 	for (i=0; i<NR_CHILDS; i++)
@@ -569,6 +541,34 @@ int main(int argc, char *argv[])
 		}
 	}
 
+	// Open the shared memory.
+	//shm_descr = shm_open(SHM_FILE, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
+	shm_descr = open("/dev/mem", O_RDWR | O_SYNC);
+	printf("/dev/mem opened.\n");
+	
+	// Size up the shared memory.
+	//ftruncate(shm_descr, integerSize);
+	
+	shm_addr = (stepper_block_t *)mmap(NULL, shm_size, PROT_WRITE | PROT_READ, MAP_SHARED, shm_descr, PRUSS_RAM2_OFFSET );
+
+	perror("mmap");
+	printf("%X\n", (unsigned int)shm_addr);
+
+	virt_addr = shm_addr;
+	for (i=0; i<BLOCK_BUFFER_SIZE; i++)
+		block_buffer[i] = &shm_addr->block_buffer[i];
+	block_buffer_head = &shm_addr->block_buffer_head;
+	block_buffer_tail = &shm_addr->block_buffer_tail;
+	check_endstops = &shm_addr->check_endstops;
+	for (i=0; i<4; i++) {
+		count_position[i] = &shm_addr->count_position[i];
+		*count_position[i] = 0;
+	}
+	*check_endstops = true;
+
+	for (i=0; i<(shm_size/4); i++)
+		*((unsigned long *)((uint8_t*)virt_addr + 4*i)) = 0;
+	
     // Register signal and signal handler
     signal(SIGINT, marlin_main_kill);
     gettimeofday(&tv,NULL);
