@@ -182,8 +182,11 @@ int pru_file;
 pid_t pid_val[NR_CHILDS];
 int PRU_shm_descr = -1;
 int PRU_shm_size;
+int TEMP_shm_descr = -1;
+int TEMP_shm_size;
 
 stepper_block_t *PRU_shm_addr;
+temp_struct_t *TEMP_shm_addr;
 
 #ifdef SDSUPPORT
 CardReader card;
@@ -502,8 +505,26 @@ int main(int argc, char *argv[])
     struct timeval tv;
 	int i;
 	PRU_shm_size = sizeof(stepper_block_buffer);
+	TEMP_shm_size = sizeof(temp_struct);
 	void *PRU_virt_addr;
+	//void *TEMP_virt_addr;
 
+	// Open the shared memory.
+	TEMP_shm_descr = shm_open(SHM_FILE, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
+	
+	// Size up the shared memory.
+	ftruncate(TEMP_shm_descr, TEMP_shm_size);
+	
+	TEMP_shm_addr = (temp_struct_t *)mmap(NULL, TEMP_shm_size, PROT_WRITE | PROT_READ, MAP_SHARED, TEMP_shm_descr, 0);
+
+	TEMP_shm_addr->temp_meas_ready= false;
+	TEMP_shm_addr->current_temperature_raw = 0;
+	TEMP_shm_addr->current_temperature_bed_raw = 0;
+	TEMP_shm_addr->maxttemp_raw = HEATER_0_RAW_HI_TEMP;
+	TEMP_shm_addr->minttemp_raw = HEATER_0_RAW_LO_TEMP;
+	TEMP_shm_addr->bed_maxttemp_raw = HEATER_BED_RAW_HI_TEMP;
+	TEMP_shm_addr->target_temperature_bed = 0;
+	
 	// Fork new child process
 	for (i=0; i<NR_CHILDS; i++)
     {
@@ -526,7 +547,7 @@ int main(int argc, char *argv[])
 			//	stepper_wait_loop(shm_addr);
 			//} else {
 				signal(SIGINT, temp_read_kill);
-				sleep(1);
+				sleep(2);
 				temp_read_loop();
 			//}
 			break;
@@ -536,7 +557,7 @@ int main(int argc, char *argv[])
 			printf("PARENT: My PID is %d\n", getpid());
 			printf("PARENT: My child's PID are %d and %d\n", pid_val[0], pid_val[1]);
 			//signal(SIGUSR1, stepper_handler);
-			signal(SIGUSR2, temp_ISR);
+			//signal(SIGUSR2, temp_ISR);
 			break;
 		}
 	}
@@ -2851,7 +2872,7 @@ void controllerFan()
   {
     lastMotorCheck = millis();
 
-    if(steppers[X_AXIS].enabled || steppers[Y_AXIS].enabled || steppers[Z_AXIS].enabled || (soft_pwm_bed > 0) || steppers[E_AXIS].enabled) //If any of the drivers are enabled...
+    if(steppers[X_AXIS].enabled || steppers[Y_AXIS].enabled || steppers[Z_AXIS].enabled || (TEMP_shm_addr->soft_pwm_bed > 0) || steppers[E_AXIS].enabled) //If any of the drivers are enabled...
     {
       lastMotor = millis(); //... set time to NOW so the fan will turn on
     }

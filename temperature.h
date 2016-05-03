@@ -35,16 +35,35 @@ void manage_heater(); //it is critical that this is called periodically.
 // do not use these routines and variables outside of temperature.cpp
 extern int target_temperature;
 extern float current_temperature;
-#ifdef SHOW_TEMP_ADC_VALUES
-  extern int current_temperature_raw;
-  extern int current_temperature_bed_raw;
-#endif
-extern int target_temperature_bed;
+//#ifdef SHOW_TEMP_ADC_VALUES
+//  extern int current_temperature_raw;
+//  extern int current_temperature_bed_raw;
+//#endif
+//extern int target_temperature_bed;
 extern float current_temperature_bed;
 
-#if defined(CONTROLLERFAN_PIN)
-  extern unsigned char soft_pwm_bed;
+typedef struct {
+	unsigned int soft_pwm;
+	unsigned int soft_pwm_bed;
+#ifdef FAN_SOFT_PWM
+	unsigned int soft_pwm_fan;
+	unsigned int fanSpeedSoftPwm;
 #endif
+	int temp_meas_ready;// = false;
+	int current_temperature_raw;// = 0;
+	int current_temperature_bed_raw;// = 0;
+	int maxttemp_raw;// = HEATER_0_RAW_HI_TEMP;
+	int minttemp_raw;// = HEATER_0_RAW_LO_TEMP;
+	int bed_maxttemp_raw;// = HEATER_BED_RAW_HI_TEMP;
+	int target_temperature_bed;// = 0;
+} temp_struct_t;
+
+extern temp_struct_t temp_struct;
+extern temp_struct_t *TEMP_shm_addr;
+
+//#if defined(CONTROLLERFAN_PIN)
+//  extern unsigned char soft_pwm_bed;
+//#endif
 
 #ifdef PIDTEMP
   extern float Kp,Ki,Kd,Kc;
@@ -62,7 +81,7 @@ extern float current_temperature_bed;
 //inline so that there is no performance decrease.
 //deg=degreeCelsius
 void temp_read_loop(void);
-void temp_ISR(int sign);
+void temp_ISR();
 
 FORCE_INLINE float degHotend() {
   return current_temperature;
@@ -70,11 +89,11 @@ FORCE_INLINE float degHotend() {
 
 #ifdef SHOW_TEMP_ADC_VALUES
   FORCE_INLINE float rawHotendTemp() {
-    return current_temperature_raw;
+    return TEMP_shm_addr->current_temperature_raw;
   };
 
   FORCE_INLINE float rawBedTemp() {
-    return current_temperature_bed_raw;
+    return TEMP_shm_addr->current_temperature_bed_raw;
   };
 #endif
 
@@ -87,7 +106,7 @@ FORCE_INLINE float degTargetHotend() {
 };
 
 FORCE_INLINE float degTargetBed() {
-  return target_temperature_bed;
+  return TEMP_shm_addr->target_temperature_bed;
 };
 
 FORCE_INLINE void setTargetHotend(const float &celsius) {
@@ -95,7 +114,7 @@ FORCE_INLINE void setTargetHotend(const float &celsius) {
 };
 
 FORCE_INLINE void setTargetBed(const float &celsius) {
-  target_temperature_bed = celsius;
+  TEMP_shm_addr->target_temperature_bed = celsius;
 };
 
 FORCE_INLINE bool isHeatingHotend(){
@@ -103,7 +122,7 @@ FORCE_INLINE bool isHeatingHotend(){
 };
 
 FORCE_INLINE bool isHeatingBed() {
-  return target_temperature_bed > current_temperature_bed;
+  return TEMP_shm_addr->target_temperature_bed > current_temperature_bed;
 };
 
 FORCE_INLINE bool isCoolingHotend() {
@@ -111,7 +130,7 @@ FORCE_INLINE bool isCoolingHotend() {
 };
 
 FORCE_INLINE bool isCoolingBed() {
-  return target_temperature_bed < current_temperature_bed;
+  return TEMP_shm_addr->target_temperature_bed < current_temperature_bed;
 };
 
 int getHeaterPower(int heater);

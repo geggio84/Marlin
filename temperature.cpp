@@ -37,10 +37,10 @@
 //=============================public variables============================
 //===========================================================================
 int target_temperature = 0;
-int target_temperature_bed = 0;
-int current_temperature_raw = 0;
+//int target_temperature_bed = 0;
+//int current_temperature_raw = 0;
 float current_temperature = 0.0;
-int current_temperature_bed_raw = 0;
+//int current_temperature_bed_raw = 0;
 float current_temperature_bed = 0.0;
 #ifdef PIDTEMP
   float Kp=DEFAULT_Kp;
@@ -57,16 +57,18 @@ float current_temperature_bed = 0.0;
   float bedKd=(DEFAULT_bedKd/PID_dT);
 #endif //PIDTEMPBED
   
-#ifdef FAN_SOFT_PWM
-  unsigned char fanSpeedSoftPwm;
-#endif
+//#ifdef FAN_SOFT_PWM
+//  unsigned char fanSpeedSoftPwm;
+//#endif
 
-unsigned char soft_pwm_bed;
+//unsigned char soft_pwm_bed;
+
+temp_struct_t temp_struct;
 
 //===========================================================================
 //=============================private variables============================
 //===========================================================================
-static volatile bool temp_meas_ready = false;
+//static volatile bool temp_meas_ready = false;
 
 #ifdef PIDTEMP
   //static cannot be external:
@@ -97,24 +99,24 @@ static volatile bool temp_meas_ready = false;
 #else //PIDTEMPBED
 	static unsigned long  previous_millis_bed_heater;
 #endif //PIDTEMPBED
-  static unsigned char soft_pwm;
+//  static unsigned char soft_pwm;
 
-#ifdef FAN_SOFT_PWM
-  static unsigned char soft_pwm_fan;
-#endif
+//#ifdef FAN_SOFT_PWM
+//  static unsigned char soft_pwm_fan;
+//#endif
 #if defined(EXTRUDER_0_AUTO_FAN_PIN)
   static unsigned long extruder_autofan_last_check;
 #endif  
 
 // Init min and max temp with extreme values to prevent false errors during startup
-static int minttemp_raw = HEATER_0_RAW_LO_TEMP;
-static int maxttemp_raw = HEATER_0_RAW_HI_TEMP;
+//static int minttemp_raw = HEATER_0_RAW_LO_TEMP;
+//static int maxttemp_raw = HEATER_0_RAW_HI_TEMP;
 static int minttemp = 0;
 static int maxttemp = 16383;
 //static int bed_minttemp_raw = HEATER_BED_RAW_LO_TEMP; /* No bed mintemp error implemented?!? */
-#ifdef BED_MAXTEMP
-static int bed_maxttemp_raw = HEATER_BED_RAW_HI_TEMP;
-#endif
+//#ifdef BED_MAXTEMP
+//static int bed_maxttemp_raw = HEATER_BED_RAW_HI_TEMP;
+//#endif
 
 static float analog2temp(int raw);
 static float analog2tempBed(int raw);
@@ -137,7 +139,7 @@ void temp_read_loop()
 {
 	while(1) {
 		usleep(50000);
-		kill(getppid(), SIGUSR2);
+		temp_ISR();
 	}
 }
 
@@ -164,18 +166,18 @@ void PID_autotune(float temp, int extruder, int ncycles)
 
   if (extruder<0)
   {
-     soft_pwm_bed = (MAX_BED_POWER)/2;
+     TEMP_shm_addr->soft_pwm_bed = (MAX_BED_POWER)/2;
      bias = d = (MAX_BED_POWER)/2;
    }
    else
    {
-     soft_pwm = (PID_MAX)/2;
+     TEMP_shm_addr->soft_pwm = (PID_MAX)/2;
      bias = d = (PID_MAX)/2;
   }
 
  for(;;) {
 
-    if(temp_meas_ready == true) { // temp sample ready
+    if(TEMP_shm_addr->temp_meas_ready == true) { // temp sample ready
       updateTemperaturesFromRawValues();
 
       input = (extruder<0)?current_temperature_bed:current_temperature;
@@ -186,9 +188,9 @@ void PID_autotune(float temp, int extruder, int ncycles)
         if(millis() - t2 > 5000) { 
           heating=false;
           if (extruder<0)
-            soft_pwm_bed = (bias - d) >> 1;
+            TEMP_shm_addr->soft_pwm_bed = (bias - d) >> 1;
           else
-            soft_pwm = (bias - d) >> 1;
+            TEMP_shm_addr->soft_pwm = (bias - d) >> 1;
           t1=millis();
           t_high=t1 - t2;
           max=temp;
@@ -240,9 +242,9 @@ void PID_autotune(float temp, int extruder, int ncycles)
             }
           }
           if (extruder<0)
-            soft_pwm_bed = (bias + d) >> 1;
+            TEMP_shm_addr->soft_pwm_bed = (bias + d) >> 1;
           else
-            soft_pwm = (bias + d) >> 1;
+            TEMP_shm_addr->soft_pwm = (bias + d) >> 1;
           cycles++;
           min=temp;
         }
@@ -255,10 +257,10 @@ void PID_autotune(float temp, int extruder, int ncycles)
     if(millis() - temp_millis > 2000) {
       int p;
       if (extruder<0){
-        p=soft_pwm_bed;       
+        p=TEMP_shm_addr->soft_pwm_bed;       
         SERIAL_PROTOCOLPGM("ok B:");
       }else{
-        p=soft_pwm;
+        p=TEMP_shm_addr->soft_pwm;
         SERIAL_PROTOCOLPGM("ok T:");
       }
 			
@@ -291,8 +293,8 @@ void updatePID()
   
 int getHeaterPower(int heater) {
 	if (heater<0)
-		return soft_pwm_bed;
-  return soft_pwm;
+		return TEMP_shm_addr->soft_pwm_bed;
+  return TEMP_shm_addr->soft_pwm;
 }
 
 #if defined(EXTRUDER_0_AUTO_FAN_PIN)
@@ -323,7 +325,7 @@ void manage_heater()
 #endif
   float pid_output;
 
-  if(temp_meas_ready != true)   //better readability
+  if(TEMP_shm_addr->temp_meas_ready != true)   //better readability
     return; 
 
   updateTemperaturesFromRawValues();
@@ -388,10 +390,10 @@ void manage_heater()
     // Check if temperature is within the correct range
     if((current_temperature > minttemp) && (current_temperature < maxttemp)) 
     {
-      soft_pwm = (int)pid_output >> 1;
+      TEMP_shm_addr->soft_pwm = (int)pid_output >> 1;
     }
     else {
-      soft_pwm = 0;
+      TEMP_shm_addr->soft_pwm = 0;
     }
 
     #ifdef WATCH_TEMP_PERIOD
@@ -425,14 +427,14 @@ void manage_heater()
   #if TEMP_SENSOR_BED != 0
   
     #if defined(THERMAL_RUNAWAY_PROTECTION_PERIOD) && (THERMAL_RUNAWAY_PROTECTION_PERIOD > 0)
-      thermal_runaway_protection(&thermal_runaway_bed_state_machine, &thermal_runaway_bed_timer, current_temperature_bed, target_temperature_bed, 9, THERMAL_RUNAWAY_PROTECTION_BED_PERIOD, THERMAL_RUNAWAY_PROTECTION_BED_HYSTERESIS);
+      thermal_runaway_protection(&thermal_runaway_bed_state_machine, &thermal_runaway_bed_timer, current_temperature_bed, TEMP_shm_addr->target_temperature_bed, 9, THERMAL_RUNAWAY_PROTECTION_BED_PERIOD, THERMAL_RUNAWAY_PROTECTION_BED_HYSTERESIS);
     #endif
 
   #ifdef PIDTEMPBED
     pid_input = current_temperature_bed;
 
     #ifndef PID_OPENLOOP
-		  pid_error_bed = target_temperature_bed - pid_input;
+		  pid_error_bed = TEMP_shm_addr->target_temperature_bed - pid_input;
 		  pTerm_bed = bedKp * pid_error_bed;
 		  temp_iState_bed += pid_error_bed;
 		  temp_iState_bed = constrain(temp_iState_bed, temp_iState_min_bed, temp_iState_max_bed);
@@ -446,51 +448,51 @@ void manage_heater()
 		  pid_output = constrain(pTerm_bed + iTerm_bed - dTerm_bed, 0, MAX_BED_POWER);
 
     #else 
-      pid_output = constrain(target_temperature_bed, 0, MAX_BED_POWER);
+      pid_output = constrain(TEMP_shm_addr->target_temperature_bed, 0, MAX_BED_POWER);
     #endif //PID_OPENLOOP
 
 	  if((current_temperature_bed > BED_MINTEMP) && (current_temperature_bed < BED_MAXTEMP)) 
 	  {
-	    soft_pwm_bed = (int)pid_output >> 1;
+	    TEMP_shm_addr->soft_pwm_bed = (int)pid_output >> 1;
 	  }
 	  else {
-	    soft_pwm_bed = 0;
+	    TEMP_shm_addr->soft_pwm_bed = 0;
 	  }
 
     #elif !defined(BED_LIMIT_SWITCHING)
       // Check if temperature is within the correct range
       if((current_temperature_bed > BED_MINTEMP) && (current_temperature_bed < BED_MAXTEMP))
       {
-        if(current_temperature_bed >= target_temperature_bed)
+        if(current_temperature_bed >= TEMP_shm_addr->target_temperature_bed)
         {
-          soft_pwm_bed = 0;
+          TEMP_shm_addr->soft_pwm_bed = 0;
         }
         else 
         {
-          soft_pwm_bed = MAX_BED_POWER>>1;
+          TEMP_shm_addr->soft_pwm_bed = MAX_BED_POWER>>1;
         }
       }
       else
       {
-        soft_pwm_bed = 0;
+        TEMP_shm_addr->soft_pwm_bed = 0;
         setPwmFrequency(HEATER_BED_PIN,0);
       }
     #else //#ifdef BED_LIMIT_SWITCHING
       // Check if temperature is within the correct band
       if((current_temperature_bed > BED_MINTEMP) && (current_temperature_bed < BED_MAXTEMP))
       {
-        if(current_temperature_bed > target_temperature_bed + BED_HYSTERESIS)
+        if(current_temperature_bed > TEMP_shm_addr->target_temperature_bed + BED_HYSTERESIS)
         {
-          soft_pwm_bed = 0;
+          TEMP_shm_addr->soft_pwm_bed = 0;
         }
-        else if(current_temperature_bed <= target_temperature_bed - BED_HYSTERESIS)
+        else if(current_temperature_bed <= TEMP_shm_addr->target_temperature_bed - BED_HYSTERESIS)
         {
-          soft_pwm_bed = MAX_BED_POWER>>1;
+          TEMP_shm_addr->soft_pwm_bed = MAX_BED_POWER>>1;
         }
       }
       else
       {
-        soft_pwm_bed = 0;
+        TEMP_shm_addr->soft_pwm_bed = 0;
         setPwmFrequency(HEATER_BED_PIN,0);
       }
     #endif
@@ -563,14 +565,14 @@ static float analog2tempBed(int raw) {
     and this function is called from normal context as it is too slow to run in interrupts and will block the stepper routine otherwise */
 static void updateTemperaturesFromRawValues()
 {
-    current_temperature = analog2temp(current_temperature_raw);
-    current_temperature_bed = analog2tempBed(current_temperature_bed_raw);
+    current_temperature = analog2temp(TEMP_shm_addr->current_temperature_raw);
+    current_temperature_bed = analog2tempBed(TEMP_shm_addr->current_temperature_bed_raw);
     //Reset the watchdog after we know we have a temperature measurement.
     watchdog_reset();
 
     CRITICAL_SECTION_START;
 
-    temp_meas_ready = false;
+    TEMP_shm_addr->temp_meas_ready = false;
 
     CRITICAL_SECTION_END;
 }
@@ -596,27 +598,27 @@ void tp_init()
   #if defined(FAN_PIN) && (FAN_PIN > -1) 
    setPwmFrequency(FAN_PIN, 0);
     #ifdef FAN_SOFT_PWM
-    soft_pwm_fan = fanSpeedSoftPwm / 2;
+    TEMP_shm_addr->soft_pwm_fan = TEMP_shm_addr->fanSpeedSoftPwm / 2;
     #endif
   #endif  
 
 #ifdef HEATER_0_MINTEMP
   minttemp = HEATER_0_MINTEMP;
-  while(analog2temp(minttemp_raw) < HEATER_0_MINTEMP) {
+  while(analog2temp(TEMP_shm_addr->minttemp_raw) < HEATER_0_MINTEMP) {
 #if HEATER_0_RAW_LO_TEMP < HEATER_0_RAW_HI_TEMP
-    minttemp_raw += OVERSAMPLENR;
+    TEMP_shm_addr->minttemp_raw += OVERSAMPLENR;
 #else
-    minttemp_raw -= OVERSAMPLENR;
+    TEMP_shm_addr->minttemp_raw -= OVERSAMPLENR;
 #endif
   }
 #endif //MINTEMP
 #ifdef HEATER_0_MAXTEMP
   maxttemp = HEATER_0_MAXTEMP;
-  while(analog2temp(maxttemp_raw) > HEATER_0_MAXTEMP) {
+  while(analog2temp(TEMP_shm_addr->maxttemp_raw) > HEATER_0_MAXTEMP) {
 #if HEATER_0_RAW_LO_TEMP < HEATER_0_RAW_HI_TEMP
-    maxttemp_raw -= OVERSAMPLENR;
+    TEMP_shm_addr->maxttemp_raw -= OVERSAMPLENR;
 #else
-    maxttemp_raw += OVERSAMPLENR;
+    TEMP_shm_addr->maxttemp_raw += OVERSAMPLENR;
 #endif
   }
 #endif //MAXTEMP
@@ -633,11 +635,11 @@ void tp_init()
   */
 #endif //BED_MINTEMP
 #ifdef BED_MAXTEMP
-  while(analog2tempBed(bed_maxttemp_raw) > BED_MAXTEMP) {
+  while(analog2tempBed(TEMP_shm_addr->bed_maxttemp_raw) > BED_MAXTEMP) {
 #if HEATER_BED_RAW_LO_TEMP < HEATER_BED_RAW_HI_TEMP
-    bed_maxttemp_raw -= OVERSAMPLENR;
+    TEMP_shm_addr->bed_maxttemp_raw -= OVERSAMPLENR;
 #else
-    bed_maxttemp_raw += OVERSAMPLENR;
+    TEMP_shm_addr->bed_maxttemp_raw += OVERSAMPLENR;
 #endif
   }
 #endif //BED_MAXTEMP
@@ -718,15 +720,15 @@ void disable_heater()
   setTargetBed(0);
   #if defined(TEMP_0_PIN) && TEMP_0_PIN > -1
   target_temperature=0;
-  soft_pwm=0;
+  TEMP_shm_addr->soft_pwm=0;
    #if defined(HEATER_0_PIN)
      setPwmFrequency(HEATER_0_PIN,0);
    #endif
   #endif
 
   #if defined(TEMP_BED_PIN) && TEMP_BED_PIN > -1
-    target_temperature_bed=0;
-    soft_pwm_bed=0;
+    TEMP_shm_addr->target_temperature_bed=0;
+    TEMP_shm_addr->soft_pwm_bed=0;
     #if defined(HEATER_BED_PIN)
       setPwmFrequency(HEATER_BED_PIN,0);
     #endif
@@ -770,7 +772,7 @@ void bed_max_temp_error(void) {
   #endif
 }
 
-void temp_ISR(int sign)
+void temp_ISR()
 {
   //these variables are only accesible from the ISR, but static, so they don't lose their value
   static unsigned char temp_count = 0;
@@ -784,26 +786,26 @@ void temp_ISR(int sign)
   static unsigned char soft_pwm_b;
   #endif
   
-  if(soft_pwm_0 != soft_pwm){
-    soft_pwm_0 = soft_pwm;
-    setPwmFrequency(HEATER_0_PIN,soft_pwm);
+  if(soft_pwm_0 != TEMP_shm_addr->soft_pwm){
+    soft_pwm_0 = TEMP_shm_addr->soft_pwm;
+    setPwmFrequency(HEATER_0_PIN,TEMP_shm_addr->soft_pwm);
   }
 
 #if defined(HEATER_BED_PIN)
-  if(soft_pwm_b != soft_pwm_bed){
-    soft_pwm_b = soft_pwm_bed;
-    setPwmFrequency(HEATER_BED_PIN,soft_pwm_bed);
+  if(soft_pwm_b != TEMP_shm_addr->soft_pwm_bed){
+    soft_pwm_b = TEMP_shm_addr->soft_pwm_bed;
+    setPwmFrequency(HEATER_BED_PIN,TEMP_shm_addr->soft_pwm_bed);
   }
 #endif
 
     #ifdef FAN_SOFT_PWM
-    soft_pwm_fan = fanSpeedSoftPwm / 2;
-    if(soft_pwm_fan > 0) setPwmFrequency(FAN_PIN,soft_pwm_fan);
+    TEMP_shm_addr->soft_pwm_fan = TEMP_shm_addr->fanSpeedSoftPwm / 2;
+    if(TEMP_shm_addr->soft_pwm_fan > 0) setPwmFrequency(FAN_PIN,TEMP_shm_addr->soft_pwm_fan);
     #endif
 
   char buf[256];
   int fd;
-  char value[4];
+  char value[6];
 
 	// Measure TEMP_0
 	#if defined(TEMP_0_PIN) && (TEMP_0_PIN > -1)
@@ -834,13 +836,13 @@ void temp_ISR(int sign)
 
   if(temp_count >= OVERSAMPLENR) // 8 * 16 * 1/(16000000/64/256)  = 131ms.
   {
-    if (!temp_meas_ready) //Only update the raw values if they have been read. Else we could be updating them during reading.
+    if (!TEMP_shm_addr->temp_meas_ready) //Only update the raw values if they have been read. Else we could be updating them during reading.
     {
-      current_temperature_raw = raw_temp_0_value;
-      current_temperature_bed_raw = raw_temp_bed_value;
+      TEMP_shm_addr->current_temperature_raw = raw_temp_0_value;
+      TEMP_shm_addr->current_temperature_bed_raw = raw_temp_bed_value;
     }
     
-    temp_meas_ready = true;
+    TEMP_shm_addr->temp_meas_ready = true;
     temp_count = 0;
     raw_temp_0_value = 0;
 	#if defined(TEMP_1_PIN) && (TEMP_1_PIN > -1)
@@ -849,16 +851,16 @@ void temp_ISR(int sign)
     raw_temp_bed_value = 0;
 
 #if HEATER_0_RAW_LO_TEMP > HEATER_0_RAW_HI_TEMP
-    if(current_temperature_raw <= maxttemp_raw) {
+    if(TEMP_shm_addr->current_temperature_raw <= TEMP_shm_addr->maxttemp_raw) {
 #else
-    if(current_temperature_raw >= maxttemp_raw) {
+    if(TEMP_shm_addr->current_temperature_raw >= TEMP_shm_addr->maxttemp_raw) {
 #endif
         max_temp_error();
     }
 #if HEATER_0_RAW_LO_TEMP > HEATER_0_RAW_HI_TEMP
-    if(current_temperature_raw >= minttemp_raw) {
+    if(TEMP_shm_addr->current_temperature_raw >= TEMP_shm_addr->minttemp_raw) {
 #else
-    if(current_temperature_raw <= minttemp_raw) {
+    if(TEMP_shm_addr->current_temperature_raw <= TEMP_shm_addr->minttemp_raw) {
 #endif
         min_temp_error();
     }
@@ -866,11 +868,11 @@ void temp_ISR(int sign)
   // No bed MINTEMP error? 
 #if defined(BED_MAXTEMP) && (TEMP_SENSOR_BED != 0)
 # if HEATER_BED_RAW_LO_TEMP > HEATER_BED_RAW_HI_TEMP
-    if(current_temperature_bed_raw <= bed_maxttemp_raw) {
+    if(TEMP_shm_addr->current_temperature_bed_raw <= TEMP_shm_addr->bed_maxttemp_raw) {
 #else
-    if(current_temperature_bed_raw >= bed_maxttemp_raw) {
+    if(TEMP_shm_addr->current_temperature_bed_raw >= TEMP_shm_addr->bed_maxttemp_raw) {
 #endif
-       target_temperature_bed = 0;
+       TEMP_shm_addr->target_temperature_bed = 0;
        bed_max_temp_error();
     }
 #endif

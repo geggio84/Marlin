@@ -167,9 +167,9 @@ extern long *count_position[NUM_AXIS];
 #define PRUSS_RAM2_OFFSET 0x4A310000
 #define SHM_FILE "/shared_mem"
 
-#ifdef FAN_SOFT_PWM
-extern unsigned char fanSpeedSoftPwm;
-#endif
+//#ifdef FAN_SOFT_PWM
+//extern unsigned char fanSpeedSoftPwm;
+//#endif
 
 #ifdef FWRETRACT
 extern bool autoretract_enabled;
