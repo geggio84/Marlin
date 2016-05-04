@@ -245,7 +245,7 @@ static float destination[NUM_AXIS] = {  0.0, 0.0, 0.0, 0.0};
 static float offset[3] = {0.0, 0.0, 0.0};
 static bool home_all_axis = true;
 static float feedrate = 1500.0, next_feedrate, saved_feedrate;
-static long gcode_N, gcode_LastN, Stopped_gcode_LastN = 0;
+static long gcode_N;
 
 static bool relative_mode = false;  //Determines Absolute or Relative Coordinates
 
@@ -273,7 +273,7 @@ static unsigned long stepper_inactive_time = DEFAULT_STEPPER_DEACTIVE_TIME*1000l
 unsigned long starttime=0;
 unsigned long stoptime=0;
 
-bool Stopped=false;
+//bool Stopped=false;
 
 #if NUM_SERVOS > 0
   Servo servos[NUM_SERVOS];
@@ -524,6 +524,10 @@ int main(int argc, char *argv[])
 	TEMP_shm_addr->minttemp_raw = HEATER_0_RAW_LO_TEMP;
 	TEMP_shm_addr->bed_maxttemp_raw = HEATER_BED_RAW_HI_TEMP;
 	TEMP_shm_addr->target_temperature_bed = 0;
+	TEMP_shm_addr->target_temperature = 0;
+	TEMP_shm_addr->Stopped=false;
+	TEMP_shm_addr->Stopped_gcode_LastN = 0;
+	TEMP_shm_addr->gcode_LastN = 0;
 	
 	// Fork new child process
 	for (i=0; i<NR_CHILDS; i++)
@@ -655,10 +659,10 @@ int get_command()
         {
           strchr_pointer = strchr(cmdbuffer[bufindw], 'N');
           gcode_N = (strtol(&cmdbuffer[bufindw][strchr_pointer - cmdbuffer[bufindw] + 1], NULL, 10));
-          if(gcode_N != gcode_LastN+1 && (strstr(cmdbuffer[bufindw], "M110") == NULL) ) {
+          if(gcode_N != TEMP_shm_addr->gcode_LastN+1 && (strstr(cmdbuffer[bufindw], "M110") == NULL) ) {
             SERIAL_ERROR_START;
             SERIAL_ERRORPGM(MSG_ERR_LINE_NO);
-            SERIAL_ERRORLN(gcode_LastN);
+            SERIAL_ERRORLN(TEMP_shm_addr->gcode_LastN);
             //Serial.println(gcode_N);
             FlushSerialRequestResend();
             serial_count = 0;
@@ -675,7 +679,7 @@ int get_command()
             if( (int)(strtod(&cmdbuffer[bufindw][strchr_pointer - cmdbuffer[bufindw] + 1], NULL)) != checksum) {
               SERIAL_ERROR_START;
               SERIAL_ERRORPGM(MSG_ERR_CHECKSUM_MISMATCH);
-              SERIAL_ERRORLN(gcode_LastN);
+              SERIAL_ERRORLN(TEMP_shm_addr->gcode_LastN);
               FlushSerialRequestResend();
               serial_count = 0;
               return 0;
@@ -686,13 +690,13 @@ int get_command()
           {
             SERIAL_ERROR_START;
             SERIAL_ERRORPGM(MSG_ERR_NO_CHECKSUM);
-            SERIAL_ERRORLN(gcode_LastN);
+            SERIAL_ERRORLN(TEMP_shm_addr->gcode_LastN);
             FlushSerialRequestResend();
             serial_count = 0;
             return 0;
           }
 
-          gcode_LastN = gcode_N;
+          TEMP_shm_addr->gcode_LastN = gcode_N;
           //if no errors, continue parsing
         }
         else  // if we don't receive 'N' but still see '*'
@@ -701,7 +705,7 @@ int get_command()
           {
             SERIAL_ERROR_START;
             SERIAL_ERRORPGM(MSG_ERR_NO_LINENUMBER_WITH_CHECKSUM);
-            SERIAL_ERRORLN(gcode_LastN);
+            SERIAL_ERRORLN(TEMP_shm_addr->gcode_LastN);
             serial_count = 0;
             return 0;
           }
@@ -713,7 +717,7 @@ int get_command()
           case 1:
           case 2:
           case 3:
-            if(Stopped == false) { // If printer is stopped by an error the G[0-3] codes are ignored.
+            if(TEMP_shm_addr->Stopped == false) { // If printer is stopped by an error the G[0-3] codes are ignored.
           #ifdef SDSUPPORT
               if(card.saving)
                 break;
@@ -1142,7 +1146,7 @@ void process_commands()
     {
     case 0: // G0 -> G1
     case 1: // G1
-      if(Stopped == false) {
+      if(TEMP_shm_addr->Stopped == false) {
         get_coordinates(); // For X Y Z E F
           #ifdef FWRETRACT
             if(autoretract_enabled)
@@ -1162,14 +1166,14 @@ void process_commands()
       }
       break;
     case 2: // G2  - CW ARC
-      if(Stopped == false) {
+      if(TEMP_shm_addr->Stopped == false) {
         get_arc_coordinates();
         prepare_arc_move(true);
         return;
       }
       break;
     case 3: // G3  - CCW ARC
-      if(Stopped == false) {
+      if(TEMP_shm_addr->Stopped == false) {
         get_arc_coordinates();
         prepare_arc_move(false);
         return;
@@ -2730,8 +2734,8 @@ void process_commands()
     }
     break;
     case 999: // M999: Restart after being stopped
-      Stopped = false;
-      gcode_LastN = Stopped_gcode_LastN;
+      TEMP_shm_addr->Stopped = false;
+      TEMP_shm_addr->gcode_LastN = TEMP_shm_addr->Stopped_gcode_LastN;
       FlushSerialRequestResend();
     break;
     }
@@ -2758,7 +2762,7 @@ void FlushSerialRequestResend()
   //char cmdbuffer[bufindr][100]="Resend:";
   MYSERIAL.flush();
   SERIAL_PROTOCOLPGM(MSG_RESEND);
-  SERIAL_PROTOCOLLN(gcode_LastN + 1);
+  SERIAL_PROTOCOLLN(TEMP_shm_addr->gcode_LastN + 1);
   ClearToSend();
 }
 
@@ -3123,15 +3127,15 @@ void temp_read_kill(int signum)
 void Stop()
 {
   disable_heater();
-  if(Stopped == false) {
-    Stopped = true;
-    Stopped_gcode_LastN = gcode_LastN; // Save last g_code for restart
+  if(TEMP_shm_addr->Stopped == false) {
+    TEMP_shm_addr->Stopped = true;
+    TEMP_shm_addr->Stopped_gcode_LastN = TEMP_shm_addr->gcode_LastN; // Save last g_code for restart
     SERIAL_ERROR_START;
     SERIAL_ERRORLNPGM(MSG_ERR_STOPPED);
   }
 }
 
-bool IsStopped() { return Stopped; };
+bool IsStopped() { return TEMP_shm_addr->Stopped; };
 
 void setPwmFrequency(const char *pin, int val)
 {

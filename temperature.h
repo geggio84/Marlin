@@ -33,7 +33,7 @@ void manage_heater(); //it is critical that this is called periodically.
 
 // low level conversion routines
 // do not use these routines and variables outside of temperature.cpp
-extern int target_temperature;
+//extern int target_temperature;
 extern float current_temperature;
 //#ifdef SHOW_TEMP_ADC_VALUES
 //  extern int current_temperature_raw;
@@ -56,6 +56,10 @@ typedef struct {
 	int minttemp_raw;// = HEATER_0_RAW_LO_TEMP;
 	int bed_maxttemp_raw;// = HEATER_BED_RAW_HI_TEMP;
 	int target_temperature_bed;// = 0;
+	int target_temperature;// = 0;
+	int Stopped;
+	long Stopped_gcode_LastN;
+	long gcode_LastN;
 } temp_struct_t;
 
 extern temp_struct_t temp_struct;
@@ -102,7 +106,7 @@ FORCE_INLINE float degBed() {
 };
 
 FORCE_INLINE float degTargetHotend() {
-  return target_temperature;
+  return TEMP_shm_addr->target_temperature;
 };
 
 FORCE_INLINE float degTargetBed() {
@@ -110,7 +114,7 @@ FORCE_INLINE float degTargetBed() {
 };
 
 FORCE_INLINE void setTargetHotend(const float &celsius) {
-  target_temperature = celsius;
+  TEMP_shm_addr->target_temperature = celsius;
 };
 
 FORCE_INLINE void setTargetBed(const float &celsius) {
@@ -118,7 +122,7 @@ FORCE_INLINE void setTargetBed(const float &celsius) {
 };
 
 FORCE_INLINE bool isHeatingHotend(){
-  return target_temperature > current_temperature;
+  return TEMP_shm_addr->target_temperature > current_temperature;
 };
 
 FORCE_INLINE bool isHeatingBed() {
@@ -126,7 +130,7 @@ FORCE_INLINE bool isHeatingBed() {
 };
 
 FORCE_INLINE bool isCoolingHotend() {
-  return target_temperature < current_temperature;
+  return TEMP_shm_addr->target_temperature < current_temperature;
 };
 
 FORCE_INLINE bool isCoolingBed() {

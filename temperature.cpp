@@ -36,7 +36,7 @@
 //===========================================================================
 //=============================public variables============================
 //===========================================================================
-int target_temperature = 0;
+//int target_temperature = 0;
 //int target_temperature_bed = 0;
 //int current_temperature_raw = 0;
 float current_temperature = 0.0;
@@ -331,19 +331,19 @@ void manage_heater()
   updateTemperaturesFromRawValues();
 
   #if defined(THERMAL_RUNAWAY_PROTECTION_PERIOD)&&(THERMAL_RUNAWAY_PROTECTION_PERIOD > 0)
-    thermal_runaway_protection(&thermal_runaway_state_machine, &thermal_runaway_timer, current_temperature, target_temperature, THERMAL_RUNAWAY_PROTECTION_PERIOD, THERMAL_RUNAWAY_PROTECTION_HYSTERESIS);
+    thermal_runaway_protection(&thermal_runaway_state_machine, &thermal_runaway_timer, current_temperature, TEMP_shm_addr->target_temperature, THERMAL_RUNAWAY_PROTECTION_PERIOD, THERMAL_RUNAWAY_PROTECTION_HYSTERESIS);
   #endif
 
   #ifdef PIDTEMP
     pid_input = current_temperature;
 
     #ifndef PID_OPENLOOP
-        pid_error = target_temperature - pid_input;
+        pid_error = TEMP_shm_addr->target_temperature - pid_input;
         if(pid_error > PID_FUNCTIONAL_RANGE) {
           pid_output = BANG_MAX;
           pid_reset = true;
         }
-        else if(pid_error < -PID_FUNCTIONAL_RANGE || target_temperature == 0) {
+        else if(pid_error < -PID_FUNCTIONAL_RANGE || TEMP_shm_addr->target_temperature == 0) {
           pid_output = 0;
           pid_reset = true;
         }
@@ -364,7 +364,7 @@ void manage_heater()
         }
         temp_dState = pid_input;
     #else 
-          pid_output = constrain(target_temperature, 0, PID_MAX);
+          pid_output = constrain(TEMP_shm_addr->target_temperature, 0, PID_MAX);
     #endif //PID_OPENLOOP
     #ifdef PID_DEBUG
     SERIAL_ECHO_START;
@@ -382,7 +382,7 @@ void manage_heater()
     #endif //PID_DEBUG
   #else /* PID off */
     pid_output = 0;
-    if(current_temperature < target_temperature) {
+    if(current_temperature < TEMP_shm_addr->target_temperature) {
       pid_output = PID_MAX;
     }
   #endif
@@ -719,7 +719,7 @@ void disable_heater()
   setTargetHotend(0);
   setTargetBed(0);
   #if defined(TEMP_0_PIN) && TEMP_0_PIN > -1
-  target_temperature=0;
+  TEMP_shm_addr->target_temperature=0;
   TEMP_shm_addr->soft_pwm=0;
    #if defined(HEATER_0_PIN)
      setPwmFrequency(HEATER_0_PIN,0);
