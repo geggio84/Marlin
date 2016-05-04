@@ -23,8 +23,6 @@
 #define MarlinSerial_h
 #include "Marlin.h"
 
-extern int serial_file;
-
 #define DEC 10
 #define HEX 16
 #define OCT 8
@@ -39,6 +37,45 @@ extern int serial_file;
 // is the index of the location from which to read.
 #define RX_BUFFER_SIZE 128
 
+#define MYSERIAL MSerial
+
+#define SERIAL_PROTOCOL(x) (MYSERIAL.print(x))
+#define SERIAL_PROTOCOL_F(x,y) (MYSERIAL.print(x,y))
+#define SERIAL_PROTOCOLPGM(x) (serialprintPGM(x))
+#define SERIAL_PROTOCOLLN(x) (MYSERIAL.print(x),MYSERIAL.write_ser('\n'))
+#define SERIAL_PROTOCOLLNPGM(x) (serialprintPGM(x),MYSERIAL.write_ser('\n'))
+
+extern int serial_file;
+
+const char errormagic[] ="Error:";
+const char echomagic[] ="echo:";
+#define SERIAL_ERROR_START (serialprintPGM(errormagic))
+#define SERIAL_ERROR(x) SERIAL_PROTOCOL(x)
+#define SERIAL_ERRORPGM(x) SERIAL_PROTOCOLPGM(x)
+#define SERIAL_ERRORLN(x) SERIAL_PROTOCOLLN(x)
+#define SERIAL_ERRORLNPGM(x) SERIAL_PROTOCOLLNPGM(x)
+
+#define SERIAL_ECHO_START (serialprintPGM(echomagic))
+#define SERIAL_ECHO(x) SERIAL_PROTOCOL(x)
+#define SERIAL_ECHOPGM(x) SERIAL_PROTOCOLPGM(x)
+#define SERIAL_ECHOLN(x) SERIAL_PROTOCOLLN(x)
+#define SERIAL_ECHOLNPGM(x) SERIAL_PROTOCOLLNPGM(x)
+
+#define SERIAL_ECHOPAIR(name,value) (serial_echopair_P(((const char *)(name)),(value)))
+
+void serial_echopair_P(const char *s_P, float v);
+void serial_echopair_P(const char *s_P, double v);
+void serial_echopair_P(const char *s_P, unsigned long v);
+//Things to write to serial from Program memory. Saves 400 to 2k of RAM.
+FORCE_INLINE void serialprintPGM(const char *str)
+{
+  char ch=*str;
+  while(ch)
+  {
+    write(serial_file,&ch,1);
+    ch=*(++str);
+  }
+}
 
 struct ring_buffer
 {
@@ -152,6 +189,7 @@ class MarlinSerial //: public Stream
     void println(unsigned long, int = DEC);
     void println(double, int = 2);
     void println(void);
+	void close_serial(void);
 };
 
 extern MarlinSerial MSerial;

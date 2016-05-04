@@ -54,6 +54,11 @@ void MarlinSerial::begin(long baud, char* serial)
     struct termios serial_config;
     
         // OPEN Serial Port
+		if (serial_file != 0) {
+			printf("Serial Port File already open: %s\n\r", serial);
+			return;
+		}
+			
         printf("Now We Open Serial Port File: %s\n\r", serial);
         serial_file = open(serial, O_RDWR | O_NOCTTY | O_NONBLOCK);
         if (serial_file == 0) {
@@ -262,6 +267,14 @@ void MarlinSerial::println(double n, int digits)
 {
   print(n, digits);
   println();
+}
+
+void MarlinSerial::close_serial(void)
+{
+    if (serial_file != 0) {
+        printf("Now We Close Serial Port File: %s\n\r", SERIAL_PORT);
+        close(serial_file);
+    }
 }
 
 // Private Methods /////////////////////////////////////////////////////////////

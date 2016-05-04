@@ -176,7 +176,7 @@ unsigned long time_zero = 0;
 myFILE *gcode_file;
 myFILE *log_file;
 FILE *config_file;
-int serial_file;
+int serial_file = 0;
 int pru_file;
 #define NR_CHILDS 1
 pid_t pid_val[NR_CHILDS];
@@ -421,7 +421,7 @@ void setup()
 	fcntl(pru_file, F_SETFL, flags | O_NONBLOCK);
   setup_killpin();
   setup_powerhold();
-  MYSERIAL.begin(BAUDRATE,(char*)SERIAL_PORT);
+  //MYSERIAL.begin(BAUDRATE,(char*)SERIAL_PORT);
   SERIAL_PROTOCOLLNPGM("start");
   SERIAL_ECHO_START;
 
@@ -529,6 +529,8 @@ int main(int argc, char *argv[])
 	TEMP_shm_addr->Stopped_gcode_LastN = 0;
 	TEMP_shm_addr->gcode_LastN = 0;
 	
+	MYSERIAL.begin(BAUDRATE,(char*)SERIAL_PORT);
+	
 	// Fork new child process
 	for (i=0; i<NR_CHILDS; i++)
     {
@@ -611,10 +613,6 @@ int main(int argc, char *argv[])
     /*if (gcode_file.file_p != NULL) {
         fclose(gcode_file.file_p);
     }*/
-    if (serial_file != 0) {
-        printf("Now We Close Serial Port File: %s\n\r", SERIAL_PORT);
-        close(serial_file);
-    }
     return EXIT_SUCCESS;
 }
 
@@ -3069,14 +3067,9 @@ void marlin_kill()
   SERIAL_ERROR_START;
   SERIAL_ERRORLNPGM(MSG_ERR_KILLED);
   suicide();
-  if (serial_file != 0) {
-        printf("Now We Close Serial Port File: %s\n\r", SERIAL_PORT);
-        close(serial_file);
-  }
-  if (config_file != NULL) {
-	    fclose(config_file);
-		printf("Now We Close Config Store File: %s\n\r",CONFIG_FILE);
-  }
+
+  MYSERIAL.close_serial();
+  
   /* Close the rpmsg_pru character device file */
   if (pru_file != 0) {
 	  close(pru_file);

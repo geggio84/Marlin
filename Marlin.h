@@ -42,7 +42,6 @@
 #define min(a,b) ((a)<(b)?(a):(b))
 #define max(a,b) ((a)>(b)?(a):(b))
 
-
 typedef struct {
     FILE *file_p;
     uint32_t currpos;
@@ -50,35 +49,6 @@ typedef struct {
 } myFILE;
 
 #include "MarlinSerial.h"
-
-#define MYSERIAL MSerial
-
-#define SERIAL_PROTOCOL(x) (MYSERIAL.print(x))
-#define SERIAL_PROTOCOL_F(x,y) (MYSERIAL.print(x,y))
-#define SERIAL_PROTOCOLPGM(x) (serialprintPGM(x))
-#define SERIAL_PROTOCOLLN(x) (MYSERIAL.print(x),MYSERIAL.write_ser('\n'))
-#define SERIAL_PROTOCOLLNPGM(x) (serialprintPGM(x),MYSERIAL.write_ser('\n'))
-
-
-const char errormagic[] ="Error:";
-const char echomagic[] ="echo:";
-#define SERIAL_ERROR_START (serialprintPGM(errormagic))
-#define SERIAL_ERROR(x) SERIAL_PROTOCOL(x)
-#define SERIAL_ERRORPGM(x) SERIAL_PROTOCOLPGM(x)
-#define SERIAL_ERRORLN(x) SERIAL_PROTOCOLLN(x)
-#define SERIAL_ERRORLNPGM(x) SERIAL_PROTOCOLLNPGM(x)
-
-#define SERIAL_ECHO_START (serialprintPGM(echomagic))
-#define SERIAL_ECHO(x) SERIAL_PROTOCOL(x)
-#define SERIAL_ECHOPGM(x) SERIAL_PROTOCOLPGM(x)
-#define SERIAL_ECHOLN(x) SERIAL_PROTOCOLLN(x)
-#define SERIAL_ECHOLNPGM(x) SERIAL_PROTOCOLLNPGM(x)
-
-#define SERIAL_ECHOPAIR(name,value) (serial_echopair_P(((const char *)(name)),(value)))
-
-void serial_echopair_P(const char *s_P, float v);
-void serial_echopair_P(const char *s_P, double v);
-void serial_echopair_P(const char *s_P, unsigned long v);
 
 void pinMode(uint8_t, uint8_t);
 void digitalWrite(uint8_t, uint8_t);
@@ -88,16 +58,6 @@ void analogWrite(uint8_t, int);
 void marlin_main_kill(int);
 void stepper_wait_kill(int);
 void temp_read_kill(int);
-//Things to write to serial from Program memory. Saves 400 to 2k of RAM.
-FORCE_INLINE void serialprintPGM(const char *str)
-{
-  char ch=*str;
-  while(ch)
-  {
-    write(serial_file,&ch,1);
-    ch=*(++str);
-  }
-}
 
 int loop();
 int get_command();
