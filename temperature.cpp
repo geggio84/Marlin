@@ -138,7 +138,7 @@ unsigned long watchmillis = 0;
 void temp_read_loop()
 {
 	while(1) {
-		usleep(50000);
+		usleep(10000);
 		temp_ISR();
 	}
 }
