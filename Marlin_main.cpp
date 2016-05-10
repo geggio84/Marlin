@@ -2950,22 +2950,17 @@ void handle_status_leds(void) {
 		for(i=0; i< 256; i++) {
 			SendColors(i, 0, 0, EXTR_LED_PIN);
 			SendColors(i, 0, 0, BED_LED_PIN);
-			usleep(500);
+			usleep(2000);
 	  }
 	  for(i=0; i< 256; i++) {
 			SendColors((255-i), i, 0, EXTR_LED_PIN);
 			SendColors((255-i), i, 0, BED_LED_PIN);
-			usleep(500);
+			usleep(2000);
 	  }
 	  for(i=0; i< 256; i++) {
 			SendColors(0, (255-i), i, EXTR_LED_PIN);
 			SendColors(0, (255-i), i, BED_LED_PIN);
-			usleep(500);
-	  }
-	  for(i=0; i< 256; i++) {
-			SendColors(i, 0, (255-i), EXTR_LED_PIN);
-			SendColors(i, 0, (255-i), BED_LED_PIN);
-			usleep(500);
+			usleep(2000);
 	  }
 	  init_LEDS = false;
   }
