@@ -697,6 +697,8 @@ const bool Z_MAX_ENDSTOP_INVERTING = true; // set to true to invert the logic of
 // Otherwise the RED led is on. There is 1C hysteresis.
 #define TEMP_STAT_LEDS
 
+#define MAX_NR_LEDS 3
+
 // Use software PWM to drive the fan, as for the heaters. This uses a very low frequency
 // which is not ass annoying as with the hardware PWM. On the other hand, if this frequency
 // is too low, you should also increment SOFT_PWM_SCALE.
