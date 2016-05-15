@@ -111,7 +111,7 @@ stepper_block_t stepper_block_buffer;            // A ring buffer for motion ins
 float extrude_min_temp=EXTRUDE_MINTEMP;
 #endif
 #ifdef XY_FREQUENCY_LIMIT
-#define MAX_FREQ_TIME (1000000.0/XY_FREQUENCY_LIMIT)
+#define MAX_FREQ_TIME (long)(1000000.0/XY_FREQUENCY_LIMIT)
 // Used for the frequency limit
 static unsigned char old_direction_bits = 0;               // Old direction bits. Used for speed calculations
 static long x_segment_time[3]={MAX_FREQ_TIME + 1,0,0};     // Segment times (in us). Used for speed calculations
@@ -685,7 +685,7 @@ block->steps_y = labs(target[Y_AXIS]-position[Y_AXIS]);
 
   // Max segement time in us.
 #ifdef XY_FREQUENCY_LIMIT
-#define MAX_FREQ_TIME (1000000.0/XY_FREQUENCY_LIMIT)
+#define MAX_FREQ_TIME (long)(1000000.0/XY_FREQUENCY_LIMIT)
   // Check and limit the xy direction change frequency
   unsigned char direction_change = block->direction_bits ^ old_direction_bits;
   old_direction_bits = block->direction_bits;
