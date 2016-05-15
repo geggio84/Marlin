@@ -2942,6 +2942,9 @@ COLOUR GetColour(double v,double vmin,double vmax)
    return(c);
 }
 
+static int prev_target_temperature=0;
+static int prev_target_temperature_bed=0;
+
 void handle_status_leds(void) {
   int i;
   COLOUR extr_rgb, bed_rgb;
@@ -2966,10 +2969,21 @@ void handle_status_leds(void) {
   }
   if(millis() > stat_update) {
 		stat_update += 500;
-		extr_rgb = GetColour((current_temperature/120), 0, 1);
-		bed_rgb = GetColour((current_temperature_bed/50), 0, 1);
-		SendColors(extr_rgb.r * 255, extr_rgb.g * 255, extr_rgb.b * 255, EXTR_LED_PIN);
-		SendColors(bed_rgb.r * 255, bed_rgb.g * 255, bed_rgb.b * 255, BED_LED_PIN);
+		if(current_temperature > 30) {
+			if (TEMP_shm_addr->target_temperature > 30)
+				prev_target_temperature = TEMP_shm_addr->target_temperature;
+			extr_rgb = GetColour(((current_temperature - 30) / (prev_target_temperature - 30)), 0, 1);
+			SendColors(extr_rgb.r * 255, extr_rgb.g * 255, extr_rgb.b * 255, EXTR_LED_PIN);
+		} else
+			SendColors(0, 0, 255, EXTR_LED_PIN);
+
+		if(current_temperature_bed > 30) {
+			if(TEMP_shm_addr->target_temperature_bed > 30)
+				prev_target_temperature_bed = TEMP_shm_addr->target_temperature_bed;
+			bed_rgb = GetColour(((current_temperature_bed - 30) / (prev_target_temperature_bed - 30)), 0, 1);
+			SendColors(bed_rgb.r * 255, bed_rgb.g * 255, bed_rgb.b * 255, BED_LED_PIN);
+		} else
+			SendColors(0, 0, 255, BED_LED_PIN);
   }
 }
 #endif
