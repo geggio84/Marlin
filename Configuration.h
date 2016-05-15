@@ -477,7 +477,9 @@ const bool Z_MAX_ENDSTOP_INVERTING = true; // set to true to invert the logic of
  * 2mm belt pitch
  *********************************************/
 #define X_RATIO ( (16.0 * 20.0 / 36.0) * 2 )
+#define X_CORRECTION (1.007)
 #define Y_RATIO ( (16.0 * 20.0 / 36.0) * 2 )
+#define Y_CORRECTION (1.007)
 /*********************************************
  * Z axis configuration
  * 6mm lead screw 1mm per rev
@@ -495,8 +497,8 @@ const bool Z_MAX_ENDSTOP_INVERTING = true; // set to true to invert the logic of
 #define DEFAULT_Z_MICROSTEPS	16
 #define DEFAULT_E_MICROSTEPS	16
 
-#define X_STEPS_PER_UNIT ( ( X_STEPS_PER_REV * DEFAULT_X_MICROSTEPS ) / X_RATIO )
-#define Y_STEPS_PER_UNIT ( ( Y_STEPS_PER_REV * DEFAULT_Y_MICROSTEPS ) / Y_RATIO )
+#define X_STEPS_PER_UNIT ( ( ( X_STEPS_PER_REV * DEFAULT_X_MICROSTEPS ) / X_RATIO ) * X_CORRECTION )
+#define Y_STEPS_PER_UNIT ( ( ( Y_STEPS_PER_REV * DEFAULT_Y_MICROSTEPS ) / Y_RATIO ) * Y_CORRECTION )
 #define Z_STEPS_PER_UNIT ( ( Z_STEPS_PER_REV * DEFAULT_Z_MICROSTEPS ) / Z_RATIO )
 #define E_STEPS_PER_UNIT ( ( E_STEPS_PER_REV * DEFAULT_E_MICROSTEPS ) / E_RATIO )
 
