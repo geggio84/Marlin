@@ -166,13 +166,13 @@ void PID_autotune(float temp, int extruder, int ncycles)
 
   if (extruder<0)
   {
-     TEMP_shm_addr->soft_pwm_bed = (MAX_BED_POWER)/2;
-     bias = d = (MAX_BED_POWER)/2;
+     TEMP_shm_addr->soft_pwm_bed = MAX_BED_POWER;
+     bias = d = MAX_BED_POWER;
    }
    else
    {
-     TEMP_shm_addr->soft_pwm = (PID_MAX)/2;
-     bias = d = (PID_MAX)/2;
+     TEMP_shm_addr->soft_pwm = PID_MAX;
+     bias = d = PID_MAX;
   }
 
  for(;;) {
@@ -204,7 +204,7 @@ void PID_autotune(float temp, int extruder, int ncycles)
           if(cycles > 0) {
             bias += (d*(t_high - t_low))/(t_low + t_high);
             bias = constrain(bias, 20 ,(extruder<0?(MAX_BED_POWER):(PID_MAX))-20);
-            if(bias > (extruder<0?(MAX_BED_POWER):(PID_MAX))/2) d = (extruder<0?(MAX_BED_POWER):(PID_MAX)) - 1 - bias;
+            if(bias > (extruder<0?(MAX_BED_POWER):(PID_MAX))) d = (extruder<0?(MAX_BED_POWER):(PID_MAX)) - 1 - bias;
             else d = bias;
 
             SERIAL_PROTOCOLPGM(" bias: "); SERIAL_PROTOCOL(bias);
@@ -390,7 +390,7 @@ void manage_heater()
     // Check if temperature is within the correct range
     if((current_temperature > minttemp) && (current_temperature < maxttemp)) 
     {
-      TEMP_shm_addr->soft_pwm = (int)pid_output >> 1;
+      TEMP_shm_addr->soft_pwm = (int)pid_output;
     }
     else {
       TEMP_shm_addr->soft_pwm = 0;
@@ -453,7 +453,7 @@ void manage_heater()
 
 	  if((current_temperature_bed > BED_MINTEMP) && (current_temperature_bed < BED_MAXTEMP)) 
 	  {
-	    TEMP_shm_addr->soft_pwm_bed = (int)pid_output >> 1;
+	    TEMP_shm_addr->soft_pwm_bed = (int)pid_output;
 	  }
 	  else {
 	    TEMP_shm_addr->soft_pwm_bed = 0;
@@ -469,7 +469,7 @@ void manage_heater()
         }
         else 
         {
-          TEMP_shm_addr->soft_pwm_bed = MAX_BED_POWER>>1;
+          TEMP_shm_addr->soft_pwm_bed = MAX_BED_POWER;
         }
       }
       else
@@ -487,7 +487,7 @@ void manage_heater()
         }
         else if(current_temperature_bed <= TEMP_shm_addr->target_temperature_bed - BED_HYSTERESIS)
         {
-          TEMP_shm_addr->soft_pwm_bed = MAX_BED_POWER>>1;
+          TEMP_shm_addr->soft_pwm_bed = MAX_BED_POWER;
         }
       }
       else
