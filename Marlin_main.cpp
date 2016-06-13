@@ -2875,26 +2875,16 @@ void controllerFan()
   {
     lastMotorCheck = millis();
 
-    if(steppers[X_AXIS].enabled || steppers[Y_AXIS].enabled || steppers[Z_AXIS].enabled || (TEMP_shm_addr->soft_pwm_bed > 0) || steppers[E_AXIS].enabled) //If any of the drivers are enabled...
-    {
-      lastMotor = millis(); //... set time to NOW so the fan will turn on
-    }
-
-    if ((millis() - lastMotor) >= (CONTROLLERFAN_SECS*1000UL) || lastMotor == 0) //If the last time any driver was enabled, is longer since than CONTROLLERSEC...
-    {
-		if (controllerfan_ON) {
+		if (TEMP_shm_addr->current_controller_temp > 55)
+			setPwmFrequency(CONTROLLERFAN_PIN, 255);
+		else if (TEMP_shm_addr->current_controller_temp > 50)
+			setPwmFrequency(CONTROLLERFAN_PIN, 200);
+		else if (TEMP_shm_addr->current_controller_temp > 40)
+			setPwmFrequency(CONTROLLERFAN_PIN, 150);
+		else if (TEMP_shm_addr->current_controller_temp > 30)
+			setPwmFrequency(CONTROLLERFAN_PIN, 100);
+		else
 			setPwmFrequency(CONTROLLERFAN_PIN, 0);
-			controllerfan_ON = false;
-		}
-    }
-    else
-    {
-		if (!controllerfan_ON) {
-			// allows digital or PWM fan output to be used (see M42 handling)
-			setPwmFrequency(CONTROLLERFAN_PIN, CONTROLLERFAN_SPEED);
-			controllerfan_ON = true;
-		}
-    }
   }
 }
 #endif
