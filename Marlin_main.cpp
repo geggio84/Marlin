@@ -528,6 +528,7 @@ int main(int argc, char *argv[])
 	TEMP_shm_addr->Stopped=false;
 	TEMP_shm_addr->Stopped_gcode_LastN = 0;
 	TEMP_shm_addr->gcode_LastN = 0;
+	TEMP_shm_addr->current_controller_temp = 0;
 	
 	MYSERIAL.begin(BAUDRATE,(char*)SERIAL_PORT);
 	

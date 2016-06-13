@@ -60,6 +60,7 @@ typedef struct {
 	int Stopped;
 	long Stopped_gcode_LastN;
 	long gcode_LastN;
+	float current_controller_temp;
 } temp_struct_t;
 
 extern temp_struct_t temp_struct;

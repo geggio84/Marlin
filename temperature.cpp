@@ -772,6 +772,8 @@ void bed_max_temp_error(void) {
   #endif
 }
 
+#define W1_PIN				"/sys/bus/w1/devices/28-0000075aa55d/w1_slave"
+
 void temp_ISR()
 {
   //these variables are only accesible from the ISR, but static, so they don't lose their value
@@ -831,6 +833,19 @@ void temp_ISR()
 		close(fd);
 		raw_temp_1_value += atoi(value);
 	#endif
+	// Measure TEMP on DS18B20
+	fd = open(W1_PIN, O_RDONLY);
+	int flags = fcntl(fd, F_GETFL, 0);
+	fcntl(fd, F_SETFL, flags | O_NONBLOCK);
+	if(read(fd, buf, 256) > 0)
+	{
+		strncpy(value, strstr(buf, "t=") + 2, 5); 
+		TEMP_shm_addr->current_controller_temp = strtof(value, NULL);
+		TEMP_shm_addr->current_controller_temp = TEMP_shm_addr->current_controller_temp / 1000;
+		//printf("Temp: %.3f C  \n", TEMP_shm_addr->current_controller_temp);
+	}
+	close(fd);
+
 
 	temp_count++;
 
