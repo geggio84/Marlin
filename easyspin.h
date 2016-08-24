@@ -73,41 +73,41 @@ typedef struct {
 
 /* easySPIN T_FAST register options */
 typedef enum {
-	easySPIN_TOFF_FAST_0_5_us = ((uint8_t) 0x00 << 4),
-	easySPIN_TOFF_FAST_1_0_us = ((uint8_t) 0x01 << 4),
-	easySPIN_TOFF_FAST_1_5_us = ((uint8_t) 0x02 << 4),
-	easySPIN_TOFF_FAST_2_0_us = ((uint8_t) 0x03 << 4),
-	easySPIN_TOFF_FAST_2_5_us = ((uint8_t) 0x04 << 4),
-	easySPIN_TOFF_FAST_3_0_us = ((uint8_t) 0x05 << 4),
-	easySPIN_TOFF_FAST_3_5_us = ((uint8_t) 0x06 << 4),
-	easySPIN_TOFF_FAST_4_0_us = ((uint8_t) 0x07 << 4),
-	easySPIN_TOFF_FAST_4_5_us = ((uint8_t) 0x08 << 4),
-	easySPIN_TOFF_FAST_5_0_us = ((uint8_t) 0x09 << 4),
-	easySPIN_TOFF_FAST_5_5_us = ((uint8_t) 0x0A << 4),
-	easySPIN_TOFF_FAST_6_0_us = ((uint8_t) 0x0B << 4),
-	easySPIN_TOFF_FAST_6_5_us = ((uint8_t) 0x0C << 4),
-	easySPIN_TOFF_FAST_7_0_us = ((uint8_t) 0x0D << 4),
-	easySPIN_TOFF_FAST_7_5_us = ((uint8_t) 0x0E << 4),
-	easySPIN_TOFF_FAST_8_0_us = ((uint8_t) 0x0F << 4)
+	easySPIN_TOFF_FAST_2_us = ((uint8_t) 0x00 << 4),
+	easySPIN_TOFF_FAST_4_us = ((uint8_t) 0x01 << 4),
+	easySPIN_TOFF_FAST_6_us = ((uint8_t) 0x02 << 4),
+	easySPIN_TOFF_FAST_8_us = ((uint8_t) 0x03 << 4),
+	easySPIN_TOFF_FAST_10_us = ((uint8_t) 0x04 << 4),
+	easySPIN_TOFF_FAST_12_us = ((uint8_t) 0x05 << 4),
+	easySPIN_TOFF_FAST_14_us = ((uint8_t) 0x06 << 4),
+	easySPIN_TOFF_FAST_16_us = ((uint8_t) 0x07 << 4),
+	easySPIN_TOFF_FAST_18_us = ((uint8_t) 0x08 << 4),
+	easySPIN_TOFF_FAST_20_us = ((uint8_t) 0x09 << 4),
+	easySPIN_TOFF_FAST_22_us = ((uint8_t) 0x0A << 4),
+	easySPIN_TOFF_FAST_24_us = ((uint8_t) 0x0B << 4),
+	easySPIN_TOFF_FAST_26_us = ((uint8_t) 0x0C << 4),
+	easySPIN_TOFF_FAST_28_us = ((uint8_t) 0x0D << 4),
+	easySPIN_TOFF_FAST_30_us = ((uint8_t) 0x0E << 4),
+	easySPIN_TOFF_FAST_32_us = ((uint8_t) 0x0F << 4)
 } easySPIN_TOFF_FAST_TypeDef;
 
 typedef enum {
-	easySPIN_FAST_STEP_0_5_us = ((uint8_t) 0x00),
-	easySPIN_FAST_STEP_1_0_us = ((uint8_t) 0x01),
-	easySPIN_FAST_STEP_1_5_us = ((uint8_t) 0x02),
-	easySPIN_FAST_STEP_2_0_us = ((uint8_t) 0x03),
-	easySPIN_FAST_STEP_2_5_us = ((uint8_t) 0x04),
-	easySPIN_FAST_STEP_3_0_us = ((uint8_t) 0x05),
-	easySPIN_FAST_STEP_3_5_us = ((uint8_t) 0x06),
-	easySPIN_FAST_STEP_4_0_us = ((uint8_t) 0x07),
-	easySPIN_FAST_STEP_4_5_us = ((uint8_t) 0x08),
-	easySPIN_FAST_STEP_5_0_us = ((uint8_t) 0x09),
-	easySPIN_FAST_STEP_5_5_us = ((uint8_t) 0x0A),
-	easySPIN_FAST_STEP_6_0_us = ((uint8_t) 0x0B),
-	easySPIN_FAST_STEP_6_5_us = ((uint8_t) 0x0C),
-	easySPIN_FAST_STEP_7_0_us = ((uint8_t) 0x0D),
-	easySPIN_FAST_STEP_7_5_us = ((uint8_t) 0x0E),
-	easySPIN_FAST_STEP_8_0_us = ((uint8_t) 0x0F)
+	easySPIN_FAST_STEP_2_us  = ((uint8_t) 0x00),
+	easySPIN_FAST_STEP_4_us  = ((uint8_t) 0x01),
+	easySPIN_FAST_STEP_6_us  = ((uint8_t) 0x02),
+	easySPIN_FAST_STEP_8_us  = ((uint8_t) 0x03),
+	easySPIN_FAST_STEP_10_us = ((uint8_t) 0x04),
+	easySPIN_FAST_STEP_12_us = ((uint8_t) 0x05),
+	easySPIN_FAST_STEP_14_us = ((uint8_t) 0x06),
+	easySPIN_FAST_STEP_16_us = ((uint8_t) 0x07),
+	easySPIN_FAST_STEP_18_us = ((uint8_t) 0x08),
+	easySPIN_FAST_STEP_20_us = ((uint8_t) 0x09),
+	easySPIN_FAST_STEP_22_us = ((uint8_t) 0x0A),
+	easySPIN_FAST_STEP_24_us = ((uint8_t) 0x0B),
+	easySPIN_FAST_STEP_26_us = ((uint8_t) 0x0C),
+	easySPIN_FAST_STEP_28_us = ((uint8_t) 0x0D),
+	easySPIN_FAST_STEP_30_us = ((uint8_t) 0x0E),
+	easySPIN_FAST_STEP_32_us = ((uint8_t) 0x0F)
 } easySPIN_FAST_STEP_TypeDef;
 
 /* easySPIN overcurrent threshold options */
