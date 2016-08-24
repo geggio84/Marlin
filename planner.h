@@ -144,18 +144,6 @@ FORCE_INLINE void plan_discard_current_block()
   }
 }
 
-// Gets the current block. Returns NULL if buffer empty
-FORCE_INLINE block_t *plan_get_current_block() 
-{
-	//printf("*block_buffer_head = %d ---- *block_buffer_tail = %d\n",*block_buffer_head,*block_buffer_tail);
-  if (*block_buffer_head == *block_buffer_tail) { 
-    return(NULL); 
-  }
-  block_t *block = block_buffer[*block_buffer_tail];
-  block->busy = true;
-  return(block);
-}
-
 // Returns true if the buffer has a queued block, false otherwise
 FORCE_INLINE bool blocks_queued() 
 {

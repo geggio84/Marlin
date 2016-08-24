@@ -563,11 +563,6 @@ int main(int argc, char *argv[])
 			break;
 
 		default:
-			//printf("PARENT: This is the parent process!\n");
-			//printf("PARENT: My PID is %d\n", getpid());
-			//printf("PARENT: My child's PID are %d and %d\n", pid_val[0], pid_val[1]);
-			//signal(SIGUSR1, stepper_handler);
-			//signal(SIGUSR2, temp_ISR);
 			break;
 		}
 	}
