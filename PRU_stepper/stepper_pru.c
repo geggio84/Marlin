@@ -305,7 +305,7 @@ unsigned char do_block()
 		// If current block is finished, reset pointer
 	} while(step_events_completed < current_block->step_event_count);
 
-	return (unsigned char)((endstop_x_hit) || (endstop_y_hit << 1) || (endstop_z_hit << 1));
+	return (unsigned char)((endstop_x_hit) || (endstop_y_hit << 1) || (endstop_z_hit << 2));
 }
 
 void plan_discard_current_block()
