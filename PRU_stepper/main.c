@@ -44,6 +44,7 @@
 #include "resource_table.h"
 #include "stepper_pru.h"
 #include "../pins.h"
+#include "../common_pru.h"
 
 /* PRU0 is mailbox module user 1 */
 #define MB_USER						1

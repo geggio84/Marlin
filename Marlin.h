@@ -25,11 +25,10 @@
 #include <signal.h>
 #include "marlin_types.h"
 
+#include "common_pru.h"
 #include "fastio.h"
 #include "Configuration.h"
 #include "pins.h"
-
-#define F_CPU 16000000
 
 #define HIGH 0x1
 #define LOW  0x0
@@ -78,9 +77,6 @@ void manage_inactivity();
 
 #define  enable_e0() { if(steppers[E_AXIS].enabled == false) easySPIN_Enable(&steppers[E_AXIS].spi_device); steppers[E_AXIS].enabled = true; }
 #define disable_e0() { if(steppers[E_AXIS].enabled == true) easySPIN_Disable(&steppers[E_AXIS].spi_device); steppers[E_AXIS].enabled = false; }
-
-enum AxisEnum {X_AXIS=0, Y_AXIS=1, Z_AXIS=2, E_AXIS=3};
-
 
 void FlushSerialRequestResend();
 void ClearToSend();

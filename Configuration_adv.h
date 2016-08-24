@@ -136,8 +136,6 @@
 
 #define AXIS_RELATIVE_MODES {false, false, false, false}
 
-#define MAX_STEP_FREQUENCY 40000 // Max step frequency for Ultimaker (5000 pps / half step)
-
 //default stepper release if idle
 #define DEFAULT_STEPPER_DEACTIVE_TIME 60
 
@@ -272,15 +270,6 @@ const unsigned int dropsegments=5; //everything with less than this number of st
 //===========================================================================
 //=============================Buffers           ============================
 //===========================================================================
-
-// The number of linear motions that can be in the plan at any give time.
-// THE BLOCK_BUFFER_SIZE NEEDS TO BE A POWER OF 2, i.g. 8,16,32 because shifts and ors are used to do the ring-buffering.
-#if defined SDSUPPORT
-  #define BLOCK_BUFFER_SIZE 16   // SD,LCD,Buttons take more memory, block buffer needs to be smaller
-#else
-  #define BLOCK_BUFFER_SIZE 16 // maximize block buffer
-#endif
-
 
 //The ASCII buffer for receiving from the serial:
 #define MAX_CMD_SIZE 96
