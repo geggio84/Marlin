@@ -411,6 +411,9 @@ void servo_init()
 
 void setup()
 {
+	char message[25];
+	int result = 0;
+
   config_file = fopen(CONFIG_FILE , "a+b");
   if (config_file == NULL)
 		printf("Error opening %s file\n",CONFIG_FILE);
@@ -469,8 +472,18 @@ void setup()
     digipot_i2c_init();
   #endif
 
-	if(write(pru_file, "PRU START", 9) > 0)
-		printf("Message: Sent to PRU\n");
+	/* Print PRU Version */
+	if(write(pru_file, "VERSION PRU", sizeof("VERSION PRU")) > 0)
+		result = read(pru_file, &message, sizeof(message));
+		if(result > 0) {
+			printf("PRU Version:	%d.%d.%d\n\n",message[2],message[1],message[0]);
+		}
+
+	if(write(pru_file, "START PRU", sizeof("START PRU")) > 0)
+		result = read(pru_file, &message, sizeof(message));
+		if(result > 0) {
+			printf("PRU Message: %s\n",message);
+		}
 }
 
 unsigned long millis(void)
@@ -3042,6 +3055,8 @@ void manage_inactivity()
 
 void marlin_kill()
 {
+	char message[25];
+	int result;
   disable_heater();
 
   disable_x();
@@ -3070,6 +3085,12 @@ void marlin_kill()
 
   MYSERIAL.close_serial();
   
+	if(write(pru_file, "STOP PRU", sizeof("STOP PRU")) > 0)
+		result = read(pru_file, &message, sizeof(message));
+		if(result > 0) {
+			printf("PRU Message: %s\n",message);
+		}
+
   /* Close the rpmsg_pru character device file */
   if (pru_file != 0) {
 	  close(pru_file);

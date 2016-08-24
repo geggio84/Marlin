@@ -34,6 +34,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <pru_cfg.h>
 #include <pru_intc.h>
 #include <rsc_types.h>
@@ -71,6 +72,17 @@
 #define CHAN_DESC					"Channel 30"
 #define CHAN_PORT					30
 
+#define START_REQ			"START PRU"
+#define STOP_REQ			"STOP PRU"
+#define START_MSG			"PRU STARTED"
+#define START_ALREADY_MSG	"PRU ALREADY STARTED"
+#define STOP_MSG			"PRU STOPPED"
+#define STOP_ALREADY_MSG	"PRU ALREADY STOPPED"
+#define VER_REQ				"VERSION PRU"
+#define VER_MAJ				0
+#define VER_MIN				9
+#define VER_REL				0
+
 /* 
  * Used to make sure the Linux drivers are ready for RPMsg communication
  * Found at linux-x.y.z/include/uapi/linux/virtio_config.h
@@ -89,12 +101,10 @@ far PRU_SRAM unsigned int counter;
 void main() {
 	struct pru_rpmsg_transport transport;
 	uint16_t src, dst, len;
-	char lenght[20];
+	char message[25];
 	volatile uint8_t *status;
 	unsigned char endstop_status;
-	int i;
-	//unsigned int *counter;
-	//pru_stepper_block block;
+	uint16_t pru_started = 0;
 
 	/* allow OCP master port access by the PRU so the PRU can read external memories */
 	CT_CFG.SYSCFG_bit.STANDBY_INIT = 0;
@@ -114,6 +124,12 @@ void main() {
 	pru_virtqueue_init(&transport.virtqueue1, &resourceTable.rpmsg_vring1, &CT_MBX.MESSAGE[MB_TO_ARM_HOST], &CT_MBX.MESSAGE[MB_FROM_ARM_HOST]);
 
 	counter = 10;
+
+	/* Access PRU Shared RAM using Constant Table                    */
+	/*****************************************************************/
+	/* C28 defaults to 0x00000000, we need to set bits 23:8 to 0x0100 in order to have it point to 0x00010000	 */
+	PRU0_CTRL.CTPPR0_bit.C28_BLK_POINTER = 0x0100;
+
 	/* Create the RPMsg channel between the PRU and ARM user space using the transport structure. */
 	while(pru_rpmsg_channel(RPMSG_NS_CREATE, &transport, CHAN_NAME, CHAN_DESC, CHAN_PORT) != PRU_RPMSG_SUCCESS);
 	while(1){
@@ -124,42 +140,47 @@ void main() {
 			/* Clear the event status, event MB_INT_NUMBER corresponds to the mailbox interrupt */
 			CT_INTC.SICR_bit.STS_CLR_IDX = MB_INT_NUMBER;
 			/* Use a while loop to read all of the current messages in the mailbox */
-			while(CT_MBX.MSGSTATUS_bit[MB_FROM_ARM_HOST].NBOFMSG > 0){
+			while (CT_MBX.MSGSTATUS_bit[MB_FROM_ARM_HOST].NBOFMSG > 0) {
 				/* Check to see if the message corresponds to a receive event for the PRU */
-				if(CT_MBX.MESSAGE[MB_FROM_ARM_HOST] == 1){
+				if (CT_MBX.MESSAGE[MB_FROM_ARM_HOST] == 1) {
 					/* Receive the message */
-					if(pru_rpmsg_receive(&transport, &src, &dst, &lenght, &len) == PRU_RPMSG_SUCCESS){
-						/* Echo the message back to the same address from which we just received */
-						//ltoa(len, lenght);
-						//pru_rpmsg_send(&transport, dst, src, lenght, sizeof(lenght));
-						//block.steps_x++;
-
-						/* C28 defaults to 0x00000000, we need to set bits 23:8 to 0x0100 in order to have it point to 0x00010000	 */
-						PRU0_CTRL.CTPPR0_bit.C28_BLK_POINTER = 0x0100;
-
-						/*for(i=0; i<BLOCK_BUFFER_SIZE; i++)
-							block_buffer[i] = (block_t *)(SHM_ADDR + (i * sizeof(block_t)));
-						block_buffer_head = (unsigned int *)(SHM_ADDR + (BLOCK_BUFFER_SIZE * sizeof(block_t)));
-						block_buffer_tail = (unsigned int *)(block_buffer_head + sizeof(block_buffer_head));
-						check_endstops = block_buffer_tail + sizeof(block_buffer_tail);
-						counter = check_endstops + sizeof(check_endstops);*/
-
-						while(1) {
-							counter += 1;
-							if (current_block == 0) {
-								// Anything in the buffer?
-								current_block = plan_get_current_block();
-								if (current_block != 0) {
-									current_block->busy = TRUE;
-									endstop_status = do_block();
-									current_block = 0;
-									plan_discard_current_block();
-								}
+					if(pru_rpmsg_receive(&transport, &src, &dst, &message, &len) == PRU_RPMSG_SUCCESS){
+						/* Decode message from Marlin Application */
+						if(strcmp(message, START_REQ) == 0) {
+							if (pru_started) {
+								pru_rpmsg_send(&transport, dst, src, START_ALREADY_MSG, sizeof(START_ALREADY_MSG));
+							} else {
+								pru_started = 1;
+								pru_rpmsg_send(&transport, dst, src, START_MSG, sizeof(START_MSG));
 							}
+						} else if (strcmp(message, STOP_REQ) == 0) {
+							if (pru_started) {
+								pru_started = 0;
+								pru_rpmsg_send(&transport, dst, src, STOP_MSG, sizeof(STOP_MSG));
+							} else {
+								pru_rpmsg_send(&transport, dst, src, STOP_ALREADY_MSG, sizeof(STOP_ALREADY_MSG));
+							}
+						} else if (strcmp(message, VER_REQ) == 0) {
+							message[2] = VER_MAJ;
+							message[1] = VER_MIN;
+							message[0] = VER_REL;
+							pru_rpmsg_send(&transport, dst, src, message, 3);
 						}
-						//pru_rpmsg_send(&transport, dst, src, &endstop_status, sizeof(endstop_status));
-						//pru_rpmsg_send(&transport, dst, src, &lenght, 8);
 					}
+				}
+			}
+		}
+
+		if (pru_started) {
+			counter += 1;
+			if (current_block == 0) {
+				// Anything in the buffer?
+				current_block = plan_get_current_block();
+				if (current_block != 0) {
+					current_block->busy = TRUE;
+					endstop_status = do_block();
+					current_block = 0;
+					plan_discard_current_block();
 				}
 			}
 		}
