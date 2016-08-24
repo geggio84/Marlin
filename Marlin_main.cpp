@@ -498,10 +498,9 @@ void header()
     printf("####################################\n\r");
     printf("#      BeagleBone 3d Printer       #\n\r");
     printf("####################################\n\r");
-    printf("based on Marlin 3d printer firmware 1.0\n\r");
-    printf("author: Matteo Geromin\n\r");
-    printf("version: %s\n\r",VERSION_STRING);
-    printf("\n\r");
+    printf("Based on Marlin 3d printer firmware 1.0\n\r");
+    printf("Author:		Matteo Geromin\n\r");
+    printf("Version:	%s\n\r",VERSION_STRING);
 }
 
 void usage()
@@ -555,27 +554,18 @@ int main(int argc, char *argv[])
 			break;
 
 		case 0:
-			printf(" CHILD: This is the child process!\n");
-			printf(" CHILD: My PID is %d\n", getpid());
-			printf(" CHILD: My parent's PID is %d\n", getppid());
-			//if(pid_val[0] == 0) {
-			//	signal(SIGINT, stepper_wait_kill);
-			//	sleep(1);
-			//	printf("sizeof stepper_block_buffer = %d Bytes\n",sizeof(stepper_block_buffer));
-			//	printf("sizeof stepper_block_buffer.block_buffer[] = %d Bytes\n",sizeof(stepper_block_buffer.block_buffer));
-			//	printf("sizeof stepper_block_buffer.block_buffer[0] = %d Bytes\n",sizeof(stepper_block_buffer.block_buffer[0]));
-			//	stepper_wait_loop(shm_addr);
-			//} else {
-				signal(SIGINT, temp_read_kill);
-				sleep(2);
-				temp_read_loop();
-			//}
+			//printf(" CHILD: This is the child process!\n");
+			//printf(" CHILD: My PID is %d\n", getpid());
+			//printf(" CHILD: My parent's PID is %d\n", getppid());
+			signal(SIGINT, temp_read_kill);
+			sleep(2);
+			temp_read_loop();
 			break;
 
 		default:
-			printf("PARENT: This is the parent process!\n");
-			printf("PARENT: My PID is %d\n", getpid());
-			printf("PARENT: My child's PID are %d and %d\n", pid_val[0], pid_val[1]);
+			//printf("PARENT: This is the parent process!\n");
+			//printf("PARENT: My PID is %d\n", getpid());
+			//printf("PARENT: My child's PID are %d and %d\n", pid_val[0], pid_val[1]);
 			//signal(SIGUSR1, stepper_handler);
 			//signal(SIGUSR2, temp_ISR);
 			break;
@@ -585,15 +575,14 @@ int main(int argc, char *argv[])
 	// Open the shared memory.
 	//shm_descr = shm_open(SHM_FILE, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
 	PRU_shm_descr = open("/dev/mem", O_RDWR | O_SYNC);
-	printf("/dev/mem opened.\n");
+	//printf("/dev/mem opened.\n");
 	
 	// Size up the shared memory.
 	//ftruncate(shm_descr, integerSize);
 	
 	PRU_shm_addr = (stepper_block_t *)mmap(NULL, PRU_shm_size, PROT_WRITE | PROT_READ, MAP_SHARED, PRU_shm_descr, PRUSS_RAM2_OFFSET );
 
-	perror("mmap");
-	printf("%X\n", (unsigned int)PRU_shm_addr);
+	//perror("mmap");
 
 	PRU_virt_addr = PRU_shm_addr;
 	for (i=0; i<BLOCK_BUFFER_SIZE; i++)
@@ -3113,7 +3102,7 @@ void marlin_main_kill(int signum)
 				kill(pid_val[0],SIGINT);
 				kill(pid_val[1],SIGINT);
 				wait(NULL);
-				printf ("Parent reads <%u   %u>\n",PRU_shm_addr->block_buffer_head,PRU_shm_addr->block_buffer_tail);
+				//printf ("Parent reads <%u   %u>\n",PRU_shm_addr->block_buffer_head,PRU_shm_addr->block_buffer_tail);
                 marlin_kill();
                 break;
                 // Cleanup and close up stuff here

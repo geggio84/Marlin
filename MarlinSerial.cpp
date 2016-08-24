@@ -59,7 +59,7 @@ void MarlinSerial::begin(long baud, char* serial)
 			return;
 		}
 			
-        printf("Now We Open Serial Port File: %s\n\r", serial);
+        //printf("Now We Open Serial Port File: %s\n\r", serial);
         serial_file = open(serial, O_RDWR | O_NOCTTY | O_NONBLOCK);
         if (serial_file == 0) {
                 printf("Failed to open file %s\n\r",serial);
