@@ -51,6 +51,9 @@ extern int spi_fd;
 #define easySPIN_ELPOS_STEP_MASK       ((uint8_t)0xC0)
 #define easySPIN_ELPOS_MICROSTEP_MASK  ((uint8_t)0x3F)
 
+#define easySPIN_TON(value)		( (value * 2 ) - 1)
+#define easySPIN_TOFF(value)	( (value * 2 ) - 1)
+
 /* Exported types ------------------------------------------------------------*/
 
 /** 
