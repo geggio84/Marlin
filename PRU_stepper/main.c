@@ -178,7 +178,7 @@ void main() {
 				// Anything in the buffer?
 				current_block = plan_get_current_block();
 				if (current_block != 0) {
-					current_block->busy = TRUE;
+					current_block->control |= BLOCK_BUSY;
 					endstop_status = do_block();
 					current_block = 0;
 					plan_discard_current_block();

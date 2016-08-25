@@ -189,7 +189,7 @@ void debug_current_block(block_t* block)
 	// acceleration steps/sec^2
 	printf("- acceleration_st = %lu steps/sec^2 (%d bytes)\n",block->acceleration_st, sizeof(block->acceleration_st));
 	printf("- fan_speed = %lu (%d bytes)\n",block->fan_speed, sizeof(block->fan_speed));
-	printf("- busy = %d (%d bytes)\n",block->busy, sizeof(block->busy));
+	printf("- control = %d (%d bytes)\n",block->control, sizeof(block->control));
 
 	printf("*************************************************\n\n");
 }

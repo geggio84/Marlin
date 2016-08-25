@@ -323,6 +323,6 @@ block_t *plan_get_current_block()
     return(0);
   }
   block_t *block = &block_buffer[block_buffer_tail];
-  block->busy = TRUE;
+  block->control |= BLOCK_BUSY;
   return(block);
 }

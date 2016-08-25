@@ -213,7 +213,7 @@ void calculate_trapezoid_for_block(block_t *block, float entry_factor, float exi
   // block->decelerate_after = accelerate_steps+plateau_steps;
   CRITICAL_SECTION_START;  // Fill variables used by the stepper in a critical section
 
-  if(block->busy == false) { // Don't update variables if block is busy.
+  if((block->control & BLOCK_BUSY) == 0) { // Don't update variables if block is busy.
     block->accelerate_until = accelerate_steps;
     block->decelerate_after = accelerate_steps+plateau_steps;
     block->initial_rate = initial_rate;
@@ -564,7 +564,7 @@ void plan_buffer_line(const float &x, const float &y, const float &z, const floa
   block_t *block = block_buffer[*block_buffer_head];
 
   // Mark block as not busy (Not executed by the stepper interrupt)
-  block->busy = false;
+  block->control = 0;
 
   // Number of steps for each axis
 // default non-h-bot planning

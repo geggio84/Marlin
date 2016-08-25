@@ -47,8 +47,11 @@ typedef struct {
   unsigned long final_rate;                          // The minimal rate at exit
   unsigned long acceleration_st;                     // acceleration steps/sec^2
   unsigned long fan_speed;
-  volatile int busy;
+  volatile int control;
 } block_t;
+
+#define BLOCK_BUSY		0x1
+#define BLOCK_DEBUG		0x2
 
 enum AxisEnum {X_AXIS=0, Y_AXIS=1, Z_AXIS=2, E_AXIS=3};
 
