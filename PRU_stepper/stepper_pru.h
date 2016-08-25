@@ -13,6 +13,33 @@
 #include "../pins.h"
 #include "../common_pru.h"
 
+/* PRU0 is mailbox module user 1 */
+#define MB_USER						1
+/* Mbox0 - mail_u1_irq (mailbox interrupt for PRU0) is Int Number 60 */
+#define MB_INT_NUMBER				60
+
+/* Host-0 Interrupt sets bit 30 in register R31 */
+#define HOST_INT					0x40000000
+
+/* The mailboxes used for RPMsg are defined in the Linux device tree
+ * PRU0 uses mailboxes 2 (From ARM) and 3 (To ARM)
+ * PRU1 uses mailboxes 4 (From ARM) and 5 (To ARM)
+ */
+#define MB_TO_ARM_HOST				3
+#define MB_FROM_ARM_HOST			2
+
+/*
+ * Using the name 'rpmsg-client-sample' will probe the RPMsg sample driver
+ * found at linux-x.y.z/samples/rpmsg/rpmsg_client_sample.c
+ *
+ * Using the name 'rpmsg-pru' will probe the rpmsg_pru driver found
+ * at linux-x.y.z/drivers/rpmsg/rpmsg_pru.c
+ */
+#define CHAN_NAME					"rpmsg-pru"
+
+#define CHAN_DESC					"Channel 30"
+#define CHAN_PORT					30
+
 volatile register uint32_t __R30;
 volatile register uint32_t __R31;
 
