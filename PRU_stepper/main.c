@@ -69,13 +69,15 @@ block_t *current_block;  // A pointer to the block currently being traced
 
 far PRU_SRAM unsigned int counter;
 
+struct pru_rpmsg_transport transport;
+uint16_t src, dst, len;
+char message[25];
+
 /*
  * main.c
  */
 void main() {
-	struct pru_rpmsg_transport transport;
-	uint16_t src, dst, len;
-	char message[25];
+
 	volatile uint8_t *status;
 	unsigned char endstop_status;
 	uint16_t pru_started = 0;

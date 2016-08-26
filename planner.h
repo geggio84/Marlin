@@ -123,4 +123,7 @@ void set_extrude_min_temp(float temp);
 #endif
 
 void reset_acceleration_rates();
+
+void debug_current_block(block_t* block);
+
 #endif

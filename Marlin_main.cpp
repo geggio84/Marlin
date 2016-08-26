@@ -420,8 +420,7 @@ void setup()
 	pru_file = open(PRU_DEVICE_NAME, O_RDWR);
   if (pru_file == 0)
 		printf("Error opening %s file\n",PRU_DEVICE_NAME);
-	int flags = fcntl(pru_file, F_GETFL, 0);
-	fcntl(pru_file, F_SETFL, flags | O_NONBLOCK);
+
   setup_killpin();
   setup_powerhold();
   //MYSERIAL.begin(BAUDRATE,(char*)SERIAL_PORT);

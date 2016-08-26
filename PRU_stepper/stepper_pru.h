@@ -101,4 +101,6 @@ block_t *plan_get_current_block();
 
 void plan_discard_current_block();
 
+void debug_step(signed char *steps);
+
 #endif /* STEPPER_PRU_H_ */

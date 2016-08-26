@@ -1,4 +1,12 @@
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <pru_cfg.h>
+#include <pru_intc.h>
+#include <rsc_types.h>
+#include <pru_virtqueue.h>
 #include <pru_rpmsg.h>
+#include <sys_mailbox.h>
 #include "stepper_pru.h"
 #include "../pins.h"
 #include "../speed_lookuptable.h"
@@ -53,6 +61,10 @@ far PRU_SRAM unsigned int block_buffer_tail;           // Index of the block to 
 far PRU_SRAM unsigned int check_endstops;
 far PRU_SRAM long count_position[4];
 
+extern struct pru_rpmsg_transport transport;
+extern uint16_t src, dst, len;
+extern char message[25];
+
 unsigned short calc_timer(unsigned short step_rate) {
 	unsigned short timer;
 	if(step_rate > MAX_STEP_FREQUENCY) step_rate = MAX_STEP_FREQUENCY;
@@ -104,6 +116,8 @@ void trapezoid_generator_reset() {
 unsigned char do_block()
 {
 	unsigned short i;
+	unsigned short block_debug = (current_block->control & BLOCK_DEBUG); // >> BLOCK_DEBUG;
+	signed char steps[4];
 	trapezoid_generator_reset();
 	counter_x = -(current_block->step_event_count >> 1);
 	counter_y = counter_x;
@@ -222,38 +236,60 @@ unsigned char do_block()
 			count_direction[E_AXIS]=1;
 		}
 
+		/* Reset steps counters */
+		steps[X_AXIS] = 0;
+		steps[Y_AXIS] = 0;
+		steps[Z_AXIS] = 0;
+		steps[E_AXIS] = 0;
+
 		for(i=0; i < step_loops; i++) { // Take multiple steps per interrupt (For high speed moves)
 
 			counter_x += current_block->steps_x;
 			if (counter_x > 0) {
-				WRITE(X_STEP_PIN, !INVERT_X_STEP_PIN);
-				counter_x -= current_block->step_event_count;
-				count_position[X_AXIS]+=count_direction[X_AXIS];
-				WRITE(X_STEP_PIN, INVERT_X_STEP_PIN);
+				if (block_debug) {
+					steps[X_AXIS] += count_direction[X_AXIS];
+				} else {
+					WRITE(X_STEP_PIN, !INVERT_X_STEP_PIN);
+					counter_x -= current_block->step_event_count;
+					count_position[X_AXIS]+=count_direction[X_AXIS];
+					WRITE(X_STEP_PIN, INVERT_X_STEP_PIN);
+				}
 			}
 
 			counter_y += current_block->steps_y;
 			if (counter_y > 0) {
-				WRITE(Y_STEP_PIN, !INVERT_Y_STEP_PIN);
-				counter_y -= current_block->step_event_count;
-				count_position[Y_AXIS]+=count_direction[Y_AXIS];
-				WRITE(Y_STEP_PIN, INVERT_Y_STEP_PIN);
+				if (block_debug) {
+					steps[Y_AXIS] += count_direction[Y_AXIS];
+				} else {
+					WRITE(Y_STEP_PIN, !INVERT_Y_STEP_PIN);
+					counter_y -= current_block->step_event_count;
+					count_position[Y_AXIS]+=count_direction[Y_AXIS];
+					WRITE(Y_STEP_PIN, INVERT_Y_STEP_PIN);
+				}
 			}
 
 			counter_z += current_block->steps_z;
 			if (counter_z > 0) {
-				WRITE(Z_STEP_PIN, !INVERT_Z_STEP_PIN);
-				counter_z -= current_block->step_event_count;
-				count_position[Z_AXIS]+=count_direction[Z_AXIS];
-				WRITE(Z_STEP_PIN, INVERT_Z_STEP_PIN);
+				if (block_debug) {
+					steps[Z_AXIS] += count_direction[Z_AXIS];
+				} else {
+					WRITE(Z_STEP_PIN, !INVERT_Z_STEP_PIN);
+					counter_z -= current_block->step_event_count;
+					count_position[Z_AXIS]+=count_direction[Z_AXIS];
+					WRITE(Z_STEP_PIN, INVERT_Z_STEP_PIN);
+				}
 			}
 
 			counter_e += current_block->steps_e;
 			if (counter_e > 0) {
-				WRITE_E_STEP(!INVERT_E_STEP_PIN);
-				counter_e -= current_block->step_event_count;
-				count_position[E_AXIS]+=count_direction[E_AXIS];
-				WRITE_E_STEP(INVERT_E_STEP_PIN);
+				if (block_debug) {
+					steps[E_AXIS] += count_direction[E_AXIS];
+				} else {
+					WRITE_E_STEP(!INVERT_E_STEP_PIN);
+					counter_e -= current_block->step_event_count;
+					count_position[E_AXIS]+=count_direction[E_AXIS];
+					WRITE_E_STEP(INVERT_E_STEP_PIN);
+				}
 			}
 
 			step_events_completed += 1;
@@ -299,8 +335,12 @@ unsigned char do_block()
 			step_loops = step_loops_nominal;
 		}
 
-		for(i=0; i < OCR1A; i++)
-			__delay_cycles(TIMER_SCALE);
+		if (block_debug) {
+			debug_step(&steps);
+		} else {
+			for(i=0; i < OCR1A; i++)
+				__delay_cycles(TIMER_SCALE);
+		}
 
 		// If current block is finished, reset pointer
 	} while(step_events_completed < current_block->step_event_count);
@@ -325,4 +365,35 @@ block_t *plan_get_current_block()
   block_t *block = &block_buffer[block_buffer_tail];
   block->control |= BLOCK_BUSY;
   return(block);
+}
+
+void debug_step(signed char *steps) {
+
+	/* First send step info */
+	ltoa(OCR1A, message);
+	pru_rpmsg_send(&transport, dst, src, message, sizeof(message));
+	ltoa(steps[X_AXIS], message);
+	pru_rpmsg_send(&transport, dst, src, message, sizeof(message));
+	ltoa(steps[Y_AXIS], message);
+	pru_rpmsg_send(&transport, dst, src, message, sizeof(message));
+	ltoa(steps[Z_AXIS], message);
+	pru_rpmsg_send(&transport, dst, src, message, sizeof(message));
+	ltoa(steps[E_AXIS], message);
+	pru_rpmsg_send(&transport, dst, src, message, sizeof(message));
+
+	/* Wait for ACK from Marlin Firmware */
+	while(1){
+		if(__R31 & HOST_INT){
+				/* Clear the mailbox interrupt */
+				CT_MBX.IRQ[MB_USER].STATUS_CLR |= 1 << (MB_FROM_ARM_HOST * 2);
+				/* Clear the event status, event MB_INT_NUMBER corresponds to the mailbox interrupt */
+				CT_INTC.SICR_bit.STS_CLR_IDX = MB_INT_NUMBER;
+				/* Use a while loop to read all of the current messages in the mailbox */
+				/* Check to see if the message corresponds to a receive event for the PRU */
+				if ((CT_MBX.MSGSTATUS_bit[MB_FROM_ARM_HOST].NBOFMSG > 0) && (CT_MBX.MESSAGE[MB_FROM_ARM_HOST] == 1))
+						/* Receive the message */
+						if(pru_rpmsg_receive(&transport, &src, &dst, &message, &len) == PRU_RPMSG_SUCCESS)
+							break;
+		}
+	}
 }

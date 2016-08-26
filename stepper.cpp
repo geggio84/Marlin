@@ -148,68 +148,6 @@ void st_wake_up() {
   ENABLE_STEPPER_DRIVER_INTERRUPT();
 }
 
-void debug_current_block(block_t* block)
-{
-	printf("*** CURRENT BLOCK (%d bytes) ***\n",sizeof(block_buffer[0]));
-	// Step count along each axis
-	printf("- steps_x = %ld (%d bytes)\n",block->steps_x, sizeof(block->steps_x));
-	printf("- steps_y = %ld (%d bytes)\n",block->steps_y, sizeof(block->steps_y));
-	printf("- steps_z = %ld (%d bytes)\n",block->steps_z, sizeof(block->steps_z));
-	printf("- steps_e = %ld (%d bytes)\n",block->steps_e, sizeof(block->steps_e));
-	// The number of step events required to complete this block
-	printf("- step_event_count = %lu (%d bytes)\n",block->step_event_count, sizeof(block->step_event_count));
-	// The index of the step event on which to stop acceleration
-	printf("- accelerate_until = %ld (%d bytes)\n",block->accelerate_until, sizeof(block->accelerate_until));
-	// The index of the step event on which to start decelerating
-	printf("- decelerate_after = %ld (%d bytes)\n",block->decelerate_after, sizeof(block->decelerate_after));
-	// The acceleration rate used for acceleration calculation
-	printf("- acceleration_rate = %ld (%d bytes)\n",block->acceleration_rate, sizeof(block->acceleration_rate));
-	// The direction bit set for this block (refers to *_DIRECTION_BIT in config.h)
-	printf("- direction_bits = %d (%d bytes)\n",block->direction_bits, sizeof(block->direction_bits));
-	// The nominal speed for this block in mm/sec
-	printf("- nominal_speed = %f mm/sec (%d bytes)\n",block->nominal_speed, sizeof(block->nominal_speed));
-	// Entry speed at previous-current junction in mm/sec
-	printf("- entry_speed = %f mm/sec (%d bytes)\n",block->entry_speed, sizeof(block->entry_speed));
-	// Maximum allowable junction entry speed in mm/sec
-	printf("- max_entry_speed = %f mm/sec (%d bytes)\n",block->max_entry_speed, sizeof(block->max_entry_speed));
-	// The total travel of this block in mm
-	printf("- millimeters = %f mm (%d bytes)\n",block->millimeters, sizeof(block->millimeters));
-	// acceleration mm/sec^2
-	printf("- acceleration = %f mm/sec^2 (%d bytes)\n",block->acceleration, sizeof(block->acceleration));
-	// Planner flag to recalculate trapezoids on entry junction
-	printf("- recalculate_flag = %d (%d bytes)\n",block->recalculate_flag, sizeof(block->recalculate_flag));
-	// Planner flag for nominal speed always reached
-	printf("- nominal_length_flag = %d (%d bytes)\n",block->nominal_length_flag, sizeof(block->nominal_length_flag));
-	// The nominal step rate for this block in step_events/sec
-	printf("- nominal_rate = %lu step_events/sec (%d bytes)\n",block->nominal_rate, sizeof(block->nominal_rate));
-	// The jerk-adjusted step rate at start of block
-	printf("- initial_rate = %lu (%d bytes)\n",block->initial_rate, sizeof(block->initial_rate));
-	// The minimal rate at exit
-	printf("- final_rate = %lu (%d bytes)\n",block->final_rate, sizeof(block->final_rate));
-	// acceleration steps/sec^2
-	printf("- acceleration_st = %lu steps/sec^2 (%d bytes)\n",block->acceleration_st, sizeof(block->acceleration_st));
-	printf("- fan_speed = %lu (%d bytes)\n",block->fan_speed, sizeof(block->fan_speed));
-	printf("- control = %d (%d bytes)\n",block->control, sizeof(block->control));
-
-	printf("*************************************************\n\n");
-}
-
-typedef struct {
-	unsigned long nominal_rate;		// The nominal step rate for this block in step_events/sec 
-	unsigned long initial_rate;		// The jerk-adjusted step rate at start of block  
-	unsigned long final_rate;		// The minimal rate at exit
-	long steps_x;
-	long steps_y;
-	long steps_z;
-	long steps_e;					// Step count along each axis
-	unsigned long step_event_count;	// The number of step events required to complete this block
-	unsigned long direction_bits;	// The direction bit set for this block
-	long accelerate_until;			// The index of the step event on which to stop acceleration
-	long decelerate_after;			// The index of the step event on which to start decelerating
-	long acceleration_rate;			// The acceleration rate used for acceleration calculation
-	unsigned long enable_endstops;
-} pru_stepper_block;
-
 #ifdef ADVANCE
   unsigned char old_OCR0A;
   // Timer interrupt for E. e_steps is set in the main routine;
