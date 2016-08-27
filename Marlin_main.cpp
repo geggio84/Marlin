@@ -180,6 +180,7 @@ myFILE *log_file;
 FILE *config_file;
 int serial_file = 0;
 int pru_file;
+FILE *debug_file;
 #define NR_CHILDS 1
 pid_t pid_val[NR_CHILDS];
 int PRU_shm_descr = -1;
@@ -622,6 +623,8 @@ int loop()
   if(buflen)
   {
     printf("Process Command nr.%d : %s\n\r",bufindr,cmdbuffer[bufindr]);
+    if (step_debug_en == true)
+		fprintf(debug_file,"%s\n",cmdbuffer[bufindr]);
     process_commands();
     buflen = (buflen-1);
     bufindr = (bufindr + 1)%BUFSIZE;
@@ -2735,12 +2738,19 @@ void process_commands()
 		SERIAL_ECHO_START;
 		SERIAL_ECHOLNPGM(MSG_STEP_DEBUG_ON);
 		SERIAL_PROTOCOLLN("");
+		debug_file = fopen(DEBUG_FILE, "w+");
+		if (debug_file == 0)
+			printf("Error opening %s file\n",DEBUG_FILE);
     break;
     case 998: // M998: Disable steps blocks debug
 		step_debug_en = false;
 		SERIAL_ECHO_START;
 		SERIAL_ECHOLNPGM(MSG_STEP_DEBUG_OFF);
 		SERIAL_PROTOCOLLN("");
+		if (debug_file != 0) {
+			fclose(debug_file);
+			printf("Now We Close DEBUG File: %s\n\r",DEBUG_FILE);
+		}
     break;
     case 999: // M999: Restart after being stopped
       TEMP_shm_addr->Stopped = false;

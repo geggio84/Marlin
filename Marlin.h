@@ -117,6 +117,7 @@ extern float zprobe_zoffset;
 extern int fanSpeed;
 extern easySPIN_stepper steppers[4];
 extern int pru_file;
+extern FILE *debug_file;
 extern unsigned int *check_endstops;
 extern long *count_position[NUM_AXIS];
 extern bool step_debug_en;

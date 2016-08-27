@@ -7,6 +7,7 @@
 // BASIC SETTINGS: select your board type, temperature sensor type, axis scaling, and endstop configuration
 
 #define CONFIG_FILE "./config"
+#define DEBUG_FILE "./steps.csv"
 
 #define PRU_DEVICE_NAME		"/dev/rpmsg_pru30"
 
