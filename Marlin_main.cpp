@@ -160,6 +160,8 @@
 // M350 - Set microstepping mode.
 // M351 - Toggle MS1 MS2 pins directly.
 // M928 - Start SD logging (M928 filename.g) - ended by M29
+// M997 - Enable steps blocks debug
+// M998 - Disable steps blocks debug
 // M999 - Restart after being stopped by error
 
 //Stepper Movement Variables
@@ -2727,6 +2729,18 @@ void process_commands()
       microstep_readings();
       #endif
     }
+    break;
+    case 997: // M997: Enable steps blocks debug
+		step_debug_en = true;
+		SERIAL_ECHO_START;
+		SERIAL_ECHOLNPGM(MSG_STEP_DEBUG_ON);
+		SERIAL_PROTOCOLLN("");
+    break;
+    case 998: // M998: Disable steps blocks debug
+		step_debug_en = false;
+		SERIAL_ECHO_START;
+		SERIAL_ECHOLNPGM(MSG_STEP_DEBUG_OFF);
+		SERIAL_PROTOCOLLN("");
     break;
     case 999: // M999: Restart after being stopped
       TEMP_shm_addr->Stopped = false;

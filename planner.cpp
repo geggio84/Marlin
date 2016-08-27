@@ -73,6 +73,7 @@ float max_z_jerk;
 float max_e_jerk;
 float mintravelfeedrate;
 unsigned long axis_steps_per_sqr_second[NUM_AXIS];
+bool step_debug_en = false;
 
 #ifdef ENABLE_AUTO_BED_LEVELING
 // this holds the required transform to compensate for bed level
@@ -571,6 +572,8 @@ void plan_buffer_line(const float &x, const float &y, const float &z, const floa
 
   // Mark block as not busy (Not executed by the stepper interrupt)
   block->control = 0;
+  if (step_debug_en == true)
+	block->control |= BLOCK_DEBUG;
 
   // Number of steps for each axis
 // default non-h-bot planning
