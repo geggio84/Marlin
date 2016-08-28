@@ -1202,6 +1202,7 @@ void process_commands()
       break;
       #endif //FWRETRACT
     case 28: //G28 Home all Axis one at a time
+	if (step_debug_en == false) {
 #ifdef ENABLE_AUTO_BED_LEVELING
       plan_bed_level_matrix.set_to_identity();  //Reset the plane ("erase" all leveling data)
 #endif //ENABLE_AUTO_BED_LEVELING
@@ -1362,9 +1363,11 @@ void process_commands()
       previous_millis_cmd = millis();
       endstops_hit_on_purpose();
       break;
+	}
 
 #ifdef ENABLE_AUTO_BED_LEVELING
     case 29: // G29 Detailed Z-Probe, probes the bed at 3 or more points.
+	if (step_debug_en == false) {
         {
             #if Z_MIN_PIN == -1
             #error "You must have a Z_MIN endstop in order to enable Auto Bed Leveling feature!!! Z_MIN_PIN must point to a valid hardware pin."
@@ -1505,8 +1508,9 @@ void process_commands()
             plan_set_position(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS]);
         }
         break;
-
+	}
     case 30: // G30 Single Z Probe
+	if (step_debug_en == false) {
         {
             engage_z_probe(); // Engage Z Servo endstop if available
 
@@ -1531,6 +1535,7 @@ void process_commands()
             retract_z_probe(); // Retract Z Servo endstop if available
         }
         break;
+	}
 #endif // ENABLE_AUTO_BED_LEVELING
     case 90: // G90
       relative_mode = false;
@@ -1744,18 +1749,21 @@ void process_commands()
       }
      break;
     case 104: // M104
-      if(setTargetedHotend(104)){
-        break;
-      }
-      if (code_seen('S')) setTargetHotend(code_value());
-      setWatch();
-      break;
+		if(step_debug_en == false) {
+			if(setTargetedHotend(104)){
+				break;
+			}
+			if (code_seen('S')) setTargetHotend(code_value());
+			setWatch();
+		}
+		break;
     case 112: //  M112 -Emergency Stop
       marlin_kill();
       break;
     case 140: // M140 set bed temp
-      if (code_seen('S')) setTargetBed(code_value());
-      break;
+		if(step_debug_en == false)
+			if (code_seen('S')) setTargetBed(code_value());
+		break;
     case 105 : // M105
       if(setTargetedHotend(105)){
         break;
@@ -1813,7 +1821,7 @@ void process_commands()
       return;
       break;
     case 109:
-    {// M109 - Wait for extruder heater to reach target.
+    if(step_debug_en == false) {// M109 - Wait for extruder heater to reach target.
       if(setTargetedHotend(109)){
         break;
       }
@@ -1894,6 +1902,7 @@ void process_commands()
       break;
     case 190: // M190 - Wait for bed heater to reach target.
     #if defined(TEMP_BED_PIN) && TEMP_BED_PIN > -1
+	if(step_debug_en == false) {
         if (code_seen('S')) {
           setTargetBed(code_value());
           CooldownNoWait = true;
@@ -1922,6 +1931,7 @@ void process_commands()
           manage_inactivity();
         }
         previous_millis_cmd = millis();
+	}
     #endif
         break;
 

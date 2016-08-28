@@ -116,7 +116,7 @@ void trapezoid_generator_reset() {
 unsigned char do_block()
 {
 	unsigned short i;
-	unsigned short block_debug = (current_block->control & BLOCK_DEBUG); // >> BLOCK_DEBUG;
+	unsigned short block_debug = (current_block->control & BLOCK_DEBUG);
 	signed char steps[4];
 	trapezoid_generator_reset();
 	counter_x = -(current_block->step_event_count >> 1);
