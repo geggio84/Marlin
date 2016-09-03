@@ -895,7 +895,6 @@ block->steps_y = labs(target[Y_AXIS]-position[Y_AXIS]);
 
 		n = 0;
 		while(n < block->step_event_count) {
-		//for (n=0; n< block->step_event_count; n++) {
 			result = read(pru_file, &message, sizeof(message));
 			if(result > 0) {
 				step_time_ns = atoi(message);
