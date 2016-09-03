@@ -337,7 +337,7 @@ unsigned char do_block()
 		}
 
 		if (block_debug) {
-			debug_step(&steps);
+			debug_step(steps);
 		} else {
 			for(i=0; i < OCR1A; i++)
 				__delay_cycles(TIMER_SCALE);
