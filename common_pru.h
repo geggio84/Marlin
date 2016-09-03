@@ -52,6 +52,7 @@ typedef struct {
 
 #define BLOCK_BUSY		0x1
 #define BLOCK_DEBUG		0x2
+#define DRY_RUN			0x4
 
 enum AxisEnum {X_AXIS=0, Y_AXIS=1, Z_AXIS=2, E_AXIS=3};
 

@@ -117,6 +117,7 @@ unsigned char do_block()
 {
 	unsigned short i;
 	unsigned short block_debug = (current_block->control & BLOCK_DEBUG);
+	unsigned short dry_run = (current_block->control & DRY_RUN);
 	signed char steps[4];
 	trapezoid_generator_reset();
 	counter_x = -(current_block->step_event_count >> 1);
@@ -282,7 +283,7 @@ unsigned char do_block()
 
 			counter_e += current_block->steps_e;
 			if (counter_e > 0) {
-				if (block_debug) {
+				if ((block_debug)||(dry_run)) {
 					steps[E_AXIS] += count_direction[E_AXIS];
 				} else {
 					WRITE_E_STEP(!INVERT_E_STEP_PIN);

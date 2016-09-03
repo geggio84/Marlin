@@ -160,6 +160,8 @@
 // M350 - Set microstepping mode.
 // M351 - Toggle MS1 MS2 pins directly.
 // M928 - Start SD logging (M928 filename.g) - ended by M29
+// M995 - Enable dry run
+// M996 - Disable dry run
 // M997 - Enable steps blocks debug
 // M998 - Disable steps blocks debug
 // M999 - Restart after being stopped by error
@@ -1749,7 +1751,7 @@ void process_commands()
       }
      break;
     case 104: // M104
-		if(step_debug_en == false) {
+		if((step_debug_en == false)&&(dry_run_en == false)) {
 			if(setTargetedHotend(104)){
 				break;
 			}
@@ -1761,7 +1763,7 @@ void process_commands()
       marlin_kill();
       break;
     case 140: // M140 set bed temp
-		if(step_debug_en == false)
+		if((step_debug_en == false)&&(dry_run_en == false))
 			if (code_seen('S')) setTargetBed(code_value());
 		break;
     case 105 : // M105
@@ -1821,7 +1823,7 @@ void process_commands()
       return;
       break;
     case 109:
-    if(step_debug_en == false) {// M109 - Wait for extruder heater to reach target.
+    if((step_debug_en == false)&&(dry_run_en == false)) {// M109 - Wait for extruder heater to reach target.
       if(setTargetedHotend(109)){
         break;
       }
@@ -1902,7 +1904,7 @@ void process_commands()
       break;
     case 190: // M190 - Wait for bed heater to reach target.
     #if defined(TEMP_BED_PIN) && TEMP_BED_PIN > -1
-	if(step_debug_en == false) {
+	if((step_debug_en == false)&&(dry_run_en == false)) {
         if (code_seen('S')) {
           setTargetBed(code_value());
           CooldownNoWait = true;
@@ -2742,6 +2744,18 @@ void process_commands()
       microstep_readings();
       #endif
     }
+    break;
+    case 995: // M995: Enable dry run
+		dry_run_en = true;
+		SERIAL_ECHO_START;
+		SERIAL_ECHOLNPGM(MSG_DRY_RUN_ON);
+		SERIAL_PROTOCOLLN("");
+    break;
+    case 996: // M996: Disable dry run
+		dry_run_en = false;
+		SERIAL_ECHO_START;
+		SERIAL_ECHOLNPGM(MSG_DRY_RUN_OFF);
+		SERIAL_PROTOCOLLN("");
     break;
     case 997: // M997: Enable steps blocks debug
 		step_debug_en = true;

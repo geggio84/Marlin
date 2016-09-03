@@ -74,6 +74,7 @@ float max_e_jerk;
 float mintravelfeedrate;
 unsigned long axis_steps_per_sqr_second[NUM_AXIS];
 bool step_debug_en = false;
+bool dry_run_en = false;
 
 #ifdef ENABLE_AUTO_BED_LEVELING
 // this holds the required transform to compensate for bed level
@@ -549,7 +550,7 @@ void plan_buffer_line(const float &x, const float &y, const float &z, const floa
   #ifdef PREVENT_DANGEROUS_EXTRUDE
   if(target[E_AXIS]!=position[E_AXIS])
   {
-    if((degHotend()<extrude_min_temp)&&(step_debug_en == false))
+    if((degHotend()<extrude_min_temp)&&(step_debug_en == false)&&(dry_run_en == false))
     {
       position[E_AXIS]=target[E_AXIS]; //behave as if the move really took place, but ignore E part
       SERIAL_ECHO_START;
@@ -574,6 +575,8 @@ void plan_buffer_line(const float &x, const float &y, const float &z, const floa
   block->control = 0;
   if (step_debug_en == true)
 	block->control |= BLOCK_DEBUG;
+  if (dry_run_en == true)
+	block->control |= DRY_RUN;
 
   // Number of steps for each axis
 // default non-h-bot planning

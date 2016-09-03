@@ -121,6 +121,7 @@ extern FILE *debug_file;
 extern unsigned int *check_endstops;
 extern long *count_position[NUM_AXIS];
 extern bool step_debug_en;
+extern bool dry_run_en;
 
 #define PRUSS_RAM2_OFFSET 0x4A310000
 #define SHM_FILE "/shared_mem"
