@@ -618,17 +618,21 @@ block->steps_y = labs(target[Y_AXIS]-position[Y_AXIS]);
     block->direction_bits |= (1<<E_AXIS); 
   }
 
-  //enable active axes
-  if(block->steps_x != 0) enable_x();
-  if(block->steps_y != 0) enable_y();
-  if(block->steps_z != 0) enable_z();
+	//enable active axes
+	if (step_debug_en == false) {
+		if(block->steps_x != 0) enable_x();
+		if(block->steps_y != 0) enable_y();
+		if(block->steps_z != 0) enable_z();
+	}
 
-  // Enable extruder(s)
-  if((block->steps_e == 0) && (DISABLE_INACTIVE_EXTRUDER)) {
-		disable_e0(); //enable only selected extruder
-  } else { //enable all
-      enable_e0();
-  }
+	// Enable extruder(s)
+	if((step_debug_en == false)&&(dry_run_en == false)) {
+		if((block->steps_e == 0) && (DISABLE_INACTIVE_EXTRUDER)) {
+			disable_e0(); //enable only selected extruder
+		} else { //enable all
+			enable_e0();
+		}
+	}
 
   if (block->steps_e == 0)
   {
