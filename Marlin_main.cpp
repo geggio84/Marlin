@@ -626,7 +626,7 @@ int loop()
   {
     printf("Process Command nr.%d : %s\n\r",bufindr,cmdbuffer[bufindr]);
     if (step_debug_en == true)
-		fprintf(debug_file,"%s\n",cmdbuffer[bufindr]);
+		fprintf(debug_file,"%s,,,,,\n",cmdbuffer[bufindr]);
     process_commands();
     buflen = (buflen-1);
     bufindr = (bufindr + 1)%BUFSIZE;
