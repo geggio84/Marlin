@@ -624,9 +624,10 @@ int loop()
     if(get_command() < 0) return -1;
   if(buflen)
   {
-    printf("Process Command nr.%d : %s\n\r",bufindr,cmdbuffer[bufindr]);
-    if (step_debug_en == true)
+	if (step_debug_en == true) {
+		printf("Process Command nr.%d : %s\n\r",bufindr,cmdbuffer[bufindr]);
 		fprintf(debug_file,"%s;;;;;\n",cmdbuffer[bufindr]);
+	}
     process_commands();
     buflen = (buflen-1);
     bufindr = (bufindr + 1)%BUFSIZE;
