@@ -76,6 +76,10 @@ unsigned long axis_steps_per_sqr_second[NUM_AXIS];
 bool step_debug_en = false;
 bool dry_run_en = false;
 
+double debug_lenght[4] = {0, 0, 0, 0};
+double debug_speed[4] = {0, 0, 0, 0};
+double debug_accel[4] = {0, 0, 0, 0};
+
 #ifdef ENABLE_AUTO_BED_LEVELING
 // this holds the required transform to compensate for bed level
 matrix_3x3 plan_bed_level_matrix = {
@@ -907,21 +911,33 @@ block->steps_y = labs(target[Y_AXIS]-position[Y_AXIS]);
 			result = read(pru_file, &message, sizeof(message));
 			if(result > 0) {
 				steps[X_AXIS] = atoi(message);
+				debug_lenght[X_AXIS] += steps[X_AXIS] / axis_steps_per_unit[X_AXIS];
+				debug_accel[X_AXIS] = ((((steps[X_AXIS] / axis_steps_per_unit[X_AXIS]) * 1000000000) / step_time_ns) - debug_speed[X_AXIS]) * 1000000000 / step_time_ns;
+				debug_speed[X_AXIS] = ((steps[X_AXIS] / axis_steps_per_unit[X_AXIS]) * 1000000000) / step_time_ns;
 			}
 			result = read(pru_file, &message, sizeof(message));
 			if(result > 0) {
 				steps[Y_AXIS] = atoi(message);
+				debug_lenght[Y_AXIS] += steps[Y_AXIS] / axis_steps_per_unit[Y_AXIS];
+				debug_accel[Y_AXIS] = ((((steps[Y_AXIS] / axis_steps_per_unit[Y_AXIS]) * 1000000000) / step_time_ns) - debug_speed[Y_AXIS]) * 1000000000 / step_time_ns;
+				debug_speed[Y_AXIS] = ((steps[Y_AXIS] / axis_steps_per_unit[Y_AXIS]) * 1000000000) / step_time_ns;
 			}
 			result = read(pru_file, &message, sizeof(message));
 			if(result > 0) {
 				steps[Z_AXIS] = atoi(message);
+				debug_lenght[Z_AXIS] += steps[Z_AXIS] / axis_steps_per_unit[Z_AXIS];
+				debug_accel[Z_AXIS] = ((((steps[Z_AXIS] / axis_steps_per_unit[Z_AXIS]) * 1000000000) / step_time_ns) - debug_speed[Z_AXIS]) * 1000000000 / step_time_ns;
+				debug_speed[Z_AXIS] = ((steps[Z_AXIS] / axis_steps_per_unit[Z_AXIS])* 1000000000) / step_time_ns;
 			}
 			result = read(pru_file, &message, sizeof(message));
 			if(result > 0) {
 				steps[E_AXIS] = atoi(message);
+				debug_lenght[E_AXIS] += steps[E_AXIS] / axis_steps_per_unit[E_AXIS];
+				debug_accel[E_AXIS] = ((((steps[E_AXIS] / axis_steps_per_unit[E_AXIS]) * 1000000000) / step_time_ns) - debug_speed[E_AXIS]) * 1000000000 / step_time_ns;
+				debug_speed[E_AXIS] = ((steps[E_AXIS] / axis_steps_per_unit[E_AXIS])* 1000000000) / step_time_ns;
 			}
 
-			fprintf(debug_file,",%d,%d,%d,%d,%d\n",step_time_ns,steps[X_AXIS],steps[Y_AXIS],steps[Z_AXIS],steps[E_AXIS]);
+			fprintf(debug_file,",%d,%d,%f,%f,%f,%d,%f,%f,%f,%d,%f,%f,%f,%d,%f,%f,%f\n",step_time_ns,steps[X_AXIS],debug_lenght[X_AXIS],debug_speed[X_AXIS],debug_accel[X_AXIS],steps[Y_AXIS],debug_lenght[Y_AXIS],debug_speed[Y_AXIS],debug_accel[Y_AXIS],steps[Z_AXIS],debug_lenght[Z_AXIS],debug_speed[Z_AXIS],debug_accel[Z_AXIS],steps[E_AXIS],debug_lenght[E_AXIS],debug_speed[E_AXIS],debug_accel[E_AXIS]);
 			write(pru_file, "ACK", sizeof("ACK"));
 
 			n += max(max(abs(steps[X_AXIS]),abs(steps[Y_AXIS])),max(abs(steps[Z_AXIS]),abs(steps[E_AXIS])));
