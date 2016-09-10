@@ -937,7 +937,7 @@ block->steps_y = labs(target[Y_AXIS]-position[Y_AXIS]);
 				debug_speed[E_AXIS] = ((steps[E_AXIS] / axis_steps_per_unit[E_AXIS])* 1000000000) / step_time_ns;
 			}
 
-			fprintf(debug_file,",%d,%d,%f,%f,%f,%d,%f,%f,%f,%d,%f,%f,%f,%d,%f,%f,%f\n",step_time_ns,steps[X_AXIS],debug_lenght[X_AXIS],debug_speed[X_AXIS],debug_accel[X_AXIS],steps[Y_AXIS],debug_lenght[Y_AXIS],debug_speed[Y_AXIS],debug_accel[Y_AXIS],steps[Z_AXIS],debug_lenght[Z_AXIS],debug_speed[Z_AXIS],debug_accel[Z_AXIS],steps[E_AXIS],debug_lenght[E_AXIS],debug_speed[E_AXIS],debug_accel[E_AXIS]);
+			fprintf(debug_file,";%d;%d;%f;%f;%f;%d;%f;%f;%f;%d;%f;%f;%f;%d;%f;%f;%f\n",step_time_ns,steps[X_AXIS],debug_lenght[X_AXIS],debug_speed[X_AXIS],debug_accel[X_AXIS],steps[Y_AXIS],debug_lenght[Y_AXIS],debug_speed[Y_AXIS],debug_accel[Y_AXIS],steps[Z_AXIS],debug_lenght[Z_AXIS],debug_speed[Z_AXIS],debug_accel[Z_AXIS],steps[E_AXIS],debug_lenght[E_AXIS],debug_speed[E_AXIS],debug_accel[E_AXIS]);
 			write(pru_file, "ACK", sizeof("ACK"));
 
 			n += max(max(abs(steps[X_AXIS]),abs(steps[Y_AXIS])),max(abs(steps[Z_AXIS]),abs(steps[E_AXIS])));
@@ -1017,46 +1017,46 @@ void reset_acceleration_rates()
 
 void debug_current_block(block_t* block)
 {
-	fprintf(debug_file,"*** CURRENT BLOCK (%d bytes) ***,,,,,\n",sizeof(block_buffer[0]));
+	fprintf(debug_file,"*** CURRENT BLOCK (%d bytes) ***;;;;;\n",sizeof(block_buffer[0]));
 	// Step count along each axis
-	fprintf(debug_file,"- steps_x = %ld (%d bytes),,,,,\n",block->steps_x, sizeof(block->steps_x));
-	fprintf(debug_file,"- steps_y = %ld (%d bytes),,,,,\n",block->steps_y, sizeof(block->steps_y));
-	fprintf(debug_file,"- steps_z = %ld (%d bytes),,,,,\n",block->steps_z, sizeof(block->steps_z));
-	fprintf(debug_file,"- steps_e = %ld (%d bytes),,,,,\n",block->steps_e, sizeof(block->steps_e));
+	fprintf(debug_file,"- steps_x = %ld (%d bytes);;;;;\n",block->steps_x, sizeof(block->steps_x));
+	fprintf(debug_file,"- steps_y = %ld (%d bytes);;;;;\n",block->steps_y, sizeof(block->steps_y));
+	fprintf(debug_file,"- steps_z = %ld (%d bytes);;;;;\n",block->steps_z, sizeof(block->steps_z));
+	fprintf(debug_file,"- steps_e = %ld (%d bytes);;;;;\n",block->steps_e, sizeof(block->steps_e));
 	// The number of step events required to complete this block
-	fprintf(debug_file,"- step_event_count = %lu (%d bytes),,,,,\n",block->step_event_count, sizeof(block->step_event_count));
+	fprintf(debug_file,"- step_event_count = %lu (%d bytes);;;;;\n",block->step_event_count, sizeof(block->step_event_count));
 	// The index of the step event on which to stop acceleration
-	fprintf(debug_file,"- accelerate_until = %ld (%d bytes),,,,,\n",block->accelerate_until, sizeof(block->accelerate_until));
+	fprintf(debug_file,"- accelerate_until = %ld (%d bytes);;;;;\n",block->accelerate_until, sizeof(block->accelerate_until));
 	// The index of the step event on which to start decelerating
-	fprintf(debug_file,"- decelerate_after = %ld (%d bytes),,,,,\n",block->decelerate_after, sizeof(block->decelerate_after));
+	fprintf(debug_file,"- decelerate_after = %ld (%d bytes);;;;;\n",block->decelerate_after, sizeof(block->decelerate_after));
 	// The acceleration rate used for acceleration calculation
-	fprintf(debug_file,"- acceleration_rate = %ld (%d bytes),,,,,\n",block->acceleration_rate, sizeof(block->acceleration_rate));
+	fprintf(debug_file,"- acceleration_rate = %ld (%d bytes);;;;;\n",block->acceleration_rate, sizeof(block->acceleration_rate));
 	// The direction bit set for this block (refers to *_DIRECTION_BIT in config.h)
-	fprintf(debug_file,"- direction_bits = %d (%d bytes),,,,,\n",block->direction_bits, sizeof(block->direction_bits));
+	fprintf(debug_file,"- direction_bits = %d (%d bytes);;;;;\n",block->direction_bits, sizeof(block->direction_bits));
 	// The nominal speed for this block in mm/sec
-	fprintf(debug_file,"- nominal_speed = %f mm/sec (%d bytes),,,,,\n",block->nominal_speed, sizeof(block->nominal_speed));
+	fprintf(debug_file,"- nominal_speed = %f mm/sec (%d bytes);;;;;\n",block->nominal_speed, sizeof(block->nominal_speed));
 	// Entry speed at previous-current junction in mm/sec
-	fprintf(debug_file,"- entry_speed = %f mm/sec (%d bytes),,,,,\n",block->entry_speed, sizeof(block->entry_speed));
+	fprintf(debug_file,"- entry_speed = %f mm/sec (%d bytes);;;;;\n",block->entry_speed, sizeof(block->entry_speed));
 	// Maximum allowable junction entry speed in mm/sec
-	fprintf(debug_file,"- max_entry_speed = %f mm/sec (%d bytes),,,,,\n",block->max_entry_speed, sizeof(block->max_entry_speed));
+	fprintf(debug_file,"- max_entry_speed = %f mm/sec (%d bytes);;;;;\n",block->max_entry_speed, sizeof(block->max_entry_speed));
 	// The total travel of this block in mm
-	fprintf(debug_file,"- millimeters = %f mm (%d bytes),,,,,\n",block->millimeters, sizeof(block->millimeters));
+	fprintf(debug_file,"- millimeters = %f mm (%d bytes);;;;;\n",block->millimeters, sizeof(block->millimeters));
 	// acceleration mm/sec^2
-	fprintf(debug_file,"- acceleration = %f mm/sec^2 (%d bytes),,,,,\n",block->acceleration, sizeof(block->acceleration));
+	fprintf(debug_file,"- acceleration = %f mm/sec^2 (%d bytes);;;;;\n",block->acceleration, sizeof(block->acceleration));
 	// Planner flag to recalculate trapezoids on entry junction
-	fprintf(debug_file,"- recalculate_flag = %d (%d bytes),,,,,\n",block->recalculate_flag, sizeof(block->recalculate_flag));
+	fprintf(debug_file,"- recalculate_flag = %d (%d bytes);;;;;\n",block->recalculate_flag, sizeof(block->recalculate_flag));
 	// Planner flag for nominal speed always reached
-	fprintf(debug_file,"- nominal_length_flag = %d (%d bytes),,,,,\n",block->nominal_length_flag, sizeof(block->nominal_length_flag));
+	fprintf(debug_file,"- nominal_length_flag = %d (%d bytes);;;;;\n",block->nominal_length_flag, sizeof(block->nominal_length_flag));
 	// The nominal step rate for this block in step_events/sec
-	fprintf(debug_file,"- nominal_rate = %lu step_events/sec (%d bytes),,,,,\n",block->nominal_rate, sizeof(block->nominal_rate));
+	fprintf(debug_file,"- nominal_rate = %lu step_events/sec (%d bytes);;;;;\n",block->nominal_rate, sizeof(block->nominal_rate));
 	// The jerk-adjusted step rate at start of block
-	fprintf(debug_file,"- initial_rate = %lu (%d bytes),,,,,\n",block->initial_rate, sizeof(block->initial_rate));
+	fprintf(debug_file,"- initial_rate = %lu (%d bytes);;;;;\n",block->initial_rate, sizeof(block->initial_rate));
 	// The minimal rate at exit
-	fprintf(debug_file,"- final_rate = %lu (%d bytes),,,,,\n",block->final_rate, sizeof(block->final_rate));
+	fprintf(debug_file,"- final_rate = %lu (%d bytes);;;;;\n",block->final_rate, sizeof(block->final_rate));
 	// acceleration steps/sec^2
-	fprintf(debug_file,"- acceleration_st = %lu steps/sec^2 (%d bytes),,,,,\n",block->acceleration_st, sizeof(block->acceleration_st));
-	fprintf(debug_file,"- fan_speed = %lu (%d bytes),,,,,\n",block->fan_speed, sizeof(block->fan_speed));
-	fprintf(debug_file,"- control = %d (%d bytes),,,,,\n",block->control, sizeof(block->control));
+	fprintf(debug_file,"- acceleration_st = %lu steps/sec^2 (%d bytes);;;;;\n",block->acceleration_st, sizeof(block->acceleration_st));
+	fprintf(debug_file,"- fan_speed = %lu (%d bytes);;;;;\n",block->fan_speed, sizeof(block->fan_speed));
+	fprintf(debug_file,"- control = %d (%d bytes);;;;;\n",block->control, sizeof(block->control));
 
-	fprintf(debug_file,"*************************************************,,,,,\n");
+	fprintf(debug_file,"*************************************************;;;;;\n");
 }
