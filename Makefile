@@ -13,7 +13,7 @@
 #Directory used to build files in, contains all the build files.
 BUILD_DIR          ?= out
 
-TARGET = $(notdir $(CURDIR))
+TARGET ?= $(notdir $(CURDIR))
 
 # VPATH tells make to look into these directory for source files,
 # there is no need to specify explicit pathnames as long as the
