@@ -52,12 +52,12 @@ REMOVE ?= rm -f
 MV ?= mv -f
 
 # Place -D or -U options here
-CDEFS    = -fpermissive ${addprefix -D , $(DEFINES)}
-CXXDEFS  = $(CDEFS)
+CDEFS    += -fpermissive ${addprefix -D , $(DEFINES)}
+CXXDEFS  += $(CDEFS)
 
 # Add all the source directories as include directories too
-CINCS = ${addprefix -I ,${VPATH}}
-CXXINCS = ${addprefix -I ,${VPATH}}
+CINCS += ${addprefix -I ,${VPATH}}
+CXXINCS += ${addprefix -I ,${VPATH}}
 
 # Compiler flag to set the C Standard level.
 # c89   - "ANSI" C
@@ -65,15 +65,15 @@ CXXINCS = ${addprefix -I ,${VPATH}}
 # c99   - ISO C99 standard (not yet fully implemented)
 # gnu99 - c99 plus GCC extensions
 #CSTANDARD = -std=gnu99
-CDEBUG = -g$(DEBUG)
-CWARN = -Wall
+CDEBUG += -g$(DEBUG)
+CWARN += -Wall
 CTUNING =
 CEXTRA =
 
 CFLAGS := $(CDEBUG) $(CDEFS) $(CINCS) -O$(OPT) $(CWARN) $(CEXTRA) $(CTUNING)
 CXXFLAGS := $(CDEBUG) $(CDEFS) $(CINCS) -O$(OPT) $(CWARN) $(CEXTRA) $(CTUNING)
 #ASFLAGS = -Wa,-adhlns=$(<:.S=.lst),-gstabs
-LDFLAGS = -lm -lrt
+LDFLAGS += -lm -lrt
 
 
 # Define all object files.
