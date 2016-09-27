@@ -93,22 +93,24 @@ class MarlinSerial //: public Stream
     
     FORCE_INLINE int available(void)
     {
-        int c;  
-        if (read(serial_file,&c,1)>0){
-                if (c != EOF)
+        char c[RX_BUFFER_SIZE];
+		int i, n, len = read(serial_file,&c,RX_BUFFER_SIZE);
+
+        for (n=0; n < len; n++){
+                if (c[n] != EOF)
                 {
-                        int i = (unsigned int)(rx_buffer.head + 1) % RX_BUFFER_SIZE;
-                        //printf("%c",c);
+                        i = (unsigned int)(rx_buffer.head + 1) % RX_BUFFER_SIZE;
+                        //printf("%c",c[n]);
                         //write(serial_file,&c,1);
                         // if we should be storing the received character into the location
                         // just before the tail (meaning that the head would advance to the
                         // current location of the tail), we're about to overflow the buffer
                         // and so we don't write the character or advance the head.
                         if (i != rx_buffer.tail) {
-                                rx_buffer.buffer[rx_buffer.head] = c;
+                                rx_buffer.buffer[rx_buffer.head] = c[n];
                                 rx_buffer.head = i;
                         }
-                        return ((unsigned int)(RX_BUFFER_SIZE + rx_buffer.head - rx_buffer.tail) % RX_BUFFER_SIZE);
+                        //return ((unsigned int)(RX_BUFFER_SIZE + rx_buffer.head - rx_buffer.tail) % RX_BUFFER_SIZE);
                 }
                 else return -1;
         }

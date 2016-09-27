@@ -118,8 +118,8 @@ int MarlinSerial::peek(void)
 int MarlinSerial::read_buf(void)
 {
   // if the head isn't ahead of the tail, we don't have any characters
-  if (rx_buffer.head == rx_buffer.tail) {
-    return -1;
+  if ((rx_buffer.head == rx_buffer.tail) && (MYSERIAL.available() <= 0)) {
+		return 0;
   } else {
     unsigned char c = rx_buffer.buffer[rx_buffer.tail];
     rx_buffer.tail = (unsigned int)(rx_buffer.tail + 1) % RX_BUFFER_SIZE;

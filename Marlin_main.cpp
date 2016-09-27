@@ -643,8 +643,9 @@ int loop()
 
 int get_command()
 {
-  while( MYSERIAL.available() > 0  && buflen < BUFSIZE) {
+  while( buflen < BUFSIZE) {
     serial_char = MYSERIAL.read_buf();
+	if (serial_char <= 0) return 0;
     if(serial_char == '\n' ||
        serial_char == '\r' ||
        (serial_char == ':' && comment_mode == false) ||
