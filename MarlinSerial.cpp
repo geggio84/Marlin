@@ -197,8 +197,7 @@ void MarlinSerial::print(double n, int digits)
 
 void MarlinSerial::println()
 {
-  print('\r');
-  print('\n');  
+  print("\r\n");
 }
 
 void MarlinSerial::println(const char &s)

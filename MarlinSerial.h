@@ -69,12 +69,7 @@ void serial_echopair_P(const char *s_P, unsigned long v);
 //Things to write to serial from Program memory. Saves 400 to 2k of RAM.
 FORCE_INLINE void serialprintPGM(const char *str)
 {
-  char ch=*str;
-  while(ch)
-  {
-    write(serial_file,&ch,1);
-    ch=*(++str);
-  }
+	write(serial_file,str,strlen(str));
 }
 
 struct ring_buffer
@@ -134,15 +129,13 @@ class MarlinSerial //: public Stream
     
     FORCE_INLINE void write_ser(const char *str)
     {
-      while (*str)
-        write_ser(*str++);
+		write(serial_file,str,strlen(str));
     }
 
 
     FORCE_INLINE void write_ser(const uint8_t *buffer, size_t size)
     {
-      while (size--)
-        write_ser(*buffer++);
+		write(serial_file,buffer,size);
     }
 
     FORCE_INLINE void print(const char *str)
