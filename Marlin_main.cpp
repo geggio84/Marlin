@@ -621,7 +621,7 @@ int main(int argc, char *argv[])
 int loop()
 {
   if(buflen < (BUFSIZE-1))
-	get_command()
+	get_command();
   if(buflen)
   {
 	if (step_debug_en == true) {
